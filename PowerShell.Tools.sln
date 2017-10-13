@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Health.Monitor", "Server.Health.Monitor\Server.Health.Monitor.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
 EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Metrics.Alerts", "AzureRM.Metrics.Alerts\AzureRM.Metrics.Alerts.pssproj", "{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
