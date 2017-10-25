@@ -1,4 +1,4 @@
-﻿$VerbosePreference = 'Continue'
+﻿$VerbosePreference = 'SilentlyContinue'
 $rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\20170304\'
 $files = Get-ChildItem -LiteralPath $rootDir -Recurse -File
 $parsedPath = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\Parsed\'
@@ -801,10 +801,12 @@ Measure-Command {
 	$global:x = 1
 	ForEach ($file in $files) {
 		If ($file.Extension -eq '.gz') {
-			$delFile = DeGZip-File -infile $file.FullName
-			Remove-Item -Path $delFile
+			$outFile = DeGZip-File -infile $file.FullName
+			$lines = Get-Content -LiteralPath $outFile
 		}
-		$lines = Get-Content -LiteralPath $file.FullName
+		Else {
+			$lines = Get-Content -LiteralPath $file.FullName
+		}
 		$fileCount = $files.count
 		$lineCount = $lines.Length
 		$global:y = 1
