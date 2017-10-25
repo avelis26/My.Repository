@@ -1,4 +1,5 @@
-﻿$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\'
+﻿$VerbosePreference = 'Continue'
+$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\'
 $files = Get-ChildItem -LiteralPath $rootDir -Recurse -File
 $parsedPath = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\Parsed\'
 $D1120 = @()
@@ -792,7 +793,11 @@ ForEach ($file in $files) {
 	If (!(Test-Path -LiteralPath $($parsedPath + $file.Directory.Name))) {
 		New-Item -ItemType Directory -Path $($parsedPath + $file.Directory.Name) -Force
 	}
+	$i = 1
+	$l = $lines.Length
 	ForEach ($line in $lines) {
+		Write-Verbose -Message "Processing $i of $l"
+		Write-Output "Processing $i of $l"
 		$lineType = ($line.Substring(1 - 1, 2)) + ($line.Substring(9 - 1, 3))
 		switch ($lineType) {
 			'D1120' {
