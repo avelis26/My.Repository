@@ -27,7 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Create-base64Creds.ps1" />
-    <Compile Include="Create-FirewallWhitelist.ps1" />
+    <Compile Include="Get-AzureIpRanges.ps1" />
     <Compile Include="Open-SftpConnection.ps1" />
     <Compile Include="Test-SftpServerApi.ps1" />
   </ItemGroup>
