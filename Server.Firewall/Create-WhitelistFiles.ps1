@@ -70,4 +70,4 @@ Function Create-FirewallWhiteList {
 	Set-Content -Path $mixPanelFile -Value $mixWhiteIPs -Force
 	Set-Content -Path $waterfallFile -Value $waterWhiteIPs -Force
 }
-Create-FirewallWhiteList -Verbose > $($historyPath + 'output.log')
+Create-FirewallWhiteList -Verbose *> $($historyPath + 'output.log')
