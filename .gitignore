@@ -3,9 +3,7 @@
 
 # User-specific files
 *.suo
-*.sln
 *.user
-*.pssproj
 *.userosscache
 *.sln.docstates
 
