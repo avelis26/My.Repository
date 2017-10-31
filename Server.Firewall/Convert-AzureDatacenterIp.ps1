@@ -9,8 +9,9 @@
 .DESCRIPTION  
 	Gathers latest public Azure service IP's and outputs one IP per line to be used in a file for firewall whitelisting.
 .NOTES  
-	File Name    : Get-AzureIPRanges.ps1
-	Author       : graham.pinkston@ansira.com
+	File Name	: Get-AzureIPRanges.ps1
+	Author		: graham.pinkston@ansira.com
+	Date		: 10/30/2017
 #>
 $newArray = @()
 $path = 'C:\tmp\'
