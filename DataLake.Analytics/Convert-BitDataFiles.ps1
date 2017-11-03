@@ -1,5 +1,5 @@
 ﻿$VerbosePreference = 'SilentlyContinue'
-$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\20170304\'
+$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\20171103\'
 $files = Get-ChildItem -LiteralPath $rootDir -Recurse -File
 $parsedPath = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\Parsed\'
 $D1120 = @()
@@ -797,125 +797,124 @@ If (!(Test-Path -LiteralPath $($parsedPath + $files[0].Directory.Name))) {
 Else {
 	Get-ChildItem -Path $($parsedPath + $files[0].Directory.Name) | Remove-Item -Force
 }
-Measure-Command {
-	$global:x = 1
-	ForEach ($file in $files) {
-		If ($file.Extension -eq '.gz') {
-			$outFile = DeGZip-File -infile $file.FullName
-			$lines = Get-Content -LiteralPath $outFile
-		}
-		Else {
-			$lines = Get-Content -LiteralPath $file.FullName
-		}
-		$fileCount = $files.count
-		$lineCount = $lines.Length
-		$global:y = 1
-		ForEach ($line in $lines) {
-			Write-Verbose -Message "Processing line $global:y of $lineCount in file $global:x of $fileCount"
-			$lineType = ($line.Substring(1 - 1, 2)) + ($line.Substring(9 - 1, 3))
-			switch ($lineType) {
-				'D1120' {
-					$D1120 += D1_120 -line $line; Break
-				}
-				'D1127' {
-					$D1127 += D1_127 -line $line; Break
-				}
-				'D1135' {
-					$D1135 += D1_135 -line $line; Break
-				}
-				'D1463' {
-					$D1463 += D1_463 -line $line; Break
-				}
-				'D1409' {
-					$D1409 += D1_409 -line $line; Break
-				}
-				'D1123' {
-					$D1123 += D1_123 -line $line; Break
-				}
-				'D1130' {
-					$D1130 += D1_130 -line $line; Break
-				}
-				'D1133' {
-					$D1133 += D1_133 -line $line; Break
-				}
-				'D1122' {
-					$D1122 += D1_122 -line $line; Break
-				}
-				'D1124' {
-					$D1124 += D1_124 -line $line; Break
-				}
-				'D1140' {
-					$D1140 += D1_140 -line $line; Break
-				}
-				'D1139' {
-					$D1139 += D1_139 -line $line; Break
-				}
-				'D1128' {
-					$D1128 += D1_128 -line $line; Break
-				}
-				'D1129' {
-					$D1129 += D1_129 -line $line; Break
-				}
-				'D1136' {
-					$D1136 += D1_136 -line $line; Break
-				}
-				'D1137' {
-					$D1137 += D1_137 -line $line; Break
-				}
-				'D1411' {
-					$D1411 += D1_411 -line $line; Break
-				}
-				'D1462' {
-					$D1462 += D1_462 -line $line; Break
-				}
-				'D1138' {
-					$D1138 += D1_138 -line $line; Break
-				}
-				'D1131' {
-					$D1131 += D1_131 -line $line; Break
-				}
-				'D1134' {
-					$D1134 += D1_134 -line $line; Break
-				}
-				'D1125' {
-					$D1125 += D1_125 -line $line; Break
-				}
-				'D1121' {
-					$D1121 += D1_121 -line $line; Break
-				}
-				'D1132' {
-					$D1132 += D1_132 -line $line; Break
-				}
-				default {
-					$line += $other; Break
-				}
-			}
-			$global:y++
-		}
-		If ($D1120 -ne $null) {$D1120 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_120.csv') -Force -NoTypeInformation -Append}
-		If ($D1127 -ne $null) {$D1127 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_127.csv') -Force -NoTypeInformation -Append}
-		If ($D1135 -ne $null) {$D1135 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_135.csv') -Force -NoTypeInformation -Append}
-		If ($D1463 -ne $null) {$D1463 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_463.csv') -Force -NoTypeInformation -Append}
-		If ($D1409 -ne $null) {$D1409 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_409.csv') -Force -NoTypeInformation -Append}
-		If ($D1123 -ne $null) {$D1123 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_123.csv') -Force -NoTypeInformation -Append}
-		If ($D1130 -ne $null) {$D1130 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_130.csv') -Force -NoTypeInformation -Append}
-		If ($D1133 -ne $null) {$D1133 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_133.csv') -Force -NoTypeInformation -Append}
-		If ($D1122 -ne $null) {$D1122 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_122.csv') -Force -NoTypeInformation -Append}
-		If ($D1124 -ne $null) {$D1124 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_124.csv') -Force -NoTypeInformation -Append}
-		If ($D1140 -ne $null) {$D1140 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_140.csv') -Force -NoTypeInformation -Append}
-		If ($D1139 -ne $null) {$D1139 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_139.csv') -Force -NoTypeInformation -Append}
-		If ($D1128 -ne $null) {$D1128 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_128.csv') -Force -NoTypeInformation -Append}
-		If ($D1129 -ne $null) {$D1129 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_129.csv') -Force -NoTypeInformation -Append}
-		If ($D1136 -ne $null) {$D1136 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_136.csv') -Force -NoTypeInformation -Append}
-		If ($D1137 -ne $null) {$D1137 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_137.csv') -Force -NoTypeInformation -Append}
-		If ($D1411 -ne $null) {$D1411 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_411.csv') -Force -NoTypeInformation -Append}
-		If ($D1462 -ne $null) {$D1462 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_462.csv') -Force -NoTypeInformation -Append}
-		If ($D1138 -ne $null) {$D1138 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_138.csv') -Force -NoTypeInformation -Append}
-		If ($D1131 -ne $null) {$D1131 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_131.csv') -Force -NoTypeInformation -Append}
-		If ($D1134 -ne $null) {$D1134 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_134.csv') -Force -NoTypeInformation -Append}
-		If ($D1125 -ne $null) {$D1125 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_125.csv') -Force -NoTypeInformation -Append}
-		If ($D1121 -ne $null) {$D1121 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_121.csv') -Force -NoTypeInformation -Append}
-		If ($D1132 -ne $null) {$D1132 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_132.csv') -Force -NoTypeInformation -Append}
-		$global:x++
+
+$global:x = 1
+ForEach ($file in $files) {
+	If ($file.Extension -eq '.gz') {
+		$outFile = DeGZip-File -infile $file.FullName
+		$lines = Get-Content -LiteralPath $outFile
 	}
+	Else {
+		$lines = Get-Content -LiteralPath $file.FullName
+	}
+	$fileCount = $files.count
+	$lineCount = $lines.Length
+	$global:y = 1
+	ForEach ($line in $lines) {
+		Write-Verbose -Message "Processing line $global:y of $lineCount in file $global:x of $fileCount"
+		$lineType = ($line.Substring(1 - 1, 2)) + ($line.Substring(9 - 1, 3))
+		switch ($lineType) {
+			'D1120' {
+				$D1120 += D1_120 -line $line; Break
+			}
+			'D1127' {
+				$D1127 += D1_127 -line $line; Break
+			}
+			'D1135' {
+				$D1135 += D1_135 -line $line; Break
+			}
+			'D1463' {
+				$D1463 += D1_463 -line $line; Break
+			}
+			'D1409' {
+				$D1409 += D1_409 -line $line; Break
+			}
+			'D1123' {
+				$D1123 += D1_123 -line $line; Break
+			}
+			'D1130' {
+				$D1130 += D1_130 -line $line; Break
+			}
+			'D1133' {
+				$D1133 += D1_133 -line $line; Break
+			}
+			'D1122' {
+				$D1122 += D1_122 -line $line; Break
+			}
+			'D1124' {
+				$D1124 += D1_124 -line $line; Break
+			}
+			'D1140' {
+				$D1140 += D1_140 -line $line; Break
+			}
+			'D1139' {
+				$D1139 += D1_139 -line $line; Break
+			}
+			'D1128' {
+				$D1128 += D1_128 -line $line; Break
+			}
+			'D1129' {
+				$D1129 += D1_129 -line $line; Break
+			}
+			'D1136' {
+				$D1136 += D1_136 -line $line; Break
+			}
+			'D1137' {
+				$D1137 += D1_137 -line $line; Break
+			}
+			'D1411' {
+				$D1411 += D1_411 -line $line; Break
+			}
+			'D1462' {
+				$D1462 += D1_462 -line $line; Break
+			}
+			'D1138' {
+				$D1138 += D1_138 -line $line; Break
+			}
+			'D1131' {
+				$D1131 += D1_131 -line $line; Break
+			}
+			'D1134' {
+				$D1134 += D1_134 -line $line; Break
+			}
+			'D1125' {
+				$D1125 += D1_125 -line $line; Break
+			}
+			'D1121' {
+				$D1121 += D1_121 -line $line; Break
+			}
+			'D1132' {
+				$D1132 += D1_132 -line $line; Break
+			}
+			default {
+				$line += $other; Break
+			}
+		}
+		$global:y++
+	}
+	If ($D1120 -ne $null) {$D1120 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_120.csv') -Force -NoTypeInformation -Append}
+	If ($D1127 -ne $null) {$D1127 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_127.csv') -Force -NoTypeInformation -Append}
+	If ($D1135 -ne $null) {$D1135 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_135.csv') -Force -NoTypeInformation -Append}
+	If ($D1463 -ne $null) {$D1463 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_463.csv') -Force -NoTypeInformation -Append}
+	If ($D1409 -ne $null) {$D1409 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_409.csv') -Force -NoTypeInformation -Append}
+	If ($D1123 -ne $null) {$D1123 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_123.csv') -Force -NoTypeInformation -Append}
+	If ($D1130 -ne $null) {$D1130 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_130.csv') -Force -NoTypeInformation -Append}
+	If ($D1133 -ne $null) {$D1133 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_133.csv') -Force -NoTypeInformation -Append}
+	If ($D1122 -ne $null) {$D1122 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_122.csv') -Force -NoTypeInformation -Append}
+	If ($D1124 -ne $null) {$D1124 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_124.csv') -Force -NoTypeInformation -Append}
+	If ($D1140 -ne $null) {$D1140 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_140.csv') -Force -NoTypeInformation -Append}
+	If ($D1139 -ne $null) {$D1139 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_139.csv') -Force -NoTypeInformation -Append}
+	If ($D1128 -ne $null) {$D1128 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_128.csv') -Force -NoTypeInformation -Append}
+	If ($D1129 -ne $null) {$D1129 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_129.csv') -Force -NoTypeInformation -Append}
+	If ($D1136 -ne $null) {$D1136 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_136.csv') -Force -NoTypeInformation -Append}
+	If ($D1137 -ne $null) {$D1137 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_137.csv') -Force -NoTypeInformation -Append}
+	If ($D1411 -ne $null) {$D1411 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_411.csv') -Force -NoTypeInformation -Append}
+	If ($D1462 -ne $null) {$D1462 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_462.csv') -Force -NoTypeInformation -Append}
+	If ($D1138 -ne $null) {$D1138 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_138.csv') -Force -NoTypeInformation -Append}
+	If ($D1131 -ne $null) {$D1131 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_131.csv') -Force -NoTypeInformation -Append}
+	If ($D1134 -ne $null) {$D1134 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_134.csv') -Force -NoTypeInformation -Append}
+	If ($D1125 -ne $null) {$D1125 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_125.csv') -Force -NoTypeInformation -Append}
+	If ($D1121 -ne $null) {$D1121 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_121.csv') -Force -NoTypeInformation -Append}
+	If ($D1132 -ne $null) {$D1132 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_132.csv') -Force -NoTypeInformation -Append}
+	$global:x++
 }
