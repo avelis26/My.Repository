@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Health.Monitor", "Server.Health.Monitor\Server.Health.Monitor.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Firewall", "Server.Firewall\Server.Firewall.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
 EndProject
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Metrics.Alerts", "AzureRM.Metrics.Alerts\AzureRM.Metrics.Alerts.pssproj", "{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}"
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Metrics.Alerts", "AzureRM.Metrics.Alerts\AzureRM.Metrics.Alerts.pssproj", "{2DCAD787-C91A-45F0-8E9D-2238C3924A35}"
 EndProject
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DataLake.Analytics", "DataLake.Analytics\DataLake.Analytics.pssproj", "{5BF6C09B-CA3A-4BD6-A6FE-A2BD54D50AE8}"
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DataLake.Analytics", "DataLake.Analytics\DataLake.Analytics.pssproj", "{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}"
+EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Health.Monitor", "Server.Health.Monitor\Server.Health.Monitor.pssproj", "{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,19 +21,23 @@ Global
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD3DEC39-7BE6-4B81-A5AB-90BAB2B32FCE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5BF6C09B-CA3A-4BD6-A6FE-A2BD54D50AE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BF6C09B-CA3A-4BD6-A6FE-A2BD54D50AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BF6C09B-CA3A-4BD6-A6FE-A2BD54D50AE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BF6C09B-CA3A-4BD6-A6FE-A2BD54D50AE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DCAD787-C91A-45F0-8E9D-2238C3924A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DCAD787-C91A-45F0-8E9D-2238C3924A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DCAD787-C91A-45F0-8E9D-2238C3924A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DCAD787-C91A-45F0-8E9D-2238C3924A35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4F06C4A6-167D-4E09-BD1F-73F0536BEEBA}
+		SolutionGuid = {0F5F9D70-3C94-4FFA-91C0-E8CEC0D9765F}
 	EndGlobalSection
 EndGlobal
