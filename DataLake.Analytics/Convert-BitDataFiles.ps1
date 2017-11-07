@@ -911,6 +911,7 @@ ForEach ($folder in $folders) {
 		If ($D1125 -ne $null) {$D1125 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_125.csv') -Force -NoTypeInformation -Append}
 		If ($D1121 -ne $null) {$D1121 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_121.csv') -Force -NoTypeInformation -Append}
 		If ($D1132 -ne $null) {$D1132 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_132.csv') -Force -NoTypeInformation -Append}
+		If ($other -ne $null) {$other | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'other.csv') -Force -NoTypeInformation -Append}
 		$global:x++
 	}
 }
