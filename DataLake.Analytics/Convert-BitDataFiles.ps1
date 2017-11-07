@@ -1,5 +1,8 @@
-﻿$VerbosePreference = 'Continue'
+﻿# Verbose preference will show what is happeneing when set to 'Continue'. Change to 'SilentlyContinue' to run faster.
+$VerbosePreference = 'Continue'
+# Root directory expects child folders that contain either uncompressed or gz commpressed ASCII files.
 $rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\'
+# Parse path may not be a child of rootDir.
 $parsedPath = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\Parsed\'
 $D1120 = @()
 $D1127 = @()
@@ -31,12 +34,13 @@ Function DeGZip-File {
 		[string]$infile,
 		$outfile = ($infile -replace '\.gz$','')
 	)
+	Write-Verbose -Message "Uncompressing $infile..."
 	$input = New-Object System.IO.FileStream $inFile, ([IO.FileMode]::Open), ([IO.FileAccess]::Read), ([IO.FileShare]::Read)
 	$output = New-Object System.IO.FileStream $outFile, ([IO.FileMode]::Create), ([IO.FileAccess]::Write), ([IO.FileShare]::None)
 	$outputFile = $output.Name
 	$gzipStream = New-Object System.IO.Compression.GzipStream $input, ([IO.Compression.CompressionMode]::Decompress)
 	$buffer = New-Object byte[](1024)
-	while($true){
+	while($true) {
 		$read = $gzipstream.Read($buffer, 0, 1024)
 		if ($read -le 0){break}
 		$output.Write($buffer, 0, $read)
@@ -44,6 +48,7 @@ Function DeGZip-File {
 	$gzipStream.Close()
 	$output.Close()
 	$input.Close()
+	Write-Verbose -Message "Removing compressed $infile..."
 	Remove-Item -Path $infile -Force
 	Return $outputFile
 }
@@ -786,13 +791,16 @@ Function D1_132 {
 $global:x = 1
 $global:fileCount = $(Get-ChildItem -Path $rootDir -Recurse -File).Count
 $folders = Get-ChildItem -Path $rootDir -Directory
+Write-Verbose -Message "$fileCount files found in $($folders.Count) folders."
 ForEach ($folder in $folders) {
 	$files = Get-ChildItem -LiteralPath $folder.FullName -Recurse -File
 	ForEach ($file in $files) {
 		If (!(Test-Path -LiteralPath $($parsedPath + $file.Directory.Name))) {
+			Write-Verbose -Message "Creating folder: $($parsedPath + $file.Directory.Name)"
 			New-Item -ItemType Directory -Path $($parsedPath + $file.Directory.Name) -Force
 		}
 		Else {
+			Write-Verbose -Message "Rmoving files in $($parsedPath + $file.Directory.Name)"
 			Get-ChildItem -Path $($parsedPath + $file.Directory.Name) | Remove-Item -Force
 		}
 		If ($file.Extension -eq '.gz') {
@@ -886,30 +894,55 @@ ForEach ($folder in $folders) {
 			}
 			$global:y++
 		}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_120.csv')..."
 		If ($D1120 -ne $null) {$D1120 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_120.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_127.csv')..."
 		If ($D1127 -ne $null) {$D1127 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_127.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_135.csv')..."
 		If ($D1135 -ne $null) {$D1135 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_135.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_463.csv')..."
 		If ($D1463 -ne $null) {$D1463 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_463.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_409.csv')..."
 		If ($D1409 -ne $null) {$D1409 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_409.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_123.csv')..."
 		If ($D1123 -ne $null) {$D1123 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_123.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_130.csv')..."
 		If ($D1130 -ne $null) {$D1130 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_130.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_133.csv')..."
 		If ($D1133 -ne $null) {$D1133 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_133.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_122.csv')..."
 		If ($D1122 -ne $null) {$D1122 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_122.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_124.csv')..."
 		If ($D1124 -ne $null) {$D1124 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_124.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_140.csv')..."
 		If ($D1140 -ne $null) {$D1140 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_140.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_139.csv')..."
 		If ($D1139 -ne $null) {$D1139 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_139.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_128.csv')..."
 		If ($D1128 -ne $null) {$D1128 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_128.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_129.csv')..."
 		If ($D1129 -ne $null) {$D1129 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_129.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_136.csv')..."
 		If ($D1136 -ne $null) {$D1136 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_136.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_137.csv')..."
 		If ($D1137 -ne $null) {$D1137 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_137.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_411.csv')..."
 		If ($D1411 -ne $null) {$D1411 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_411.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_462.csv')..."
 		If ($D1462 -ne $null) {$D1462 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_462.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_138.csv')..."
 		If ($D1138 -ne $null) {$D1138 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_138.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_131.csv')..."
 		If ($D1131 -ne $null) {$D1131 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_131.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_134.csv')..."
 		If ($D1134 -ne $null) {$D1134 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_134.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_125.csv')..."
 		If ($D1125 -ne $null) {$D1125 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_125.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_121.csv')..."
 		If ($D1121 -ne $null) {$D1121 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_121.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'D1_132.csv')..."
 		If ($D1132 -ne $null) {$D1132 | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'D1_132.csv') -Force -NoTypeInformation -Append}
+		Write-Verbose -Message "Exporting $($parsedPath + $file.Directory.Name + '\' + 'other.csv')..."
 		If ($other -ne $null) {$other | Export-Csv -LiteralPath $($parsedPath + $file.Directory.Name + '\' + 'other.csv') -Force -NoTypeInformation -Append}
 		$global:x++
 	}
