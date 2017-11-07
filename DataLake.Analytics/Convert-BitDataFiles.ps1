@@ -784,18 +784,18 @@ Function D1_132 {
 		Write-Error -Message $_.Exception.Message -ErrorAction Stop
 	}
 }
-If (!(Test-Path -LiteralPath $($parsedPath + $files[0].Directory.Name))) {
-	New-Item -ItemType Directory -Path $($parsedPath + $files[0].Directory.Name) -Force
-}
-Else {
-	Get-ChildItem -Path $($parsedPath + $files[0].Directory.Name) | Remove-Item -Force
-}
 $global:x = 1
 $global:fileCount = $(Get-ChildItem -Path $rootDir -Recurse -File).Count
 $folders = Get-ChildItem -Path $rootDir -Directory
 ForEach ($folder in $folders) {
 	$files = Get-ChildItem -LiteralPath $folder.FullName -Recurse -File
 	ForEach ($file in $files) {
+		If (!(Test-Path -LiteralPath $($parsedPath + $file.Directory.Name))) {
+			New-Item -ItemType Directory -Path $($parsedPath + $file.Directory.Name) -Force
+		}
+		Else {
+			Get-ChildItem -Path $($parsedPath + $file.Directory.Name) | Remove-Item -Force
+		}
 		If ($file.Extension -eq '.gz') {
 			$outFile = DeGZip-File -infile $file.FullName
 			$lines = Get-Content -LiteralPath $outFile
