@@ -1,6 +1,5 @@
 ﻿$VerbosePreference = 'Continue'
-#$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\20171103\'
-$rootDir = 'C:\Users\graham.pinkston\Documents\BIT DATA SAMPLE\'
+$rootDir = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\BIT_CRM\'
 $parsedPath = 'C:\Users\graham.pinkston\AppData\Local\USQLDataRoot\Parsed\'
 $D1120 = @()
 $D1127 = @()
