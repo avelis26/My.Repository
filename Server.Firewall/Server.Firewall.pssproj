@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="Create-AzurePubIpFile.ps1" />
     <Compile Include="Create-WhitelistFiles.ps1" />
+    <Compile Include="Fix-Firewall.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
