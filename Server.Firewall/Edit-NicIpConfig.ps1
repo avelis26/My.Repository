@@ -1,3 +1,5 @@
+#Install-Module AzureRM -AllowClobber -Force
+Update-Module -Name AzureRM
 Import-Module AzureRM
 $password = Get-Content "C:\Users\graham.pinkston\Documents\Secrets\op1.txt" | ConvertTo-SecureString
 $user = "gpink003@7-11.com"
