@@ -35,8 +35,8 @@ ForEach ($vm in $vmList) {
 			Description = 'Alert when RAM utilization is over 80% for 5 minutes';
 			Actions = $actionEmail
 		}
-		Add-AzureRmMetricAlertRule @params
-		#Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
+		#Add-AzureRmMetricAlertRule @params
+		Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
 		#Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
 	}
 }

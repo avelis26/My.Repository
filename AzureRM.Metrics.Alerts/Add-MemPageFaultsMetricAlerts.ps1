@@ -36,7 +36,7 @@ ForEach ($vm in $vmList) {
 			Actions = $actionEmail
 		}
 		#Add-AzureRmMetricAlertRule @params
-		#Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
-		Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
+		Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
+		#Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
 	}
 }

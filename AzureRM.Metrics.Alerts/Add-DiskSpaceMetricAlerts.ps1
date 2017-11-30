@@ -35,8 +35,8 @@ ForEach ($vm in $vmList) {
 			Description = 'Alert when disk space is less than 15% for 5 minutes';
 			Actions = $actionEmail
 		}
-		Add-AzureRmMetricAlertRule @params
-		#Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
+		#Add-AzureRmMetricAlertRule @params
+		Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
 		#Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
 	}
 }
