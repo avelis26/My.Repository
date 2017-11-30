@@ -2,8 +2,18 @@
 $password = Get-Content "C:\Users\graham.pinkston\Documents\Secrets\op1.txt" | ConvertTo-SecureString
 $user = "gpink003@7-11.com"
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-Login-AzureRmAccount -Credential $credential
-Set-AzureRmContext -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
+Try {
+	Login-AzureRmAccount -Credential $credential -ErrorAction Stop
+}
+Catch {
+	throw $_
+}
+Try {
+	Set-AzureRmContext -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
+}
+Catch {
+	throw $_
+}
 $vmList = Get-AzureRmVM -Status
 ForEach ($vm in $vmList) {
 	If ($vm.StorageProfile.osDisk.osType -eq 'Windows' -and $vm.PowerState -eq 'running') {
@@ -25,8 +35,8 @@ ForEach ($vm in $vmList) {
 			Description = 'Alert when CPU utilization is over 90% for 5 minutes';
 			Actions = $actionEmail
 		}
-		Add-AzureRmMetricAlertRule @params
-		#Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
+		#Add-AzureRmMetricAlertRule @params
+		Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
 		#Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
 	}
 }

@@ -2,8 +2,18 @@ Import-Module AzureRM
 $password = Get-Content "C:\Users\graham.pinkston\Documents\Secrets\op1.txt" | ConvertTo-SecureString
 $user = "gpink003@7-11.com"
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-Login-AzureRmAccount -Credential $credential
-Set-AzureRmContext -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
+Try {
+	Login-AzureRmAccount -Credential $credential -ErrorAction Stop
+}
+Catch {
+	throw $_
+}
+Try {
+	Set-AzureRmContext -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
+}
+Catch {
+	throw $_
+}
 $vmList = Get-AzureRmVM -Status
 ForEach ($vm in $vmList) {
 	If ($vm.StorageProfile.osDisk.osType -eq 'Windows' -and $vm.PowerState -eq 'running') {
