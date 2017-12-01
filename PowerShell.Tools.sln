@@ -7,9 +7,11 @@ Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Firewall", "Server.F
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Metrics.Alerts", "AzureRM.Metrics.Alerts\AzureRM.Metrics.Alerts.pssproj", "{2DCAD787-C91A-45F0-8E9D-2238C3924A35}"
 EndProject
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DataLake.Analytics", "DataLake.Analytics\DataLake.Analytics.pssproj", "{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}"
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.DataLake.Analytics", "DataLake.Analytics\AzureRM.DataLake.Analytics.pssproj", "{B8A12F14-2BDF-4A34-8ADB-FE8C8559AB37}"
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Health.Monitor", "Server.Health.Monitor\Server.Health.Monitor.pssproj", "{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}"
+EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Generic.Tools", "AzureRM.Generic.Tools\AzureRM.Generic.Tools.pssproj", "{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
