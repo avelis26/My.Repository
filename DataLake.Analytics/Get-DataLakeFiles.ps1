@@ -18,6 +18,7 @@ Try {
 	Write-Verbose -Message "Getting list of files in $dataLakeRootPath ..."
 	$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem -Account $seiDataLakeName -Path $dataLakeRootPath -ErrorAction Stop
 	Write-Verbose -Message "$($dataLakeFiles.Length) files found..."
+<#
 	If (!(Test-Path -LiteralPath $destinationRootPath)) {
 		Write-Verbose -Message "Creating folder:  $destinationRootPath ..."
 		New-Item -ItemType Directory -Path $destinationRootPath -Force
@@ -28,7 +29,9 @@ Try {
 		Export-AzureRmDataLakeStoreItem -Account $seiDataLakeName -Path $file.Path -Destination $($destinationRootPath + $targetFolder + '\' + $($file.Name))
 		$i++
 	}
+#>
 }
 Catch {
 	throw $_
 }
+$dataLakeFiles | Where-Object -FilterScript {$_.Extension -ne '.gz'}

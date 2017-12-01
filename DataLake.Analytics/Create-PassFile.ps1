@@ -1,5 +1,5 @@
 #####################################################################################
-$clrPass = '9uNb0u|\|d><2600@' ##-Don't save file with password, clear before save-##
+$clrPass = '' ##-Don't save file with password, clear before save-##
 #####################################################################################
 $passFileName = 'op1.txt'
 $passFileRootPath = 'C:\Users\graham.pinkston\Documents\Secrets\'
