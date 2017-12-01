@@ -28,7 +28,6 @@
   <ItemGroup>
     <Compile Include="Convert-BitDataFiles.ps1" />
     <Compile Include="Convert-BitDataFiles_121_122_124.ps1" />
-    <Compile Include="Create-PassFile.ps1" />
     <Compile Include="Get-DataLakeFiles.ps1" />
     <Compile Include="Test-Progrss.ps1" />
   </ItemGroup>
