@@ -4,15 +4,15 @@ $user = "gpink003@7-11.com"
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 $seiDataLakeName = '711dlprodcons01'
 $ansiraDataLakeName = 'mscrmprodadls'
-$targetFolder = '20171129'
+$targetFolder = '20171121'
 $dataLakeRootPath = "/BIT_CRM/$targetFolder/"
-$destinationRootPath = 'C:\Temp\'
+$destinationRootPath = 'C:\BIT_CRM\Temp\'
 $i = 0
 Try {
 	Write-Verbose -Message 'Importing AzureRm module...'
 	Import-Module AzureRM
 	Write-Verbose -Message 'Logging into Azure...'
-	Login-AzureRmAccount -Credential $credential -ErrorAction Stop
+	Login-AzureRmAccount -ErrorAction Stop
 	Write-Verbose -Message 'Setting subscription...'
 	Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 	Write-Verbose -Message "Getting list of files in $dataLakeRootPath ..."
