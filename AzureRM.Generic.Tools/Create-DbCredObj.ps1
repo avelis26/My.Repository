@@ -9,8 +9,8 @@ $params = @{
 	Account = 'mscrmprodadla';    
 	DatabaseName = '7ELE';
 	CredentialName = 'gpink003';
-	Credential = $mysecret;
-    DatabaseHost = 'msprodsqldw.database.windows.net';
-    Port = 1433
+	Credential = $cred;
+	DatabaseHost = 'msprodsqldw.database.windows.net';
+	Port = 1433
 }
 New-AzureRmDataLakeAnalyticsCatalogCredential @params
