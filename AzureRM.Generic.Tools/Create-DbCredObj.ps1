@@ -4,12 +4,13 @@ Login-AzureRmAccount
 Set-AzureRmContext –SubscriptionID 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $encPass = Get-Content -Path 'C:\Users\graham.pinkston\Documents\Secrets\op1.txt'
 $passwd = ConvertTo-SecureString $encPass
-$mysecret = New-Object System.Management.Automation.PSCredential("gpink003", $passwd)
-$params = {
-    Database = '7ELE'
-    Host = 'msprodsqldw.database.windows.net'
+$mysecret = New-Object System.Management.Automation.PSCredential('gpink003@7-11.com', $passwd)
+$params = @{
+	Account = 'mscrmprodadla';    
+	DatabaseName = '7ELE';
+	CredentialName = 'gpink003';
+	Credential = $mysecret;
+    DatabaseHost = 'msprodsqldw.database.windows.net';
     Port = 1433
-    Secret = $mysecret
-    AccountName = 'mscrmprodadla'
 }
-New-AzureRmDataLakeAnalyticsCatalogSecret @params
+New-AzureRmDataLakeAnalyticsCatalogCredential @params
