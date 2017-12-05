@@ -6,9 +6,9 @@ Function Get-DataLakeAggregateFiles {
 	##   This option is the folder on your local machine where you would like the files to be downloaded:##
 	[string]$destinationRootPath = 'C:\BIT_CRM\',                                                        ##
 	##   This option is which day you want to be the beginning of your downloads to start at:            ##
-	[string]$startDate = '10-26-2017',                                                                   ##
+	[string]$startDate = '10-27-2017',                                                                   ##
 	##   This option is how many days ahead you want to download (1 = one day only):                     ##
-	[int]$range = 1                                                                                      ##
+	[int]$range = 3                                                                                      ##
 	#######################################################################################################
 	#######################################################################################################
 	)
@@ -26,7 +26,7 @@ Function Get-DataLakeAggregateFiles {
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 
-		Write-Verbose -Message "$($dataLakeFiles.Length) files found..."
+		Write-Verbose -Message "Creating $destinationRootPath folder..."
 		If (!(Test-Path -LiteralPath $destinationRootPath)) {
 			Write-Verbose -Message "Creating folder:  $destinationRootPath ..."
 			New-Item -ItemType Directory -Path $destinationRootPath -Force
