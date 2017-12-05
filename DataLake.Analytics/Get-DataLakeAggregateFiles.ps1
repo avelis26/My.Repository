@@ -18,7 +18,7 @@ Function Get-DataLakeAggregateFiles {
 	$i = 0
 	Try {
 		Write-Verbose -Message 'Importing AzureRm module...'
-		Import-Module AzureRM
+		Import-Module AzureRM -ErrorAction Stop
 
 		Write-Verbose -Message 'Logging into Azure...'
 		Login-AzureRmAccount -ErrorAction Stop
