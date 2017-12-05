@@ -36,7 +36,7 @@ Try {
 		$processDate = $year + $month + $day
 		$dataLakeSearchPath = $dataLakeRootPath + $processDate
 		Write-Verbose -Message "Getting list of files in $dataLakeSearchPath ..."
-		$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem -Account $seiDataLakeName -Path $dataLakeSearchPath -ErrorAction Stop
+		$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem -Account $seiDataLakeName -Path $dataLakeSearchPath -ErrorAction SilentlyContinue
 		ForEach ($file in $dataLakeFiles) {
 			Write-Verbose "Downloading file $($file.Name)..."
 			$params = @{
