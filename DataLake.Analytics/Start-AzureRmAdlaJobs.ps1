@@ -1,24 +1,21 @@
-Function Get-DataLakeAggregateFiles {
+Function Start-AzureDataLakeAnalyticsJobs {
 	[CmdletBinding()]
 	Param(
-		[string]$destinationRootPath = 'C:\BIT_CRM\',
 		[string]$startDate = '10-27-2017',
 		[string]$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec',
-		[string]$rg = 'CRM-ADLA-RG',
 		[string]$adla = 'mscrmprodadla',
-		[string]$adls = 'mscrmprodadls',
-		[string]$location = 'East US 2',
 		[int]$range = 3,
 		[int]$parallel = 5,
-		[switch]$Aggregate,
-		[switch]$Structure
+		[switch]$aggregate,
+		[switch]$structure,
+		[switch]$continue
 	)
-	If ($Aggregate -eq $true) {
+	If ($aggregate -eq $true) {
 		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Aggregate_SEI_BIT_Data\'
 		$scripts = Get-ChildItem -Path $usqlRootPath -Filter "*Txn*.usql" -File
 		$alter = 12
 	}
-	ElseIf ($Structure -eq $true) {
+	ElseIf ($structure -eq $true) {
 		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Parse_SEI_BIT_Data\'
 		$scripts = Get-ChildItem -Path $usqlRootPath -Filter "*12*.usql" -File | Where-Object -FilterScript {$_.Name -like "*121*" -or $_.Name -like "*122*" -or $_.Name -like "*124*"}
 		$alter = 3
@@ -59,4 +56,4 @@ Function Get-DataLakeAggregateFiles {
 		$_
 	}
 }
-Get-DataLakeAggregateFiles -Aggregate
+Start-AzureDataLakeAnalyticsJobs -Aggregate
