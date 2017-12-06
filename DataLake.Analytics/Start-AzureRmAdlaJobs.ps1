@@ -23,24 +23,27 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		Write-Host "Nodes Per Job :: $parallel"
 		Write-Host "Job Type      :: $jobType"
 		Write-Host '********************************************************************' -ForegroundColor Magenta
-		$continue = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
+		$answer = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
+		Return $answer
 	}
+	$startDateObj = Get-Date -Date $startDate
+	$endDateObj = Get-Date -Date $endDate
+	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	If ($aggregate -eq $true) {
-		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Aggregate_SEI_BIT_Data\'
+		$usqlRootPath = 'C:\Scripts\USQL\Aggregate\'
 		$alter = 12
-		Confirm-Run -jobType 'Aggregate'
+		$continue = Confirm-Run -jobType 'Aggregate'
 	}
 	ElseIf ($structure -eq $true) {
-		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Parse_SEI_BIT_Data\'
+		$usqlRootPath = 'C:\Scripts\USQL\Structure\'
 		$alter = 3
-		Confirm-Run -jobType 'Structure'
+		$continue = Confirm-Run -jobType 'Structure'
 	}
 	Else {
 		$missingSwitchError = New-Object System.SystemException "Please choose either Aggregate or Structure switch!!!"
 		Throw $missingSwitchError
 	}
 	$scripts = Get-ChildItem -Path $usqlRootPath -File
-	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
 	$x = $i
 	If ($continue -eq 'y') {
@@ -49,8 +52,6 @@ Function Start-AzureDataLakeAnalyticsJobs {
 			Get-AzureRmContext 
 			Login-AzureRmAccount -SubscriptionId $subId -ErrorAction Stop
 			Set-AzureRmContext -Subscription $subId
-			$startDateObj = Get-Date -Date $startDate
-			$endDateObj = Get-Date -Date $endDate
 			$endDay = $endDateObj.Day.ToString("00")
 			$endMonth = $endDateObj.Month.ToString("00")
 			$endYear = $endDateObj.Year.ToString("0000")
