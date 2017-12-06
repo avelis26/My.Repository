@@ -1,59 +1,93 @@
 Function Start-AzureDataLakeAnalyticsJobs {
 	[CmdletBinding()]
 	Param(
-		[string]$startDate = '10-27-2017',
+		# startDate and endDate will be included in processing
+		# Month and Day must be 2 digit and follow format mm-dd-yyyy
+		[string]$startDate = '11-23-2017',
+		[string]$endDate = '12-05-2017',
+		# Number of nodes to commit to job
+		[int]$parallel = 12,
+		# NO CHANGES BELOW THIS LINE ARE NEEDED
 		[string]$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec',
 		[string]$adla = 'mscrmprodadla',
-		[int]$range = 3,
-		[int]$parallel = 5,
 		[switch]$aggregate,
-		[switch]$structure,
-		[switch]$continue
+		[switch]$structure
 	)
+	Function Confirm-Run {
+		Param(
+			[string]$jobType
+		)
+		Write-Host '********************************************************************' -ForegroundColor Magenta
+		Write-Host "Start Date    :: $startDate"
+		Write-Host "End Date      :: $endDate"
+		Write-Host "Nodes Per Job :: $parallel"
+		Write-Host "Job Type      :: $jobType"
+		Write-Host '********************************************************************' -ForegroundColor Magenta
+		$continue = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
+	}
 	If ($aggregate -eq $true) {
 		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Aggregate_SEI_BIT_Data\'
-		$scripts = Get-ChildItem -Path $usqlRootPath -Filter "*Txn*.usql" -File
 		$alter = 12
+		Confirm-Run -jobType 'Aggregate'
 	}
 	ElseIf ($structure -eq $true) {
 		$usqlRootPath = 'C:\Users\avelis\source\repos\SEI_Data_Lake_Analyitcs\Parse_SEI_BIT_Data\'
-		$scripts = Get-ChildItem -Path $usqlRootPath -Filter "*12*.usql" -File | Where-Object -FilterScript {$_.Name -like "*121*" -or $_.Name -like "*122*" -or $_.Name -like "*124*"}
 		$alter = 3
+		Confirm-Run -jobType 'Structure'
 	}
 	Else {
-		$missingSwitchError = New-Object System.SystemException "Please choose either Aggregate or Structure switch!"
+		$missingSwitchError = New-Object System.SystemException "Please choose either Aggregate or Structure switch!!!"
 		Throw $missingSwitchError
 	}
-	$range = 1
+	$scripts = Get-ChildItem -Path $usqlRootPath -File
+	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
 	$x = $i
-	Try {
-		Import-Module AzureRM -ErrorAction Stop
-		Get-AzureRmContext 
-		Login-AzureRmAccount -SubscriptionId $subId -ErrorAction Stop
-		Set-AzureRmContext -Subscription $subId
-		While ($i -lt $range) {
-			$date = Get-Date -Date $startDate
-			[string]$day = $($date.AddDays($i)).day.ToString("00")
-			[string]$month = $($date.AddDays($i)).month.ToString("00")
-			[string]$year = $($date.AddDays($i)).year.ToString("0000")
-			$processDate = $year + $month + $day
-			ForEach ($script in $scripts) {
-				$x++
-				$code = Get-Content -Path $script.FullName
-				$code[$alter] = "DECLARE @datedFolder string = ""$processDate"";"
-				$scratchPad = "c:\temp\$processDate-$($script.Name)"
-				$code | Set-Content -Path $scratchPad -Force
-				Write-Verbose "----------------------------------------------------------------"
-				Write-Verbose "Starting job $x of $($range*3) :: $($script.BaseName + '-' +$processDate)..."
-				Submit-AdlJob -Account $adla -Name $($script.BaseName + '-' +$processDate) -ScriptPath $scratchPad -DegreeOfParallelism $parallel
-				Start-Sleep -Seconds 2
+	If ($continue -eq 'y') {
+		Try {
+			Import-Module AzureRM -ErrorAction Stop
+			Get-AzureRmContext 
+			Login-AzureRmAccount -SubscriptionId $subId -ErrorAction Stop
+			Set-AzureRmContext -Subscription $subId
+			$startDateObj = Get-Date -Date $startDate
+			$endDateObj = Get-Date -Date $endDate
+			$endDay = $endDateObj.Day.ToString("00")
+			$endMonth = $endDateObj.Month.ToString("00")
+			$endYear = $endDateObj.Year.ToString("0000")
+			$endWhile = $endYear + $endMonth + $endDay
+			$processDate = 'start'
+			While ($processDate -ne $endWhile) {
+				$day = $($startDateObj.AddDays($i)).day.ToString("00")
+				$month = $($startDateObj.AddDays($i)).month.ToString("00")
+				$year = $($startDateObj.AddDays($i)).year.ToString("0000")
+				$processDate = $year + $month + $day
+				ForEach ($script in $scripts) {
+					$x++
+					$code = Get-Content -Path $script.FullName
+					$code[$alter] = "DECLARE @datedFolder string = ""$processDate"";"
+					$scratchPad = "c:\temp\$processDate-$($script.Name)"
+					$code | Set-Content -Path $scratchPad -Force
+					Write-Verbose "----------------------------------------------------------------"
+					Write-Verbose "Starting job $x of $($range*3) :: $($script.BaseName + '-' +$processDate)..."
+					$params = @{
+						Account = $adla;
+						Name = $($script.BaseName + '-' + $processDate);
+						ScriptPath = $scratchPad;
+						DegreeOfParallelism = $parallel
+					}
+					Submit-AdlJob @params
+					Start-Sleep -Seconds 2
+				}
+				$i++
 			}
-			$i++
+		}
+		Catch {
+			$_
 		}
 	}
-	Catch {
-		$_
+	Else {
+		Write-Output 'Exiting...'
+		Exit 0
 	}
 }
-Start-AzureDataLakeAnalyticsJobs -Aggregate
+Start-AzureDataLakeAnalyticsJobs -structure -Verbose
