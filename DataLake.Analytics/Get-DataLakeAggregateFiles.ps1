@@ -13,7 +13,7 @@ Function Get-DataLakeAggregateFiles {
 	#######################################################################################################
 	)
 	$seiDataLakeName = '711dlprodcons01'
-	$ansiraDataLakeName = 'mscrmprodadls'
+	#$ansiraDataLakeName = 'mscrmprodadls'
 	$dataLakeRootPath = "/BIT_CRM/Aggregates/"
 	$i = 0
 	Try {
