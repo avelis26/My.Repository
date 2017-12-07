@@ -4,7 +4,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		# startDate and endDate will be included in processing
 		# Month and Day must be 2 digit and follow format mm-dd-yyyy
 		[string]$startDate = '11-23-2017',
-		[string]$endDate = '12-01-2017',
+		[string]$endDate = '12-06-2017',
 		# Number of nodes to commit to job
 		[int]$parallel = 12,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
@@ -24,12 +24,14 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		Write-Host "Nodes Per Job :: $parallel"
 		Write-Host "Job Type      :: $jobType"
 		Write-Host '********************************************************************' -ForegroundColor Magenta
-		$answer = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
+		$ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
+        $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
 		Return $answer
 	}
 	$startDateObj = Get-Date -Date $startDate
 	$endDateObj = Get-Date -Date $endDate
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
+	$continue = $null
 	If ($aggregate -eq $true) {
 		$usqlRootPath = 'C:\Scripts\USQL\Aggregate\'
 		$alter = 12
