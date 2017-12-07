@@ -45,7 +45,8 @@ Function Get-DataLakeAggregateFiles {
 				$params = @{
 					Account = $seiDataLakeName;
 					Path = $($file.Path);
-					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name))
+					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name));
+					Force = $true
 				}
 				Export-AzureRmDataLakeStoreItem @params
 			}
