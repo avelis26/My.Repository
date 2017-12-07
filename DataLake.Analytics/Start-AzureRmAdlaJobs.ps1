@@ -4,10 +4,11 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		# startDate and endDate will be included in processing
 		# Month and Day must be 2 digit and follow format mm-dd-yyyy
 		[string]$startDate = '11-23-2017',
-		[string]$endDate = '12-05-2017',
+		[string]$endDate = '12-01-2017',
 		# Number of nodes to commit to job
 		[int]$parallel = 12,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
+        [string]$tempRoot = 'c:\temp\',
 		[string]$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec',
 		[string]$adla = 'mscrmprodadla',
 		[switch]$aggregate,
@@ -46,12 +47,19 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	$scripts = Get-ChildItem -Path $usqlRootPath -File
 	$i = 0
 	$x = $i
+    $user = 'gpink003@7-11.com'
+    $password = ConvertTo-SecureString -String $(Get-Content -Path 'C:\Users\graham.pinkston\Documents\Secrets\op1.txt')
 	If ($continue -eq 'y') {
 		Try {
 			Import-Module AzureRM -ErrorAction Stop
-			Get-AzureRmContext 
-			Login-AzureRmAccount -SubscriptionId $subId -ErrorAction Stop
+			Get-AzureRmContext
+            $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+			Login-AzureRmAccount -SubscriptionId $subId -Credential $credential -ErrorAction Stop
 			Set-AzureRmContext -Subscription $subId
+            If (!(Test-Path -LiteralPath $tempRoot)) {
+			    Write-Verbose -Message "Creating folder:  $tempRoot ..."
+			    New-Item -ItemType Directory -Path $tempRoot -Force
+		    }
 			$endDay = $endDateObj.Day.ToString("00")
 			$endMonth = $endDateObj.Month.ToString("00")
 			$endYear = $endDateObj.Year.ToString("0000")
@@ -66,7 +74,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 					$x++
 					$code = Get-Content -Path $script.FullName
 					$code[$alter] = "DECLARE @datedFolder string = ""$processDate"";"
-					$scratchPad = "c:\temp\$processDate-$($script.Name)"
+					$scratchPad = "$tempRoot$processDate-$($script.Name)"
 					$code | Set-Content -Path $scratchPad -Force
 					Write-Verbose "----------------------------------------------------------------"
 					Write-Verbose "Starting job $x of $($range*3) :: $($script.BaseName + '-' +$processDate)..."
