@@ -3,11 +3,12 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	Param(
 		# startDate and endDate will be included in processing
 		# Month and Day must be 2 digit and follow format mm-dd-yyyy
-		[string]$startDate = '11-23-2017',
-		[string]$endDate = '12-06-2017',
+		[string]$startDate = '02-15-2017',
+		[string]$endDate = '02-15-2017',
 		# Number of nodes to commit to job
-		[int]$parallel = 12,
+		[int]$parallel = 83,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
+		[int]$alter = 3,
         [string]$tempRoot = 'c:\temp\',
 		[string]$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec',
 		[string]$adla = 'mscrmprodadla',
@@ -24,7 +25,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		Write-Host "Nodes Per Job :: $parallel"
 		Write-Host "Job Type      :: $jobType"
 		Write-Host '********************************************************************' -ForegroundColor Magenta
-		$ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
+        $ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
         $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
 		Return $answer
 	}
@@ -34,12 +35,10 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	$continue = $null
 	If ($aggregate -eq $true) {
 		$usqlRootPath = 'C:\Scripts\USQL\Aggregate\'
-		$alter = 12
 		$continue = Confirm-Run -jobType 'Aggregate'
 	}
 	ElseIf ($structure -eq $true) {
 		$usqlRootPath = 'C:\Scripts\USQL\Structure\'
-		$alter = 3
 		$continue = Confirm-Run -jobType 'Structure'
 	}
 	Else {
