@@ -8,13 +8,14 @@ Function Get-DataLakeAggregateFiles {
 		##   This option is which day you want to be the beginning of your downloads to start at:
 		[string]$startDate = '10-23-2017',
 		[string]$endDate = '11-22-2017',
-		[string]$user = 'gpink003@7-11.com',
-        [string]$passFile = 'C:\Users\gpink003\Documents\Secrets\op1.txt'
+		[string]$userName = 'gpink003'
 		#######################################################################################################
 		#######################################################################################################
 	)
+	$user = $userName + '@7-11.com'
 	$dataLakeStoreName = 'mscrmprodadls'
 	$dataLakeRootPath = "/BIT_CRM/"
+	$passFile = Get-Content -LiteralPath "C:\Users\$userName\Documents\Secrets\$userName.cred"
 	$startDateObj = Get-Date -Date $startDate
 	$endDateObj = Get-Date -Date $endDate
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
