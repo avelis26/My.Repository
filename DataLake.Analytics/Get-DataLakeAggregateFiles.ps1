@@ -1,41 +1,39 @@
 Function Get-DataLakeAggregateFiles {
 	[CmdletBinding()]
 	Param(
-	#######################################################################################################
-	#######################################################################################################
-	##   This option is the folder on your local machine where you would like the files to be downloaded:##
-	[string]$destinationRootPath = 'C:\BIT_CRM\',                                                        ##
-	##   This option is which day you want to be the beginning of your downloads to start at:            ##
-	[string]$startDate = '10-27-2017',                                                                   ##
-	##   This option is how many days ahead you want to download (1 = one day only):                     ##
-	[int]$range = 3                                                                                      ##
-	#######################################################################################################
-	#######################################################################################################
+		#######################################################################################################
+		#######################################################################################################
+		##   This option is the folder on your local machine where you would like the files to be downloaded:##
+		[string]$destinationRootPath = 'C:\BIT_CRM\',                                                        ##
+		##   This option is which day you want to be the beginning of your downloads to start at:            ##
+		[string]$startDate = '10-23-2017',                                                                   ##
+		[string]$endDate = '11-22-2017'                                                                      ##
+		#######################################################################################################
+		#######################################################################################################
 	)
 	$seiDataLakeName = '711dlprodcons01'
 	#$ansiraDataLakeName = 'mscrmprodadls'
 	$dataLakeRootPath = "/BIT_CRM/Aggregates/"
+	$startDateObj = Get-Date -Date $startDate
+	$endDateObj = Get-Date -Date $endDate
+	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
 	Try {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
-
 		Write-Verbose -Message 'Logging into Azure...'
 		Login-AzureRmAccount -ErrorAction Stop
-
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
-
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
 		If (!(Test-Path -LiteralPath $destinationRootPath)) {
 			Write-Verbose -Message "Creating folder:  $destinationRootPath ..."
 			New-Item -ItemType Directory -Path $destinationRootPath -Force
 		}
 		While ($i -lt $range) {
-			$date = Get-Date -Date $startDate
-			[string]$day = $($date.AddDays($i)).day.ToString("00")
-			[string]$month = $($date.AddDays($i)).month.ToString("00")
-			[string]$year = $($date.AddDays($i)).year.ToString("0000")
+			[string]$day = $($startDateObj.AddDays($i)).day.ToString("00")
+			[string]$month = $($startDateObj.AddDays($i)).month.ToString("00")
+			[string]$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$processDate = $year + $month + $day
 			$dataLakeSearchPath = $dataLakeRootPath + $processDate
 			Write-Verbose -Message "Getting list of files in $dataLakeSearchPath ..."
