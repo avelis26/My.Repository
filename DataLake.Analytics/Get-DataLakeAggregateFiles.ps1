@@ -21,10 +21,7 @@ Function Get-DataLakeAggregateFiles {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
 		Write-Verbose -Message 'Logging into Azure...'
-		$user = 'gpink003@7-11.com'
-		$password = ConvertTo-SecureString -String $(Get-Content -Path 'C:\Users\graham.pinkston\Documents\Secrets\op1.txt')
-		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
+		Login-AzureRmAccount -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
