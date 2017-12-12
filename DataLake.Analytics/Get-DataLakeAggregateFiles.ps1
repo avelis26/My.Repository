@@ -20,7 +20,7 @@ Function Get-DataLakeAggregateFiles {
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
 	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
-    $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	Try {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
