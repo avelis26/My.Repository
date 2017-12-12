@@ -1,4 +1,4 @@
-﻿$clrPass = Read-Host -Prompt "Enter password:"
+﻿$clrPass = Read-Host -Prompt "Enter password:" -AsSecureString
 $passFileName = 'op1.txt'
 $passFileRootPath = 'C:\Users\graham.pinkston\Documents\Secrets\'
 If (!(Test-Path -LiteralPath $passFileRootPath)) {

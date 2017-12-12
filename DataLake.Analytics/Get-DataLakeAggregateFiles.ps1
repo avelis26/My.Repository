@@ -3,11 +3,13 @@ Function Get-DataLakeAggregateFiles {
 	Param(
 		#######################################################################################################
 		#######################################################################################################
-		##   This option is the folder on your local machine where you would like the files to be downloaded:##
-		[string]$destinationRootPath = 'C:\BIT_CRM\',                                                        ##
-		##   This option is which day you want to be the beginning of your downloads to start at:            ##
-		[string]$startDate = '10-23-2017',                                                                   ##
-		[string]$endDate = '11-22-2017'                                                                      ##
+		##   This option is the folder on your local machine where you would like the files to be downloaded:
+		[string]$destinationRootPath = 'C:\BIT_CRM\',
+		##   This option is which day you want to be the beginning of your downloads to start at:
+		[string]$startDate = '10-23-2017',
+		[string]$endDate = '11-22-2017',
+		[string]$user = 'gpink003@7-11.com',
+        [string]$passFile = 'C:\Users\gpink003\Documents\Secrets\op1.txt'
 		#######################################################################################################
 		#######################################################################################################
 	)
@@ -17,11 +19,13 @@ Function Get-DataLakeAggregateFiles {
 	$endDateObj = Get-Date -Date $endDate
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
+	$password = ConvertTo-SecureString -String $(Get-Content -Path $passFile)
+    $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	Try {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
 		Write-Verbose -Message 'Logging into Azure...'
-		Login-AzureRmAccount -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
