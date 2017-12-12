@@ -15,12 +15,11 @@ Function Get-DataLakeAggregateFiles {
 	$user = $userName + '@7-11.com'
 	$dataLakeStoreName = 'mscrmprodadls'
 	$dataLakeRootPath = "/BIT_CRM/"
-	$passFile = Get-Content -LiteralPath "C:\Users\$userName\Documents\Secrets\$userName.cred"
 	$startDateObj = Get-Date -Date $startDate
 	$endDateObj = Get-Date -Date $endDate
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 	$i = 0
-	$password = ConvertTo-SecureString -String $(Get-Content -Path $passFile)
+	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
     $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	Try {
 		Write-Verbose -Message 'Importing AzureRm module...'
