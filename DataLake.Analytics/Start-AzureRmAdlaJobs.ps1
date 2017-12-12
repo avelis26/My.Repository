@@ -3,10 +3,10 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	Param(
 		# startDate and endDate will be included in processing
 		# Month and Day must be 2 digit and follow format mm-dd-yyyy
-		[string]$startDate = '02-15-2017',
-		[string]$endDate = '02-15-2017',
+		[string]$startDate = '10-23-2017',
+		[string]$endDate = '11-22-2017',
 		# Number of nodes to commit to job
-		[int]$parallel = 83,
+		[int]$parallel = 5,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
 		[int]$alter = 3,
         [string]$tempRoot = 'c:\temp\',
@@ -26,7 +26,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		Write-Host "Job Type      :: $jobType"
 		Write-Host '********************************************************************' -ForegroundColor Magenta
         $ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
-        $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*3) jobs? (y/n)"
+        $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*$scriptCount) jobs? (y/n)"
 		Return $answer
 	}
 	$startDateObj = Get-Date -Date $startDate
@@ -35,17 +35,20 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	$continue = $null
 	If ($aggregate -eq $true) {
 		$usqlRootPath = 'C:\Scripts\USQL\Aggregate\'
+		$scripts = Get-ChildItem -Path $usqlRootPath -File
+		$scriptCount = $scripts.Count
 		$continue = Confirm-Run -jobType 'Aggregate'
 	}
 	ElseIf ($structure -eq $true) {
 		$usqlRootPath = 'C:\Scripts\USQL\Structure\'
+		$scripts = Get-ChildItem -Path $usqlRootPath -File
+		$scriptCount = $scripts.Count
 		$continue = Confirm-Run -jobType 'Structure'
 	}
 	Else {
 		$missingSwitchError = New-Object System.SystemException "Please choose either Aggregate or Structure switch!!!"
 		Throw $missingSwitchError
 	}
-	$scripts = Get-ChildItem -Path $usqlRootPath -File
 	$i = 0
 	$x = $i
     $user = 'gpink003@7-11.com'
@@ -78,7 +81,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 					$scratchPad = "$tempRoot$processDate-$($script.Name)"
 					$code | Set-Content -Path $scratchPad -Force
 					Write-Verbose "----------------------------------------------------------------"
-					Write-Verbose "Starting job $x of $($range*3) :: $($script.BaseName + '-' +$processDate)..."
+					Write-Verbose "Starting job $x of $($range*$scriptCount) :: $($script.BaseName + '-' +$processDate)..."
 					$params = @{
 						Account = $adla;
 						Name = $($script.BaseName + '-' + $processDate);
@@ -100,4 +103,4 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		Exit 0
 	}
 }
-Start-AzureDataLakeAnalyticsJobs -structure -Verbose
+Start-AzureDataLakeAnalyticsJobs -aggregate -Verbose
