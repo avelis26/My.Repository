@@ -11,9 +11,8 @@ Function Get-DataLakeAggregateFiles {
 		#######################################################################################################
 		#######################################################################################################
 	)
-	$seiDataLakeName = '711dlprodcons01'
-	#$ansiraDataLakeName = 'mscrmprodadls'
-	$dataLakeRootPath = "/BIT_CRM/Aggregates/"
+	$dataLakeStoreName = 'mscrmprodadls'
+	$dataLakeRootPath = "/BIT_CRM/"
 	$startDateObj = Get-Date -Date $startDate
 	$endDateObj = Get-Date -Date $endDate
 	[int]$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
@@ -22,7 +21,10 @@ Function Get-DataLakeAggregateFiles {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
 		Write-Verbose -Message 'Logging into Azure...'
-		Login-AzureRmAccount -ErrorAction Stop
+		$user = 'gpink003@7-11.com'
+		$password = ConvertTo-SecureString -String $(Get-Content -Path 'C:\Users\graham.pinkston\Documents\Secrets\op1.txt')
+		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
@@ -37,16 +39,21 @@ Function Get-DataLakeAggregateFiles {
 			$processDate = $year + $month + $day
 			$dataLakeSearchPath = $dataLakeRootPath + $processDate
 			Write-Verbose -Message "Getting list of files in $dataLakeSearchPath ..."
-			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem -Account $seiDataLakeName -Path $dataLakeSearchPath -ErrorAction SilentlyContinue
+			$getParams = @{
+				Account = $dataLakeStoreName;
+				Path = $dataLakeSearchPath;
+				ErrorAction = 'SilentlyContinue';
+			}
+			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like "*txn*"}
 			ForEach ($file in $dataLakeFiles) {
 				Write-Verbose "Downloading file $($file.Name)..."
-				$params = @{
-					Account = $seiDataLakeName;
+				$exportParams = @{
+					Account = $dataLakeStoreName;
 					Path = $($file.Path);
 					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name));
 					Force = $true
 				}
-				Export-AzureRmDataLakeStoreItem @params
+				Export-AzureRmDataLakeStoreItem @exportParams
 			}
 			$i++
 		}
