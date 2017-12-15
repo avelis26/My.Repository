@@ -3,11 +3,12 @@ Function Get-DataLakeAggregateFiles {
 	Param(
 		#######################################################################################################
 		#######################################################################################################
-		##   This option is the folder on your local machine where you would like the files to be downloaded:
+		##   Enter the path where you want your aggregate files to be downloaded on your local machine:
 		[string]$destinationRootPath = 'C:\BIT_CRM\',
-		##   This option is which day you want to be the beginning of your downloads to start at:
+		##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 		[string]$startDate = '10-23-2017',
 		[string]$endDate = '11-22-2017',
+		##   Enter your 7-11 user name without domain:
 		[string]$userName = 'gpink003'
 		#######################################################################################################
 		#######################################################################################################
