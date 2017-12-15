@@ -26,7 +26,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Create-base64Creds.ps1" />
     <Compile Include="Open-SftpConnection.ps1" />
     <Compile Include="Test-ConnectionToCrmServers.ps1" />
     <Compile Include="Test-SftpServerApi.ps1" />
