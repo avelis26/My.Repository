@@ -27,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="Count-LinesInLargeFile.ps1" />
     <Compile Include="Create-base64Creds.ps1" />
     <Compile Include="Create-DbCredObj.ps1" />
     <Compile Include="Create-EncryptedCreds.ps1" />
