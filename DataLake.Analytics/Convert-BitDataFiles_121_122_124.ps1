@@ -55,7 +55,7 @@ Function D1_121 {
 			TotalAmount = $line.SubString(83 - 1, 11);
 			TransactionCode = $line.Substring(94 - 1, 6);
 			TransactionSequence = $line.Substring(100 - 1, 11) #pk
-			'7RewardMemberID' = $line.Substring(111 - 1, 19)
+			RewardMemberID = $line.Substring(111 - 1, 19)
 		}
 		Return $lineObj
 	}
