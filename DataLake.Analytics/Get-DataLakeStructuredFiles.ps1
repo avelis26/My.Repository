@@ -1,4 +1,4 @@
-Function Get-DataLakeRawFiles {
+Function Get-DataLakeStructuredFiles {
 	[CmdletBinding()]
 	Param(
 		#######################################################################################################
@@ -7,7 +7,7 @@ Function Get-DataLakeRawFiles {
 		[string]$destinationRootPath = 'C:\BIT_CRM\',
 		##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 		[string]$startDate = '10-23-2017',
-		[string]$endDate = '10-23-2017',
+		[string]$endDate = '11-22-2017',
 		##   Enter your 7-11 user name without domain:
 		[string]$userName = 'gpink003'
 		#######################################################################################################
@@ -17,7 +17,7 @@ Function Get-DataLakeRawFiles {
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
 		$user = $userName + '@7-11.com'
-		$dataLakeStoreName = '711dlprodcons01'
+		$dataLakeStoreName = 'mscrmprodadls'
 		$dataLakeRootPath = "/BIT_CRM/"
 		$startDateObj = Get-Date -Date $startDate
 		$endDateObj = Get-Date -Date $endDate
@@ -26,7 +26,7 @@ Function Get-DataLakeRawFiles {
 		$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 		Write-Verbose -Message 'Logging into Azure...'
-		Login-AzureRmAccount -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
@@ -46,7 +46,7 @@ Function Get-DataLakeRawFiles {
 				Path = $dataLakeSearchPath;
 				ErrorAction = 'SilentlyContinue';
 			}
-			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams
+			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like "*txn*"}
 			ForEach ($file in $dataLakeFiles) {
 				Write-Verbose "Downloading file $($file.Name)..."
 				$exportParams = @{
@@ -65,4 +65,4 @@ Function Get-DataLakeRawFiles {
 		throw $_
 	}
 }
-Get-DataLakeRawFiles -Verbose
+Get-DataLakeStructuredFiles -Verbose
