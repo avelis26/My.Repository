@@ -9,6 +9,8 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		[int]$parallel = 5,
 		# Number of seconds to wait between launching jobs
 		[int]$sleepSeconds = 2,
+		# 7-11 User (without domain)
+		[string]$userName = 'gpink003',
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
 		[int]$alter = 3,
         [string]$tempRoot = 'c:\temp\',
@@ -53,13 +55,13 @@ Function Start-AzureDataLakeAnalyticsJobs {
 	}
 	$i = 0
 	$x = $i
-    $user = 'gpink003@7-11.com'
-    $password = ConvertTo-SecureString -String $(Get-Content -Path 'C:\Users\graham.pinkston\Documents\Secrets\op1.txt')
+    $user = $userName + '@7-11.com'
+    $password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	If ($continue -eq 'y') {
 		Try {
 			Import-Module AzureRM -ErrorAction Stop
 			Get-AzureRmContext
-            $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 			Login-AzureRmAccount -SubscriptionId $subId -Credential $credential -ErrorAction Stop
 			Set-AzureRmContext -Subscription $subId
             If (!(Test-Path -LiteralPath $tempRoot)) {
