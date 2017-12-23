@@ -7,6 +7,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		[string]$endDate = '11-22-2017',
 		# Number of nodes to commit to job
 		[int]$parallel = 5,
+		# Number of seconds to wait between launching jobs
 		[int]$sleepSeconds = 2,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
 		[int]$alter = 3,

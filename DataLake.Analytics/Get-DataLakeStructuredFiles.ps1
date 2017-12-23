@@ -7,7 +7,7 @@ Function Get-DataLakeStructuredFiles {
 		[string]$destinationRootPath = 'C:\BIT_CRM\',
 		##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 		[string]$startDate = '10-23-2017',
-		[string]$endDate = '11-22-2017',
+		[string]$endDate = '10-23-2017',
 		##   Enter your 7-11 user name without domain:
 		[string]$userName = 'gpink003'
 		#######################################################################################################
@@ -26,7 +26,7 @@ Function Get-DataLakeStructuredFiles {
 		$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 		Write-Verbose -Message 'Logging into Azure...'
-		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
+		Login-AzureRmAccount -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
@@ -46,7 +46,7 @@ Function Get-DataLakeStructuredFiles {
 				Path = $dataLakeSearchPath;
 				ErrorAction = 'SilentlyContinue';
 			}
-			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like "*txn*"}
+			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like "*output*"}
 			ForEach ($file in $dataLakeFiles) {
 				Write-Verbose "Downloading file $($file.Name)..."
 				$exportParams = @{

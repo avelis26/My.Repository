@@ -33,6 +33,7 @@
     <Compile Include="Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="Get-DataLakeRawFiles.ps1" />
     <Compile Include="Get-DataLakeStructuredFiles.ps1" />
+    <Compile Include="Insert-CsvToAzDb.ps1" />
     <Compile Include="Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>

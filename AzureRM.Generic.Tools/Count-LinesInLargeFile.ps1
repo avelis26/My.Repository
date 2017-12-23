@@ -1,8 +1,6 @@
 Clear-Host
 $files = @(
-    "C:\Users\graham.pinkston\Downloads\20171031_d1_121_output.csv",
-    "C:\Users\graham.pinkston\Downloads\20171031_d1_122_output.csv",
-    "C:\Users\graham.pinkston\Downloads\20171031_d1_124_output.csv"
+    "C:\BIT_CRM\20171023\20171023_d1_121_output.csv"
 )
 $total = 0
 ForEach ($file in $files) {
