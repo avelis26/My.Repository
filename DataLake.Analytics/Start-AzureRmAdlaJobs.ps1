@@ -7,6 +7,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 		[string]$endDate = '11-22-2017',
 		# Number of nodes to commit to job
 		[int]$parallel = 5,
+		[int]$sleepSeconds = 2,
 		# NO CHANGES BELOW THIS LINE ARE NEEDED
 		[int]$alter = 3,
         [string]$tempRoot = 'c:\temp\',
@@ -89,7 +90,7 @@ Function Start-AzureDataLakeAnalyticsJobs {
 						DegreeOfParallelism = $parallel
 					}
 					Submit-AdlJob @params
-					Start-Sleep -Seconds 2
+					Start-Sleep -Seconds $sleepSeconds
 				}
 				$i++
 			}
