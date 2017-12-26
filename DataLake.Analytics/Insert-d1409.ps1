@@ -74,7 +74,7 @@ Function Get-DataLakeStructuredFiles {
 		$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like $searchPattern}
 		$global:foundFiles = $dataLakeFiles
 		If ($dataLakeFiles.Count -eq 0) {
-			Write-Output "No files found. Waiting 60 seconds..."
+			Write-Output "No files found in $dataLakeSearchPath. Waiting 60 seconds..."
 			Start-Sleep -Seconds 60
 		}
 		ElseIf ($dataLakeFiles.Count -lt $expected) {
