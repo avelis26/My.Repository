@@ -8,8 +8,10 @@ Catch {
 	throw $_
 }
 Try {
-	$global:startDate = '10-22-2017'
-	$global:endDate = '10-22-2017'
+	$global:startDate = '10-23-2017'
+	$global:endDate = '12-06-2017'
+	$global:expected = 1
+	$global:searchPattern = "*d1*13*output.csv"
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -32,6 +34,7 @@ Try {
 	$processDate = $null
 	$global:foundFiles = $null
 	$global:goodFile = $null
+	$continue = $null
 	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	If (!(Test-Path -LiteralPath $destinationRoot)) {
@@ -68,17 +71,17 @@ Function Get-DataLakeStructuredFiles {
 			Path = $dataLakeSearchPath;
 			ErrorAction = 'SilentlyContinue';
 		}
-		$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like "*d1*13*output.csv"}
+		$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams | Where-Object -FilterScript {$_.Name -like $searchPattern}
 		$global:foundFiles = $dataLakeFiles
 		If ($dataLakeFiles.Count -eq 0) {
 			Write-Output "No files found. Waiting 60 seconds..."
 			Start-Sleep -Seconds 60
 		}
-		ElseIf ($dataLakeFiles.Count -eq 1) {
-			Write-Output "Found one file, waiting 30 seconds for the other..."
+		ElseIf ($dataLakeFiles.Count -lt $expected) {
+			Write-Output "Some files found, waiting 30 seconds for others..."
 			Start-Sleep -Seconds 30
 		}
-		ElseIf ($dataLakeFiles.Count -eq 2) {
+		ElseIf ($dataLakeFiles.Count -eq $expected) {
 			ForEach ($file in $dataLakeFiles) {
 				Write-Verbose "Downloading file $($file.Name)..."
 				$exportParams = @{
@@ -117,73 +120,99 @@ Function Insert-CsvToAzDb {
 		throw New-Object -TypeName System.ArgumentOutOfRangeException
 	}
 }
-Try {	
-	While ($i -lt $range) {
-		$day = $($startDateObj.AddDays($i)).day.ToString("00")
-		$month = $($startDateObj.AddDays($i)).month.ToString("00")
-		$year = $($startDateObj.AddDays($i)).year.ToString("0000")
-		$processDate = $year + $month + $day
-		$dataLakeSearchPath = $dataLakeRootPath + $processDate
-		$destinationRootPath = $destinationRoot + $processDate + '\'
-		Get-DataLakeStructuredFiles -dataLakeSearchPath $dataLakeSearchPath -destinationRootPath $destinationRootPath -Verbose
-		$structuredFiles = Get-ChildItem -Path $destinationRootPath -ErrorAction Stop
-		$table = $null
-		ForEach ($file in $structuredFiles) {
-			If ($file.Name -like "*d1_409*") {
-				$table = 'Temp409'
+Function Confirm-Run {
+	Param(
+		[string]$jobType
+	)
+	Write-Host '********************************************************************' -ForegroundColor Magenta
+	Write-Host "Start Date      :: $startDate"
+	Write-Host "End Date        :: $endDate"
+	Write-Host "Expected Files  :: $expected"
+	Write-Host "Search Pattern  :: $searchPattern"
+	Write-Host '********************************************************************' -ForegroundColor Magenta
+    $ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
+    $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*$expected) jobs? (y/n)"
+	Return $answer
+}
+If ($answer -eq 'y') {
+	Try {	
+		While ($i -lt $range) {
+			$day = $($startDateObj.AddDays($i)).day.ToString("00")
+			$month = $($startDateObj.AddDays($i)).month.ToString("00")
+			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
+			$processDate = $year + $month + $day
+			$dataLakeSearchPath = $dataLakeRootPath + $processDate
+			$destinationRootPath = $destinationRoot + $processDate + '\'
+			Get-DataLakeStructuredFiles -dataLakeSearchPath $dataLakeSearchPath -destinationRootPath $destinationRootPath -Verbose
+			$structuredFiles = Get-ChildItem -Path $destinationRootPath -ErrorAction Stop
+			$table = $null
+			ForEach ($file in $structuredFiles) {
+				If ($file.Name -like "*d1_136*") {
+					$table = 'Temp136'
+				}
+				ElseIf ($file.Name -like "*d1_137*") {
+					$table = 'Temp137'
+				}	
+				ElseIf ($file.Name -like "*d1_409*") {
+					$table = 'Temp409'
+				}
+				Else {
+					throw New-Object -TypeName System.FormatException
+				}
+				Insert-CsvToAzDb -file $file.FullName -table $table -Verbose
+				$global:goodFile = $file.Name
 			}
-			Else {
-				throw New-Object -TypeName System.FormatException
-			}
-			Insert-CsvToAzDb -file $file.FullName -table $table -Verbose
-			$global:goodFile = $file.Name
+			$i++
 		}
-		$i++
+	}
+	Catch [System.IO.FileNotFoundException] {
+		$errorParams = @{
+			Exception = New-Object -TypeName System.Exception ("InvalidResult")
+			Message = 'Failed to find the files in the data lake!';
+			Category = 'InvalidResult';
+			ErrorId = 477;
+		}
+		Write-Error @errorParams
+		Write-Debug -Message "Files: $foundFiles"
+	}
+	Catch [System.FormatException] {
+		$errorParams = @{
+			Exception = New-Object -TypeName System.Exception ("InvalidResult")
+			Message = 'You forgot to update the file and table names!';
+			Category = 'InvalidResult';
+			ErrorId = 133;
+		}
+		Write-Error @errorParams
+		Write-Debug -Message "Files: $foundFiles"
+	}
+	Catch [System.ArgumentOutOfRangeException],[System.Management.Automation.RuntimeException] {
+		$errorParams = @{
+			Exception = New-Object -TypeName System.Exception ("InvalidResult")
+			Message = 'BCP returned unexpected result!';
+			Category = 'InvalidResult';
+			ErrorId = 256;
+		}
+		Write-Error @errorParams
+		Write-Debug -Message "Result: $bcpResult"
+	}
+	Catch {
+		$errorParams = @{
+			Exception = New-Object -TypeName System.Exception ("InvalidResult")
+			Message = 'Unknown Error!';
+			Category = 'InvalidResult';
+			ErrorId = 444;
+		}
+		Write-Error @errorParams
+	}
+	Finally {
+		Write-Output '------------------------------------------------------------------'
+		Write-Verbose -Message "Cleaning up $destinationRoot ..."
+		Write-Debug -Message "Last good file inserted: $goodFile"
+		Remove-Item -Path $destinationRoot -Recurse -Force
+		Write-Output '------------------------------------------------------------------'
 	}
 }
-Catch [System.IO.FileNotFoundException] {
-	$errorParams = @{
-		Exception = New-Object -TypeName System.Exception ("InvalidResult")
-		Message = 'Failed to find the files in the data lake!';
-		Category = 'InvalidResult';
-		ErrorId = 477;
-	}
-	Write-Error @errorParams
-	Write-Debug -Message "Files: $foundFiles"
-}
-Catch [System.FormatException] {
-	$errorParams = @{
-		Exception = New-Object -TypeName System.Exception ("InvalidResult")
-		Message = 'You forgot to update the file and table names!';
-		Category = 'InvalidResult';
-		ErrorId = 133;
-	}
-	Write-Error @errorParams
-	Write-Debug -Message "Files: $foundFiles"
-}
-Catch [System.ArgumentOutOfRangeException],[System.Management.Automation.RuntimeException] {
-	$errorParams = @{
-		Exception = New-Object -TypeName System.Exception ("InvalidResult")
-		Message = 'BCP returned unexpected result!';
-		Category = 'InvalidResult';
-		ErrorId = 256;
-	}
-	Write-Error @errorParams
-	Write-Debug -Message "Result: $bcpResult"
-}
-Catch {
-	$errorParams = @{
-		Exception = New-Object -TypeName System.Exception ("InvalidResult")
-		Message = 'Unknown Error!';
-		Category = 'InvalidResult';
-		ErrorId = 444;
-	}
-	Write-Error @errorParams
-}
-Finally {
-	Write-Output '------------------------------------------------------------------'
-	Write-Verbose -Message "Cleaning up $destinationRoot ..."
-	Write-Debug -Message "Last good file inserted: $goodFile"
-	Remove-Item -Path $destinationRoot -Recurse -Force
-	Write-Output '------------------------------------------------------------------'
+Else {
+	Write-Output 'Exiting...'
+	Exit 0
 }
