@@ -8,8 +8,8 @@ Catch {
 	throw $_
 }
 Try {
-	$global:startDate = '10-23-2017'
-	$global:endDate = '10-23-2017'
+	$global:startDate = '10-22-2017'
+	$global:endDate = '10-22-2017'
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -166,7 +166,9 @@ Catch [System.ArgumentOutOfRangeException],[System.Management.Automation.Runtime
 	Write-Debug -Message "Result: $bcpResult"
 }
 Finally {
+	Write-Output '------------------------------------------------------------------'
 	Write-Verbose -Message "Cleaning up $destinationRoot ..."
 	Write-Debug -Message "Last good file inserted: $goodFile"
-	Remove-Item -Path $destinationRoot -Force -Recurse
+	Remove-Item -Path $destinationRoot -Recurse -Force
+	Write-Output '------------------------------------------------------------------'
 }
