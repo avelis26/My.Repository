@@ -121,9 +121,6 @@ Function Insert-CsvToAzDb {
 	}
 }
 Function Confirm-Run {
-	Param(
-		[string]$jobType
-	)
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	Write-Host "Start Date      :: $startDate"
 	Write-Host "End Date        :: $endDate"
@@ -134,7 +131,8 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*$expected) jobs? (y/n)"
 	Return $answer
 }
-If ($answer -eq 'y') {
+$continue = Confirm-Run
+If ($continue -eq 'y') {
 	Try {	
 		While ($i -lt $range) {
 			$day = $($startDateObj.AddDays($i)).day.ToString("00")
