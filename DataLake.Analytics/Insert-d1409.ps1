@@ -11,7 +11,7 @@ Try {
 	$global:startDate = '10-23-2017'
 	$global:endDate = '12-06-2017'
 	$global:expected = 1
-	$global:searchPattern = "*d1*13*output.csv"
+	$global:searchPattern = "*d1*409*output.csv"
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
