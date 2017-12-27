@@ -154,6 +154,9 @@ If ($continue -eq 'y') {
 				ElseIf ($file.Name -like "*d1_409*") {
 					$table = 'Temp409'
 				}
+				ElseIf ($file.Name -like "*d1_410*") {
+					$table = 'Temp410'
+				}
 				Else {
 					throw New-Object -TypeName System.FormatException
 				}
