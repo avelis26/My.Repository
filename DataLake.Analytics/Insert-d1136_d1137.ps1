@@ -8,8 +8,8 @@ Catch {
 	throw $_
 }
 Try {
-	$global:startDate = '10-22-2017'
-	$global:endDate = '10-22-2017'
+	$global:startDate = '10-20-2017'
+	$global:endDate = '10-20-2017'
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'

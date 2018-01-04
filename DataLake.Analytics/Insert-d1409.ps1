@@ -9,9 +9,9 @@ Catch {
 }
 Try {
 	$global:startDate = '10-23-2017'
-	$global:endDate = '12-06-2017'
+	$global:endDate = '10-23-2017'
 	$global:expected = 1
-	$global:searchPattern = "*d1*409*output.csv"
+	$global:searchPattern = "*d1*121*output.csv"
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -35,8 +35,8 @@ Try {
 	$global:foundFiles = $null
 	$global:goodFile = $null
 	$continue = $null
-	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
-	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	#$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
+	#$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	If (!(Test-Path -LiteralPath $destinationRoot)) {
 		Write-Verbose -Message "Creating folder:  $destinationRoot ..."
 		New-Item -ItemType Directory -Path $destinationRoot -Force
@@ -47,7 +47,8 @@ Catch {
 }
 Try {
 	Write-Verbose -Message 'Logging into Azure...'
-	Login-AzureRmAccount -Credential $credential -Subscription $subscription -ErrorAction Stop
+	#Login-AzureRmAccount -Credential $credential -Subscription $subscription -ErrorAction Stop
+	Login-AzureRmAccount -Subscription $subscription -ErrorAction Stop
 }
 Catch {
 	throw $_
@@ -127,7 +128,6 @@ Function Confirm-Run {
 	Write-Host "Expected Files  :: $expected"
 	Write-Host "Search Pattern  :: $searchPattern"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
-    $ignore = Read-Host -Prompt "Did you copy the new script files? (y/n)"		
     $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*$expected) jobs? (y/n)"
 	Return $answer
 }
@@ -147,6 +147,9 @@ If ($continue -eq 'y') {
 			ForEach ($file in $structuredFiles) {
 				If ($file.Name -like "*d1_136*") {
 					$table = 'Temp136'
+				}
+				ElseIf ($file.Name -like "*d1_121*") {
+					$table = 'stg_TXNHeader_121'
 				}
 				ElseIf ($file.Name -like "*d1_137*") {
 					$table = 'Temp137'
@@ -210,6 +213,7 @@ If ($continue -eq 'y') {
 		Write-Verbose -Message "Cleaning up $destinationRoot ..."
 		Write-Debug -Message "Last good file inserted: $goodFile"
 		Remove-Item -Path $destinationRoot -Recurse -Force
+		Write-Output $(Get-Date)
 		Write-Output '------------------------------------------------------------------'
 	}
 }
