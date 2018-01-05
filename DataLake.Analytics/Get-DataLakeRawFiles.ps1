@@ -26,7 +26,7 @@ Function Get-DataLakeRawFiles {
 		$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 		Write-Verbose -Message 'Logging into Azure...'
-		Login-AzureRmAccount -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -ErrorAction Stop
 		Write-Verbose -Message 'Setting subscription...'
 		Set-AzureRmContext -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
 		Write-Verbose -Message "Creating $destinationRootPath folder..."
