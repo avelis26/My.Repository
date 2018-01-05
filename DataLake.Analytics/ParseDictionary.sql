@@ -1,605 +1,628 @@
-CREATE VIEW [Src].[VwPOSAmexCardSales]
+CREATE VIEW [120].[VwPOSAmexCardSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 4 )  AS DayNumber,
-         Substring( [column 0], 16, 4 )  AS ShiftNumber,
-         Substring( [column 0], 20, 14 ) AS TransactionDate,
-         Substring( [column 0], 34, 19 ) AS CardAccountNumber,
-         Substring( [column 0], 53, 6 )  AS EmployeeNumber,
-         Substring( [column 0], 59, 11 ) AS SequenceNumber,
-         Substring( [column 0], 70, 3 )  AS DeviceNumber,
-         Substring( [column 0], 73, 9 )  AS ApprovalCode,
-         Substring( [column 0], 82, 4 )  AS ResponseCode,
-         Substring( [column 0], 86, 6 )  AS STTNumber,
-         Substring( [column 0], 92, 6 )  AS LoadAmount,
-         Substring( [column 0], 98, 6 )  AS FeeAmount,
-         Substring( [column 0], 104, 6 ) AS CardBalance,
-         Substring( [column 0], 110, 1 ) AS VoidFlag,
-         Substring( [column 0], 111, 6 ) AS EmbeddedFee,
-         Substring( [column 0], 117, 6 ) AS VendorFee
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '120' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSComments]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 004 ) AS DayNumber,
+ Substring( [column 0], 016, 004 ) AS ShiftNumber,
+ Substring( [column 0], 020, 014 ) AS TransactionDate,
+ Substring( [column 0], 034, 019 ) AS CardAccountNumber,
+ Substring( [column 0], 053, 006 ) AS EmployeeNumber,
+ Substring( [column 0], 059, 011 ) AS SequenceNumber,
+ Substring( [column 0], 070, 003 ) AS DeviceNumber,
+ Substring( [column 0], 073, 009 ) AS ApprovalCode,
+ Substring( [column 0], 082, 004 ) AS ResponseCode,
+ Substring( [column 0], 086, 006 ) AS STTNumber,
+ Substring( [column 0], 092, 006 ) AS LoadAmount,
+ Substring( [column 0], 098, 006 ) AS FeeAmount,
+ Substring( [column 0], 104, 006 ) AS CardBalance,
+ Substring( [column 0], 110, 001 ) AS VoidFlag,
+ Substring( [column 0], 111, 006 ) AS EmbeddedFee,
+ Substring( [column 0], 117, 006 ) AS VendorFee
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '120' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [121].[VwPOSTransactionHeader]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumbar,
-         Substring( [column 0], 46, 80 ) AS Comments,
-         Substring( [column 0], 126, 6 ) AS RecordType
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '127' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSConfiguration]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 001 ) AS Aborted,
+ Substring( [column 0], 036, 006 ) AS DeviceNumber,
+ Substring( [column 0], 042, 006 ) AS DeviceType,
+ Substring( [column 0], 048, 006 ) AS EmployeeNumber,
+ Substring( [column 0], 054, 008 ) AS EndDate,
+ Substring( [column 0], 062, 006 ) AS EndTime,
+ Substring( [column 0], 068, 008 ) AS StartDate,
+ Substring( [column 0], 076, 006 ) AS StartTime,
+ Substring( [column 0], 082, 001 ) AS Status,
+ Substring( [column 0], 083, 011 ) AS TotalAmount,
+ Substring( [column 0], 094, 006 ) AS TransactionCode,
+ Substring( [column 0], 100, 011 ) AS TransactionSequence,
+ Substring( [column 0], 111, 019 ) AS RewardMemberID
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '121' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [122].[VwPOSItemSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )  AS RecordId,
-         Substring( [column 0], 3, 6 )  AS StoreNumber,
-         Substring( [column 0], 9, 3 )  AS TransactionType,
-         Substring( [column 0], 12, 6 ) AS TerminalNumber,
-         Substring( [column 0], 18, 6 ) AS Scanner,
-         Substring( [column 0], 24, 6 ) AS MsrPort,
-         Substring( [column 0], 30, 6 ) AS CustomerDisplayPort,
-         Substring( [column 0], 36, 6 ) AS PinPadPort,
-         Substring( [column 0], 42, 6 ) AS ForceDrop,
-         Substring( [column 0], 48, 1 ) AS IsCloseDrawer,
-         Substring( [column 0], 49, 1 ) AS IsShowSafeDrop,
-         Substring( [column 0], 50, 1 ) AS IsOpenDrawer,
-         Substring( [column 0], 51, 1 ) AS IsShiftSignOn,
-         Substring( [column 0], 52, 1 ) AS IsPumpInterface,
-         Substring( [column 0], 53, 1 ) AS IsAuditEOS,
-         Substring( [column 0], 54, 1 ) AS IsRevenueEOS,
-         Substring( [column 0], 55, 1 ) AS IsNetworkBatchEOS,
-         Substring( [column 0], 56, 1 ) AS IsAcceptEOS,
-         Substring( [column 0], 57, 1 ) AS IsAuditEOD,
-         Substring( [column 0], 58, 1 ) AS IsRevenueEOD,
-         Substring( [column 0], 59, 1 ) AS IsNetworkEOD,
-         Substring( [column 0], 60, 1 ) AS IsAcceptEOD,
-         Substring( [column 0], 61, 5 ) AS TerminalType,
-         Substring( [column 0], 66, 6 ) AS AlarmDropAmount
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '135' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSCouponReject]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordID,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 011 ) AS ProductNumber,
+ Substring( [column 0], 057, 014 ) AS PLUNumber,
+ Substring( [column 0], 071, 011 ) AS RecordAmount,
+ Substring( [column 0], 082, 006 ) AS RecordCount,
+ Substring( [column 0], 088, 006 ) AS RecordType,
+ Substring( [column 0], 094, 001 ) AS SizeIndx,
+ Substring( [column 0], 095, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 096, 001 ) AS PriceOverideFlag,
+ Substring( [column 0], 097, 001 ) AS TaxableFlag,
+ Substring( [column 0], 098, 001 ) AS VoidFlag,
+ Substring( [column 0], 099, 001 ) AS RecommendedFlag,
+ Substring( [column 0], 100, 006 ) AS PriceMultiple,
+ Substring( [column 0], 106, 006 ) AS CarryStatus,
+ Substring( [column 0], 112, 001 ) AS TaxOverideFlag,
+ Substring( [column 0], 113, 002 ) AS PromotionCount,
+ Substring( [column 0], 115, 004 ) AS SalesPrice,
+ Substring( [column 0], 119, 004 ) AS MUBasePrice,
+ Substring( [column 0], 123, 014 ) AS HostItemId,
+ Substring( [column 0], 137, 010 ) AS CouponCount
+ FROM [Ext].[POS]
+ WHERE Substring( [column 0], 009, 003 ) = '122'AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [123].[VwPOSDepartmentSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 9 )   AS DayNumber,
-         Substring( [column 0], 21, 6 )   AS ShiftNumber,
-         Substring( [column 0], 27, 9 )   AS TransactionUID,
-         Substring( [column 0], 36, 9 )   AS SequenceNumber,
-         Substring( [column 0], 45, 22 )  AS PLUNumber,
-         Substring( [column 0], 67, 15 )  AS PrimaryCompany,
-         Substring( [column 0], 82, 6 )   AS OfferCode,
-         Substring( [column 0], 88, 9 )   AS SaveValue,
-         Substring( [column 0], 97, 9 )   AS PrimaryPurchaseRequirement,
-         Substring( [column 0], 106, 1 )  AS PrimaryPurchaseRequirementCode,
-         Substring( [column 0], 107, 3 )  AS PrimaryPurchaseFamilyCode,
-         Substring( [column 0], 110, 1 )  AS AdditionalPurchaseRulesCode,
-         Substring( [column 0], 111, 9 )  AS SecondPurchaseRequirement,
-         Substring( [column 0], 120, 1 )  AS SecondPurchaseRequirementCode,
-         Substring( [column 0], 121, 3 )  AS SecondPurchaseFamilyCode,
-         Substring( [column 0], 124, 15 ) AS SecondCompany,
-         Substring( [column 0], 139, 9 )  AS ThirdPurchaseRequirement,
-         Substring( [column 0], 148, 1 )  AS ThirdPurchaseRequirementCode,
-         Substring( [column 0], 149, 3 )  AS ThirdPurchaseFamilyCode,
-         Substring( [column 0], 152, 15 ) AS ThirdCompany,
-         Substring( [column 0], 167, 6 )  AS ExpirationDate,
-         Substring( [column 0], 173, 6 )  AS StartDate,
-         Substring( [column 0], 179, 15 ) AS SerialNumber,
-         Substring( [column 0], 194, 15 ) AS RetailerID,
-         Substring( [column 0], 209, 1 )  AS SaveValueCode,
-         Substring( [column 0], 210, 1 )  AS DiscountedItem,
-         Substring( [column 0], 211, 1 )  AS IsStoreCoupon,
-         Substring( [column 0], 212, 1 )  AS IsMultiple,
-         Substring( [column 0], 213, 80 ) AS RejectReason
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '463' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSCouponSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 006 ) AS DepartmentNumber,
+ Substring( [column 0], 052, 006 ) AS SubDepartment,
+ Substring( [column 0], 058, 006 ) AS RecordType,
+ Substring( [column 0], 064, 006 ) AS RecordCount,
+ Substring( [column 0], 070, 011 ) AS RecordAmount,
+ Substring( [column 0], 081, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 082, 001 ) AS VoidFlag,
+ Substring( [column 0], 083, 001 ) AS TaxableFlag,
+ Substring( [column 0], 084, 001 ) AS PriceOverideFlag,
+ Substring( [column 0], 085, 001 ) AS TaxOverideFlag,
+ Substring( [column 0], 086, 014 ) AS HostItemId
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '123' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [124].[VwPOSMediaSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 9 )   AS DayNumber,
-         Substring( [column 0], 21, 6 )   AS ShiftNumber,
-         Substring( [column 0], 27, 9 )   AS TransactionUID,
-         Substring( [column 0], 36, 9 )   AS SequenceNumber,
-         Substring( [column 0], 45, 9 )   AS CouponId,
-         Substring( [column 0], 54, 18 )  AS CouponDescription,
-         Substring( [column 0], 72, 22 )  AS PLUNumber,
-         Substring( [column 0], 94, 2 )   AS CouponType,
-         Substring( [column 0], 96, 2 )   AS CouponValueCode,
-         Substring( [column 0], 98, 9 )   AS EntryMethod,
-         Substring( [column 0], 107, 9 )  AS HostMediaNumber,
-         Substring( [column 0], 116, 9 )  AS RecordAmount,
-         Substring( [column 0], 125, 9 )  AS RecordCount,
-         Substring( [column 0], 134, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 135, 1 )  AS VoidFlag,
-         Substring( [column 0], 136, 1 )  AS TaxableFlag,
-         Substring( [column 0], 137, 1 )  AS TaxOverrideFlag,
-         Substring( [column 0], 138, 1 )  AS AnnulFlag,
-         Substring( [column 0], 139, 15 ) AS PrimaryCompanyId,
-         Substring( [column 0], 154, 6 )  AS OfferCode,
-         Substring( [column 0], 160, 9 )  AS SaveValue,
-         Substring( [column 0], 169, 9 )  AS PrimaryPurchaseRequirement,
-         Substring( [column 0], 178, 1 )  AS PrimaryPurchaseRequirementCode,
-         Substring( [column 0], 179, 3 )  AS PrimaryPurchaseFamilyCode,
-         Substring( [column 0], 182, 1 )  AS AdditionalPurchaseRulesCode,
-         Substring( [column 0], 183, 9 )  AS SecondPurchaseRequirement,
-         Substring( [column 0], 192, 1 )  AS SecondPurchaseRequirementCode,
-         Substring( [column 0], 193, 3 )  AS SecondPurchaseFamilyCode,
-         Substring( [column 0], 196, 15 ) AS SecondCompanyId,
-         Substring( [column 0], 211, 9 )  AS ThirdPurchaseRequirement,
-         Substring( [column 0], 220, 1 )  AS ThirdPurchaseRequirementCode,
-         Substring( [column 0], 221, 3 )  AS ThirdPurchaseFamilyCode,
-         Substring( [column 0], 224, 15 ) AS ThirdCompanyId,
-         Substring( [column 0], 239, 6 )  AS ExpirationDate,
-         Substring( [column 0], 245, 6 )  AS StartDate,
-         Substring( [column 0], 251, 15 ) AS SerialNumber,
-         Substring( [column 0], 266, 15 ) AS RetailerId,
-         Substring( [column 0], 281, 1 )  AS SaveValueCode,
-         Substring( [column 0], 282, 1 )  AS DiscountedItem,
-         Substring( [column 0], 283, 1 )  AS StoreCouponIndicator,
-         Substring( [column 0], 284, 1 )  AS NoMultiplyFlag
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '409' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSDepartmentSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 006 ) AS MediaNumber,
+ Substring( [column 0], 052, 011 ) AS NetworkMediaSequenceNumber,
+ Substring( [column 0], 063, 002 ) AS MediaType,
+ Substring( [column 0], 065, 006 ) AS RecordCount,
+ Substring( [column 0], 071, 011 ) AS RecordAmount,
+ Substring( [column 0], 082, 006 ) AS RecordType,
+ Substring( [column 0], 088, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 089, 001 ) AS VoidFlag,
+ Substring( [column 0], 090, 005 ) AS ExchangeRate,
+ Substring( [column 0], 095, 011 ) AS ForeignAmount
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '124' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [125].[VwPOSTaxSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 6 )  AS DepartmentNumber,
-         Substring( [column 0], 52, 6 )  AS SubDepartment,
-         Substring( [column 0], 58, 6 )  AS RecordType,
-         Substring( [column 0], 64, 6 )  AS RecordCount,
-         Substring( [column 0], 70, 11 ) AS RecordAmount,
-         Substring( [column 0], 81, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 82, 1 )  AS VoidFlag,
-         Substring( [column 0], 83, 1 )  AS TaxableFlag,
-         Substring( [column 0], 84, 1 )  AS PriceOverideFlag,
-         Substring( [column 0], 85, 1 )  AS TaxOverideFlag,
-         Substring( [column 0], 86, 14 ) AS HostItemId
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '123' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSFuelSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 047, 006 ) AS RecordType,
+ Substring( [column 0], 053, 011 ) AS RecordAmount,
+ Substring( [column 0], 064, 006 ) AS TaxTable,
+ Substring( [column 0], 070, 001 ) AS IsVoid,
+ Substring( [column 0], 071, 001 ) AS IsDeduct
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '125' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [127].[VwPOSComments]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 6 )   AS DayNumber,
-         Substring( [column 0], 18, 6 )   AS ShiftNumber,
-         Substring( [column 0], 24, 11 )  AS TransactionUID,
-         Substring( [column 0], 35, 11 )  AS SequenceNumber,
-         Substring( [column 0], 46, 6 )   AS RecordType,
-         Substring( [column 0], 52, 6 )   AS DispenserNumber,
-         Substring( [column 0], 58, 6 )   AS SaleProductId,
-         Substring( [column 0], 64, 6 )   AS HoseNumber,
-         Substring( [column 0], 70, 6 )   AS MediaNumber,
-         Substring( [column 0], 76, 6 )   AS ServiceLevelId,
-         Substring( [column 0], 82, 11 )  AS PricePerUnit,
-         Substring( [column 0], 93, 11 )  AS SaleVolume,
-         Substring( [column 0], 104, 11 ) AS CreePage,
-         Substring( [column 0], 115, 11 ) AS RecordAmount,
-         Substring( [column 0], 126, 6 )  AS FuelPriceTable,
-         Substring( [column 0], 132, 6 )  AS FuelPriceGroup,
-         Substring( [column 0], 138, 6 )  AS PrimaryTankNumber,
-         Substring( [column 0], 144, 11 ) AS PrimaryTankVolume,
-         Substring( [column 0], 155, 6 )  AS SecondaryTankNumber,
-         Substring( [column 0], 161, 11 ) AS SecondaryTankVolume,
-         Substring( [column 0], 172, 1 )  AS ManualFlag,
-         Substring( [column 0], 173, 1 )  AS AutoFinalFlag,
-         Substring( [column 0], 174, 6 )  AS DeviceType,
-         Substring( [column 0], 180, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 181, 1 )  AS VoidFlag,
-         Substring( [column 0], 182, 1 )  AS PrepayFlag,
-         Substring( [column 0], 183, 11 ) AS MediaAdjustAmount,
-         Substring( [column 0], 194, 11 ) AS AdjustPricePerUnit
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '130';
-
-CREATE VIEW [Src].[VwPOSICLoadSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumbar,
+ Substring( [column 0], 046, 080 ) AS Comments,
+ Substring( [column 0], 126, 006 ) AS RecordType
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '127' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [128].[VwPOSPaidInByReason]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 6 )   AS DayNumber,
-         Substring( [column 0], 18, 6 )   AS ShiftNumber,
-         Substring( [column 0], 24, 11 )  AS TransactionUID,
-         Substring( [column 0], 35, 11 )  AS SequenceNumber,
-         Substring( [column 0], 46, 11 )  AS LoadSaleSequenceNumber,
-         Substring( [column 0], 57, 4 )   AS RecordType,
-         Substring( [column 0], 61, 6 )   AS LoadAmount,
-         Substring( [column 0], 67, 6 )   AS BalanceAmount,
-         Substring( [column 0], 73, 19 )  AS AccountNumber,
-         Substring( [column 0], 92, 6 )   AS STTNumber,
-         Substring( [column 0], 98, 6 )   AS AuthorizationTime,
-         Substring( [column 0], 104, 12 ) AS AuthorizationNumber,
-         Substring( [column 0], 116, 6 )  AS AuthorizationCode,
-         Substring( [column 0], 122, 12 ) AS NetworkTerminal,
-         Substring( [column 0], 134, 2 )  AS NetworkLocalTerminal,
-         Substring( [column 0], 136, 14 ) AS PLUNumber,
-         Substring( [column 0], 150, 11 ) AS ItemId,
-         Substring( [column 0], 161, 11 ) AS ItmCostAmount,
-         Substring( [column 0], 172, 11 ) AS VendorId,
-         Substring( [column 0], 183, 6 )  AS FeeAmount,
-         Substring( [column 0], 189, 6 )  AS FeeAmountEmbedded,
-         Substring( [column 0], 195, 6 )  AS FeeAmountVendor
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '133' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSItemSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 047, 011 ) AS Amount,
+ Substring( [column 0], 058, 006 ) AS MediaNumber,
+ Substring( [column 0], 064, 006 ) AS ReasonCode,
+ Substring( [column 0], 070, 006 ) AS RecordType,
+ Substring( [column 0], 076, 006 ) AS TerminalNumber,
+ Substring( [column 0], 082, 001 ) AS VoidFlag
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '128' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [129].[VwPOSPaidOutByReason]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordID,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 6 )   AS DayNumber,
-         Substring( [column 0], 18, 6 )   AS ShiftNumber,
-         Substring( [column 0], 24, 11 )  AS TransactionUID,
-         Substring( [column 0], 35, 11 )  AS SequenceNumber,
-         Substring( [column 0], 46, 11 )  AS ProductNumber,
-         Substring( [column 0], 57, 14 )  AS PLUNumber,
-         Substring( [column 0], 71, 11 )  AS RecordAmount,
-         Substring( [column 0], 82, 6 )   AS RecordCount,
-         Substring( [column 0], 88, 6 )   AS RecordType,
-         Substring( [column 0], 94, 1 )   AS SizeIndx,
-         Substring( [column 0], 95, 1 )   AS ErrorCorrectionFlag,
-         Substring( [column 0], 96, 1 )   AS PriceOverideFlag,
-         Substring( [column 0], 97, 1 )   AS TaxableFlag,
-         Substring( [column 0], 98, 1 )   AS VoidFlag,
-         Substring( [column 0], 99, 1 )   AS RecommendedFlag,
-         Substring( [column 0], 100, 6 )  AS PriceMultiple,
-         Substring( [column 0], 106, 6 )  AS CarryStatus,
-         Substring( [column 0], 112, 1 )  AS TaxOverideFlag,
-         Substring( [column 0], 113, 2 )  AS PromotionCount,
-         Substring( [column 0], 115, 4 )  AS SalesPrice,
-         Substring( [column 0], 119, 4 )  AS MUBasePrice,
-         Substring( [column 0], 123, 14 ) AS HostItemId,
-         Substring( [column 0], 137, 10 ) AS CouponCount
-  FROM   [Ext].[POS]
-  WHERE  Substring( [column 0], 9, 3 ) = '122'AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSMediaSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 047, 011 ) AS Amount,
+ Substring( [column 0], 058, 006 ) AS MediaNumber,
+ Substring( [column 0], 064, 006 ) AS ReasonCode,
+ Substring( [column 0], 070, 006 ) AS RecordType,
+ Substring( [column 0], 076, 006 ) AS TerminalNumber,
+ Substring( [column 0], 082, 001 ) AS VoidFlag
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '129' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [130].[VwPOSFuelSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 6 )  AS MediaNumber,
-         Substring( [column 0], 52, 11 ) AS NetworkMediaSequenceNumber,
-         Substring( [column 0], 63, 2 )  AS MediaType,
-         Substring( [column 0], 65, 6 )  AS RecordCount,
-         Substring( [column 0], 71, 11 ) AS RecordAmount,
-         Substring( [column 0], 82, 6 )  AS RecordType,
-         Substring( [column 0], 88, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 89, 1 )  AS VoidFlag,
-         Substring( [column 0], 90, 5 )  AS ExchangeRate,
-         Substring( [column 0], 95, 11 ) AS ForeignAmount
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '124' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSMoneyOrderSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 006 ) AS RecordType,
+ Substring( [column 0], 052, 006 ) AS DispenserNumber,
+ Substring( [column 0], 058, 006 ) AS SaleProductId,
+ Substring( [column 0], 064, 006 ) AS HoseNumber,
+ Substring( [column 0], 070, 006 ) AS MediaNumber,
+ Substring( [column 0], 076, 006 ) AS ServiceLevelId,
+ Substring( [column 0], 082, 011 ) AS PricePerUnit,
+ Substring( [column 0], 093, 011 ) AS SaleVolume,
+ Substring( [column 0], 104, 011 ) AS CreePage,
+ Substring( [column 0], 115, 011 ) AS RecordAmount,
+ Substring( [column 0], 126, 006 ) AS FuelPriceTable,
+ Substring( [column 0], 132, 006 ) AS FuelPriceGroup,
+ Substring( [column 0], 138, 006 ) AS PrimaryTankNumber,
+ Substring( [column 0], 144, 011 ) AS PrimaryTankVolume,
+ Substring( [column 0], 155, 006 ) AS SecondaryTankNumber,
+ Substring( [column 0], 161, 011 ) AS SecondaryTankVolume,
+ Substring( [column 0], 172, 001 ) AS ManualFlag,
+ Substring( [column 0], 173, 001 ) AS AutoFinalFlag,
+ Substring( [column 0], 174, 006 ) AS DeviceType,
+ Substring( [column 0], 180, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 181, 001 ) AS VoidFlag,
+ Substring( [column 0], 182, 001 ) AS PrepayFlag,
+ Substring( [column 0], 183, 011 ) AS MediaAdjustAmount,
+ Substring( [column 0], 194, 011 ) AS AdjustPricePerUnit
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '130' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [131].[VwPOSShiftStatus]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 6 )  AS MoneyOrderSaleAmount,
-         Substring( [column 0], 52, 4 )  AS MoneyOrderFeeAmount,
-         Substring( [column 0], 56, 12 ) AS MoneyOrderSerialNumber,
-         Substring( [column 0], 68, 10 ) AS MoneyOrderDepartmentSaleSeqNumber,
-         Substring( [column 0], 78, 10 ) AS MoneyOrderDepartmentFeeNumber,
-         Substring( [column 0], 88, 10 ) AS MoneyOrderPrintedFlg
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '140';
-
-CREATE VIEW [Src].[VwPOSNetworkSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordID,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 001 ) AS BackOfficeDayStatus,
+ Substring( [column 0], 013, 001 ) AS POSPostingDayStatus,
+ Substring( [column 0], 014, 006 ) AS DayNumber,
+ Substring( [column 0], 020, 006 ) AS ShiftNumber,
+ Substring( [column 0], 026, 008 ) AS BusinessDate,
+ Substring( [column 0], 034, 014 ) AS ShiftStartDate,
+ Substring( [column 0], 048, 014 ) AS ShiftEndDate
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '131' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [132].[VwPOSTransactionType]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 6 )   AS DayNumber,
-         Substring( [column 0], 18, 6 )   AS ShiftNumber,
-         Substring( [column 0], 24, 11 )  AS TransactionUID,
-         Substring( [column 0], 35, 11 )  AS SequenceNumber,
-         Substring( [column 0], 46, 4 )   AS OwnerSequenceNumber,
-         Substring( [column 0], 50, 40 )  AS AccountNumber,
-         Substring( [column 0], 90, 10 )  AS BatchNumber,
-         Substring( [column 0], 100, 10 ) AS BatchSequenceNumber,
-         Substring( [column 0], 110, 4 )  AS CardTransactionFee,
-         Substring( [column 0], 114, 6 )  AS RecordType,
-         Substring( [column 0], 120, 12 ) AS ReponseCodeText,
-         Substring( [column 0], 132, 12 ) AS AuthorizationNumber,
-         Substring( [column 0], 144, 6 )  AS AuthorizationCode1,
-         Substring( [column 0], 150, 6 )  AS AuthorizationCode2,
-         Substring( [column 0], 156, 26 ) AS CustomerName,
-         Substring( [column 0], 182, 10 ) AS EntryType,
-         Substring( [column 0], 192, 4 )  AS ExpirationDate,
-         Substring( [column 0], 196, 6 )  AS AuthorizationTime,
-         Substring( [column 0], 202, 10 ) AS VehicleNumber,
-         Substring( [column 0], 212, 10 ) AS OdometerReading,
-         Substring( [column 0], 222, 10 ) AS DriverNumber,
-         Substring( [column 0], 232, 14 ) AS CustomizedReferenceNumber,
-         Substring( [column 0], 246, 3 )  AS AccountType,
-         Substring( [column 0], 249, 6 )  AS AuthorizationTraceId,
-         Substring( [column 0], 255, 20 ) AS AuthorizationPartyName,
-         Substring( [column 0], 275, 6 )  AS STTNumber,
-         Substring( [column 0], 281, 4 )  AS BalanceAmount,
-         Substring( [column 0], 285, 40 ) AS MaskedAccountNumber,
-         Substring( [column 0], 325, 9 )  AS RoutingNumber,
-         Substring( [column 0], 334, 10 ) AS CheckNumber,
-         Substring( [column 0], 344, 10 ) AS CardType,
-         Substring( [column 0], 354, 11 ) AS Amount
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '139' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSPaidInByReason]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS TransactionCode,
+ Substring( [column 0], 018, 020 ) AS TransactionDescription,
+ Substring( [column 0], 038, 006 ) AS AddOrSubstruct
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '132' AND
+ Substring( [column 0], 001, 002 ) = 'D1'; 
+GO
+CREATE VIEW [133].[VwPOSICLoadSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 47, 11 ) AS Amount,
-         Substring( [column 0], 58, 6 )  AS MediaNumber,
-         Substring( [column 0], 64, 6 )  AS ReasonCode,
-         Substring( [column 0], 70, 6 )  AS RecordType,
-         Substring( [column 0], 76, 6 )  AS TerminalNumber,
-         Substring( [column 0], 82, 1 )  AS VoidFlag
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '128' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSPaidOutByReason]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 011 ) AS LoadSaleSequenceNumber,
+ Substring( [column 0], 057, 004 ) AS RecordType,
+ Substring( [column 0], 061, 006 ) AS LoadAmount,
+ Substring( [column 0], 067, 006 ) AS BalanceAmount,
+ Substring( [column 0], 073, 019 ) AS AccountNumber,
+ Substring( [column 0], 092, 006 ) AS STTNumber,
+ Substring( [column 0], 098, 006 ) AS AuthorizationTime,
+ Substring( [column 0], 104, 012 ) AS AuthorizationNumber,
+ Substring( [column 0], 116, 006 ) AS AuthorizationCode,
+ Substring( [column 0], 122, 012 ) AS NetworkTerminal,
+ Substring( [column 0], 134, 002 ) AS NetworkLocalTerminal,
+ Substring( [column 0], 136, 014 ) AS PLUNumber,
+ Substring( [column 0], 150, 011 ) AS ItemId,
+ Substring( [column 0], 161, 011 ) AS ItmCostAmount,
+ Substring( [column 0], 172, 011 ) AS VendorId,
+ Substring( [column 0], 183, 006 ) AS FeeAmount,
+ Substring( [column 0], 189, 006 ) AS FeeAmountEmbedded,
+ Substring( [column 0], 195, 006 ) AS FeeAmountVendor
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '133' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [134].[VwPOSStoreEmployeeFile]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 47, 11 ) AS Amount,
-         Substring( [column 0], 58, 6 )  AS MediaNumber,
-         Substring( [column 0], 64, 6 )  AS ReasonCode,
-         Substring( [column 0], 70, 6 )  AS RecordType,
-         Substring( [column 0], 76, 6 )  AS TerminalNumber,
-         Substring( [column 0], 82, 1 )  AS VoidFlag
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '129' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSPromotionSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS EmployeeNumber,
+ Substring( [column 0], 018, 030 ) AS EmployeeName,
+ Substring( [column 0], 048, 008 ) AS Password,
+ Substring( [column 0], 056, 008 ) AS ClassId,
+ Substring( [column 0], 064, 001 ) AS SecurityLevel,
+ Substring( [column 0], 065, 009 ) AS SSN,
+ Substring( [column 0], 074, 014 ) AS PasswordChangeDate,
+ Substring( [column 0], 088, 008 ) AS Password2,
+ Substring( [column 0], 096, 008 ) AS Password3,
+ Substring( [column 0], 104, 008 ) AS Password4,
+ Substring( [column 0], 112, 008 ) AS Password5,
+ Substring( [column 0], 120, 008 ) AS Password6,
+ Substring( [column 0], 128, 014 ) AS LockoutDate
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '134' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [135].[VwPOSConfiguration]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 6 )  AS RecordType,
-         Substring( [column 0], 52, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 53, 1 )  AS VoidFlag,
-         Substring( [column 0], 54, 1 )  AS TaxableFlag,
-         Substring( [column 0], 55, 1 )  AS TaxOverideFlag,
-         Substring( [column 0], 56, 6 )  AS PromotionId,
-         Substring( [column 0], 62, 6 )  AS RecordCount,
-         Substring( [column 0], 68, 6 )  AS RecordAmount,
-         Substring( [column 0], 74, 6 )  AS PromotionProductCode,
-         Substring( [column 0], 80, 6 )  AS DepartmentNumber,
-         Substring( [column 0], 86, 1 )  AS TAX_TBL_1,
-         Substring( [column 0], 87, 1 )  AS TAX_TBL_2,
-         Substring( [column 0], 88, 1 )  AS TAX_TBL_3,
-         Substring( [column 0], 89, 1 )  AS TAX_TBL_4,
-         Substring( [column 0], 90, 1 )  AS TAX_TBL_5,
-         Substring( [column 0], 91, 1 )  AS TAX_TBL_6,
-         Substring( [column 0], 92, 2 )  AS ALLOW_FOOD_STAMP
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '136' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSPromotionSalesDetails]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS TerminalNumber,
+ Substring( [column 0], 018, 006 ) AS Scanner,
+ Substring( [column 0], 024, 006 ) AS MsrPort,
+ Substring( [column 0], 030, 006 ) AS CustomerDisplayPort,
+ Substring( [column 0], 036, 006 ) AS PinPadPort,
+ Substring( [column 0], 042, 006 ) AS ForceDrop,
+ Substring( [column 0], 048, 001 ) AS IsCloseDrawer,
+ Substring( [column 0], 049, 001 ) AS IsShowSafeDrop,
+ Substring( [column 0], 050, 001 ) AS IsOpenDrawer,
+ Substring( [column 0], 051, 001 ) AS IsShiftSignOn,
+ Substring( [column 0], 052, 001 ) AS IsPumpInterface,
+ Substring( [column 0], 053, 001 ) AS IsAuditEOS,
+ Substring( [column 0], 054, 001 ) AS IsRevenueEOS,
+ Substring( [column 0], 055, 001 ) AS IsNetworkBatchEOS,
+ Substring( [column 0], 056, 001 ) AS IsAcceptEOS,
+ Substring( [column 0], 057, 001 ) AS IsAuditEOD,
+ Substring( [column 0], 058, 001 ) AS IsRevenueEOD,
+ Substring( [column 0], 059, 001 ) AS IsNetworkEOD,
+ Substring( [column 0], 060, 001 ) AS IsAcceptEOD,
+ Substring( [column 0], 061, 005 ) AS TerminalType,
+ Substring( [column 0], 066, 006 ) AS AlarmDropAmount
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '135' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [136].[VwPOSPromotionSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 11 ) AS OwnerSequenceNumber,
-         Substring( [column 0], 57, 11 ) AS PromotionSequenceNumber,
-         Substring( [column 0], 68, 6 )  AS RecordAmount,
-         Substring( [column 0], 74, 6 )  AS RecordCount,
-         Substring( [column 0], 80, 4 )  AS PromotionGroupId,
-         Substring( [column 0], 84, 4 )  AS ThresholdQty
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '137' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSSafeActivity]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 006 ) AS RecordType,
+ Substring( [column 0], 052, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 053, 001 ) AS VoidFlag,
+ Substring( [column 0], 054, 001 ) AS TaxableFlag,
+ Substring( [column 0], 055, 001 ) AS TaxOverideFlag,
+ Substring( [column 0], 056, 006 ) AS PromotionId,
+ Substring( [column 0], 062, 006 ) AS RecordCount,
+ Substring( [column 0], 068, 006 ) AS RecordAmount,
+ Substring( [column 0], 074, 006 ) AS PromotionProductCode,
+ Substring( [column 0], 080, 006 ) AS DepartmentNumber,
+ Substring( [column 0], 086, 001 ) AS TAX_TBL_1,
+ Substring( [column 0], 087, 001 ) AS TAX_TBL_2,
+ Substring( [column 0], 088, 001 ) AS TAX_TBL_3,
+ Substring( [column 0], 089, 001 ) AS TAX_TBL_4,
+ Substring( [column 0], 090, 001 ) AS TAX_TBL_5,
+ Substring( [column 0], 091, 001 ) AS TAX_TBL_6,
+ Substring( [column 0], 092, 002 ) AS ALLOW_FOOD_STAMP
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '136' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [137].[VwPOSPromotionSalesDetails]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 1 )  AS SafeActivityType,
-         Substring( [column 0], 47, 6 )  AS SafeMediaNumber,
-         Substring( [column 0], 53, 2 )  AS SafeMediaType,
-         Substring( [column 0], 55, 11 ) AS POSAmount,
-         Substring( [column 0], 66, 11 ) AS SafeAmount,
-         Substring( [column 0], 77, 11 ) AS ForeignAmount,
-         Substring( [column 0], 88, 6 )  AS EnvelopeNumber,
-         Substring( [column 0], 94, 1 )  AS CommunicationStatus
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '411';
-
-CREATE VIEW [Src].[VwPOSSalesReject]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 011 ) AS OwnerSequenceNumber,
+ Substring( [column 0], 057, 011 ) AS PromotionSequenceNumber,
+ Substring( [column 0], 068, 006 ) AS RecordAmount,
+ Substring( [column 0], 074, 006 ) AS RecordCount,
+ Substring( [column 0], 080, 004 ) AS PromotionGroupId,
+ Substring( [column 0], 084, 004 ) AS ThresholdQty
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '137' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [138].[VwPOSSaleTransactionSummary]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 9 )  AS DayNumber,
-         Substring( [column 0], 21, 6 )  AS ShiftNumber,
-         Substring( [column 0], 27, 9 )  AS TransactionUID,
-         Substring( [column 0], 36, 9 )  AS SequenceNumber,
-         Substring( [column 0], 45, 9 )  AS ItemId,
-         Substring( [column 0], 54, 14 ) AS PLUNumber,
-         Substring( [column 0], 68, 6 )  AS BestBeforeDate,
-         Substring( [column 0], 74, 6 )  AS SellByDate,
-         Substring( [column 0], 80, 6 )  AS ExpirationDate,
-         Substring( [column 0], 86, 10 ) AS ExpirationDateTime,
-         Substring( [column 0], 96, 80 ) AS RejectedReason
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '462' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSSaleTransactionSummary]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 008 ) AS TransactionDate,
+ Substring( [column 0], 020, 011 ) AS TransactionHour,
+ Substring( [column 0], 031, 011 ) AS MerchandiseAmount,
+ Substring( [column 0], 042, 011 ) AS GasSalesAmount,
+ Substring( [column 0], 053, 011 ) AS MerchandiseCount,
+ Substring( [column 0], 064, 011 ) AS GasSaleCount,
+ Substring( [column 0], 075, 011 ) AS POSCount,
+ Substring( [column 0], 086, 011 ) AS CRINDCount,
+ Substring( [column 0], 097, 001 ) AS PeriodCode,
+ Substring( [column 0], 098, 008 ) AS ExpiryDate,
+ Substring( [column 0], 106, 011 ) AS MerchandiseUnits
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '138' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [139].[VwPOSNetworkSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 8 )   AS TransactionDate,
-         Substring( [column 0], 20, 11 )  AS TransactionHour,
-         Substring( [column 0], 31, 11 )  AS MerchandiseAmount,
-         Substring( [column 0], 42, 11 )  AS GasSalesAmount,
-         Substring( [column 0], 53, 11 )  AS MerchandiseCount,
-         Substring( [column 0], 64, 11 )  AS GasSaleCount,
-         Substring( [column 0], 75, 11 )  AS POSCount,
-         Substring( [column 0], 86, 11 )  AS CRINDCount,
-         Substring( [column 0], 97, 1 )   AS PeriodCode,
-         Substring( [column 0], 98, 8 )   AS ExpiryDate,
-         Substring( [column 0], 106, 11 ) AS MerchandiseUnits
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '138' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSShiftStatus]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 004 ) AS OwnerSequenceNumber,
+ Substring( [column 0], 050, 040 ) AS AccountNumber,
+ Substring( [column 0], 090, 010 ) AS BatchNumber,
+ Substring( [column 0], 100, 010 ) AS BatchSequenceNumber,
+ Substring( [column 0], 110, 004 ) AS CardTransactionFee,
+ Substring( [column 0], 114, 006 ) AS RecordType,
+ Substring( [column 0], 120, 012 ) AS ReponseCodeText,
+ Substring( [column 0], 132, 012 ) AS AuthorizationNumber,
+ Substring( [column 0], 144, 006 ) AS AuthorizationCode1,
+ Substring( [column 0], 150, 006 ) AS AuthorizationCode2,
+ Substring( [column 0], 156, 026 ) AS CustomerName,
+ Substring( [column 0], 182, 010 ) AS EntryType,
+ Substring( [column 0], 192, 004 ) AS ExpirationDate,
+ Substring( [column 0], 196, 006 ) AS AuthorizationTime,
+ Substring( [column 0], 202, 010 ) AS VehicleNumber,
+ Substring( [column 0], 212, 010 ) AS OdometerReading,
+ Substring( [column 0], 222, 010 ) AS DriverNumber,
+ Substring( [column 0], 232, 014 ) AS CustomizedReferenceNumber,
+ Substring( [column 0], 246, 003 ) AS AccountType,
+ Substring( [column 0], 249, 006 ) AS AuthorizationTraceId,
+ Substring( [column 0], 255, 020 ) AS AuthorizationPartyName,
+ Substring( [column 0], 275, 006 ) AS STTNumber,
+ Substring( [column 0], 281, 004 ) AS BalanceAmount,
+ Substring( [column 0], 285, 040 ) AS MaskedAccountNumber,
+ Substring( [column 0], 325, 009 ) AS RoutingNumber,
+ Substring( [column 0], 334, 010 ) AS CheckNumber,
+ Substring( [column 0], 344, 010 ) AS CardType,
+ Substring( [column 0], 354, 011 ) AS Amount
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '139' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [140].[VwPOSMoneyOrderSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordID,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 1 )  AS BackOfficeDayStatus,
-         Substring( [column 0], 13, 1 )  AS POSPostingDayStatus,
-         Substring( [column 0], 14, 6 )  AS DayNumber,
-         Substring( [column 0], 20, 6 )  AS ShiftNumber,
-         Substring( [column 0], 26, 8 )  AS BusinessDate,
-         Substring( [column 0], 34, 14 ) AS ShiftStartDate,
-         Substring( [column 0], 48, 14 ) AS ShiftEndDate
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '131' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSStoreEmployeeFile]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 006 ) AS MoneyOrderSaleAmount,
+ Substring( [column 0], 052, 004 ) AS MoneyOrderFeeAmount,
+ Substring( [column 0], 056, 012 ) AS MoneyOrderSerialNumber,
+ Substring( [column 0], 068, 010 ) AS MoneyOrderDepartmentSaleSeqNumber,
+ Substring( [column 0], 078, 010 ) AS MoneyOrderDepartmentFeeNumber,
+ Substring( [column 0], 088, 010 ) AS MoneyOrderPrintedFlg
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '140' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [409].[VwPOSCouponSales]
 AS
-  SELECT Substring( [column 0], 1, 2 )    AS RecordId,
-         Substring( [column 0], 3, 6 )    AS StoreNumber,
-         Substring( [column 0], 9, 3 )    AS TransactionType,
-         Substring( [column 0], 12, 6 )   AS EmployeeNumber,
-         Substring( [column 0], 18, 30 )  AS EmployeeName,
-         Substring( [column 0], 48, 8 )   AS Password,
-         Substring( [column 0], 56, 8 )   AS ClassId,
-         Substring( [column 0], 64, 1 )   AS SecurityLevel,
-         Substring( [column 0], 65, 9 )   AS SSN,
-         Substring( [column 0], 74, 14 )  AS PasswordChangeDate,
-         Substring( [column 0], 88, 8 )   AS Password2,
-         Substring( [column 0], 96, 8 )   AS Password3,
-         Substring( [column 0], 104, 8 )  AS Password4,
-         Substring( [column 0], 112, 8 )  AS Password5,
-         Substring( [column 0], 120, 8 )  AS Password6,
-         Substring( [column 0], 128, 14 ) AS LockoutDate
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '134' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSTaxSales]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 009 ) AS DayNumber,
+ Substring( [column 0], 021, 006 ) AS ShiftNumber,
+ Substring( [column 0], 027, 009 ) AS TransactionUID,
+ Substring( [column 0], 036, 009 ) AS SequenceNumber,
+ Substring( [column 0], 045, 009 ) AS CouponId,
+ Substring( [column 0], 054, 018 ) AS CouponDescription,
+ Substring( [column 0], 072, 022 ) AS PLUNumber,
+ Substring( [column 0], 094, 002 ) AS CouponType,
+ Substring( [column 0], 096, 002 ) AS CouponValueCode,
+ Substring( [column 0], 098, 009 ) AS EntryMethod,
+ Substring( [column 0], 107, 009 ) AS HostMediaNumber,
+ Substring( [column 0], 116, 009 ) AS RecordAmount,
+ Substring( [column 0], 125, 009 ) AS RecordCount,
+ Substring( [column 0], 134, 001 ) AS ErrorCorrectionFlag,
+ Substring( [column 0], 135, 001 ) AS VoidFlag,
+ Substring( [column 0], 136, 001 ) AS TaxableFlag,
+ Substring( [column 0], 137, 001 ) AS TaxOverrideFlag,
+ Substring( [column 0], 138, 001 ) AS AnnulFlag,
+ Substring( [column 0], 139, 015 ) AS PrimaryCompanyId,
+ Substring( [column 0], 154, 006 ) AS OfferCode,
+ Substring( [column 0], 160, 009 ) AS SaveValue,
+ Substring( [column 0], 169, 009 ) AS PrimaryPurchaseRequirement,
+ Substring( [column 0], 178, 001 ) AS PrimaryPurchaseRequirementCode,
+ Substring( [column 0], 179, 003 ) AS PrimaryPurchaseFamilyCode,
+ Substring( [column 0], 182, 001 ) AS AdditionalPurchaseRulesCode,
+ Substring( [column 0], 183, 009 ) AS SecondPurchaseRequirement,
+ Substring( [column 0], 192, 001 ) AS SecondPurchaseRequirementCode,
+ Substring( [column 0], 193, 003 ) AS SecondPurchaseFamilyCode,
+ Substring( [column 0], 196, 015 ) AS SecondCompanyId,
+ Substring( [column 0], 211, 009 ) AS ThirdPurchaseRequirement,
+ Substring( [column 0], 220, 001 ) AS ThirdPurchaseRequirementCode,
+ Substring( [column 0], 221, 003 ) AS ThirdPurchaseFamilyCode,
+ Substring( [column 0], 224, 015 ) AS ThirdCompanyId,
+ Substring( [column 0], 239, 006 ) AS ExpirationDate,
+ Substring( [column 0], 245, 006 ) AS StartDate,
+ Substring( [column 0], 251, 015 ) AS SerialNumber,
+ Substring( [column 0], 266, 015 ) AS RetailerId,
+ Substring( [column 0], 281, 001 ) AS SaveValueCode,
+ Substring( [column 0], 282, 001 ) AS DiscountedItem,
+ Substring( [column 0], 283, 001 ) AS StoreCouponIndicator,
+ Substring( [column 0], 284, 001 ) AS NoMultiplyFlag
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '409' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [410].[VwPOSCouponSalesDetails]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS DayNumber,
-         Substring( [column 0], 18, 6 )  AS ShiftNumber,
-         Substring( [column 0], 24, 11 ) AS TransactionUID,
-         Substring( [column 0], 35, 11 ) AS SequenceNumber,
-         Substring( [column 0], 46, 1 )  AS ErrorCorrectionFlag,
-         Substring( [column 0], 47, 6 )  AS RecordType,
-         Substring( [column 0], 53, 11 ) AS RecordAmount,
-         Substring( [column 0], 64, 6 )  AS TaxTable,
-         Substring( [column 0], 70, 1 )  AS IsVoid,
-         Substring( [column 0], 71, 1 )  AS IsDeduct
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '125' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSTransactionHeader]
+ SELECT
+ Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 010 ) AS TransactionUID,
+ Substring( [column 0], 034, 010 ) AS SequenceNumber,
+ Substring( [column 0], 044, 010 ) AS OwnerSequenceNumber,
+ Substring( [column 0], 054, 010 ) AS CouponCouponNumber,
+ Substring( [column 0], 064, 006 ) AS RecordCount,
+ Substring( [column 0], 070, 001 ) AS ReportedItemFlag,
+ Substring( [column 0], 071, 001 ) AS OwnerType
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '410' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [411].[VwPOSSafeActivity]
 AS
-  SELECT Rtrim( Ltrim( Substring( [column 0], 1, 2 ) ) )    AS RecordId,
-         Rtrim( Ltrim( Substring( [column 0], 3, 6 ) ) )    AS StoreNumber,
-         Rtrim( Ltrim( Substring( [column 0], 9, 3 ) ) )    AS TransactionType,
-         Rtrim( Ltrim( Substring( [column 0], 12, 6 ) ) )   AS DayNumber,
-         Rtrim( Ltrim( Substring( [column 0], 18, 6 ) ) )   AS ShiftNumber,
-         Rtrim( Ltrim( Substring( [column 0], 24, 11 ) ) )  AS TransactionUID,
-         Rtrim( Ltrim( Substring( [column 0], 35, 1 ) ) )   AS Aborted,
-         Rtrim( Ltrim( Substring( [column 0], 36, 6 ) ) )   AS DeviceNumber,
-         Rtrim( Ltrim( Substring( [column 0], 42, 6 ) ) )   AS DeviceType,
-         Rtrim( Ltrim( Substring( [column 0], 48, 6 ) ) )   AS EmployeeNumber,
-         Rtrim( Ltrim( Substring( [column 0], 54, 8 ) ) )   AS EndDate,
-         Rtrim( Ltrim( Substring( [column 0], 62, 6 ) ) )   AS EndTime,
-         Rtrim( Ltrim( Substring( [column 0], 68, 8 ) ) )   AS StartDate,
-         Rtrim( Ltrim( Substring( [column 0], 76, 6 ) ) )   AS StartTime,
-         Rtrim( Ltrim( Substring( [column 0], 82, 1 ) ) )   AS [Status],
-         Rtrim( Ltrim( Substring( [column 0], 83, 11 ) ) )  AS TotalAmount,
-         Rtrim( Ltrim( Substring( [column 0], 94, 6 ) ) )   AS TransactionCode,
-         Rtrim( Ltrim( Substring( [column 0], 100, 11 ) ) ) AS TransactionSequence,
-         Rtrim( Ltrim( Substring( [column 0], 111, 19 ) ) ) AS 7RewardMemberID
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '121' AND
-         Substring( [column 0], 1, 2 ) = 'D1';
-
-CREATE VIEW [Src].[VwPOSTransactionType]
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 006 ) AS DayNumber,
+ Substring( [column 0], 018, 006 ) AS ShiftNumber,
+ Substring( [column 0], 024, 011 ) AS TransactionUID,
+ Substring( [column 0], 035, 011 ) AS SequenceNumber,
+ Substring( [column 0], 046, 001 ) AS SafeActivityType,
+ Substring( [column 0], 047, 006 ) AS SafeMediaNumber,
+ Substring( [column 0], 053, 002 ) AS SafeMediaType,
+ Substring( [column 0], 055, 011 ) AS POSAmount,
+ Substring( [column 0], 066, 011 ) AS SafeAmount,
+ Substring( [column 0], 077, 011 ) AS ForeignAmount,
+ Substring( [column 0], 088, 006 ) AS EnvelopeNumber,
+ Substring( [column 0], 094, 001 ) AS CommunicationStatus
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '411' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [462].[VwPOSSalesReject]
 AS
-  SELECT Substring( [column 0], 1, 2 )   AS RecordId,
-         Substring( [column 0], 3, 6 )   AS StoreNumber,
-         Substring( [column 0], 9, 3 )   AS TransactionType,
-         Substring( [column 0], 12, 6 )  AS TransactionCode,
-         Substring( [column 0], 18, 20 ) AS TransactionDescription,
-         Substring( [column 0], 38, 6 )  AS AddOrSubstruct
-  FROM   ext.POS
-  WHERE  Substring( [column 0], 9, 3 ) = '132' AND
-         Substring( [column 0], 1, 2 ) = 'D1'; 
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 009 ) AS DayNumber,
+ Substring( [column 0], 021, 006 ) AS ShiftNumber,
+ Substring( [column 0], 027, 009 ) AS TransactionUID,
+ Substring( [column 0], 036, 009 ) AS SequenceNumber,
+ Substring( [column 0], 045, 009 ) AS ItemId,
+ Substring( [column 0], 054, 014 ) AS PLUNumber,
+ Substring( [column 0], 068, 006 ) AS BestBeforeDate,
+ Substring( [column 0], 074, 006 ) AS SellByDate,
+ Substring( [column 0], 080, 006 ) AS ExpirationDate,
+ Substring( [column 0], 086, 010 ) AS ExpirationDateTime,
+ Substring( [column 0], 096, 080 ) AS RejectedReason
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '462' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+GO
+CREATE VIEW [463].[VwPOSCouponReject]
+AS
+ SELECT Substring( [column 0], 001, 002 ) AS RecordId,
+ Substring( [column 0], 003, 006 ) AS StoreNumber,
+ Substring( [column 0], 009, 003 ) AS TransactionType,
+ Substring( [column 0], 012, 009 ) AS DayNumber,
+ Substring( [column 0], 021, 006 ) AS ShiftNumber,
+ Substring( [column 0], 027, 009 ) AS TransactionUID,
+ Substring( [column 0], 036, 009 ) AS SequenceNumber,
+ Substring( [column 0], 045, 022 ) AS PLUNumber,
+ Substring( [column 0], 067, 015 ) AS PrimaryCompany,
+ Substring( [column 0], 082, 006 ) AS OfferCode,
+ Substring( [column 0], 088, 009 ) AS SaveValue,
+ Substring( [column 0], 097, 009 ) AS PrimaryPurchaseRequirement,
+ Substring( [column 0], 106, 001 ) AS PrimaryPurchaseRequirementCode,
+ Substring( [column 0], 107, 003 ) AS PrimaryPurchaseFamilyCode,
+ Substring( [column 0], 110, 001 ) AS AdditionalPurchaseRulesCode,
+ Substring( [column 0], 111, 009 ) AS SecondPurchaseRequirement,
+ Substring( [column 0], 120, 001 ) AS SecondPurchaseRequirementCode,
+ Substring( [column 0], 121, 003 ) AS SecondPurchaseFamilyCode,
+ Substring( [column 0], 124, 015 ) AS SecondCompany,
+ Substring( [column 0], 139, 009 ) AS ThirdPurchaseRequirement,
+ Substring( [column 0], 148, 001 ) AS ThirdPurchaseRequirementCode,
+ Substring( [column 0], 149, 003 ) AS ThirdPurchaseFamilyCode,
+ Substring( [column 0], 152, 015 ) AS ThirdCompany,
+ Substring( [column 0], 167, 006 ) AS ExpirationDate,
+ Substring( [column 0], 173, 006 ) AS StartDate,
+ Substring( [column 0], 179, 015 ) AS SerialNumber,
+ Substring( [column 0], 194, 015 ) AS RetailerID,
+ Substring( [column 0], 209, 001 ) AS SaveValueCode,
+ Substring( [column 0], 210, 001 ) AS DiscountedItem,
+ Substring( [column 0], 211, 001 ) AS IsStoreCoupon,
+ Substring( [column 0], 212, 001 ) AS IsMultiple,
+ Substring( [column 0], 213, 080 ) AS RejectReason
+ FROM ext.POS
+ WHERE Substring( [column 0], 009, 003 ) = '463' AND
+ Substring( [column 0], 001, 002 ) = 'D1';
+Go

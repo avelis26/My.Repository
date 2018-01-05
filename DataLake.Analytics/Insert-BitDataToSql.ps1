@@ -108,7 +108,7 @@ Function Insert-CsvToAzDb {
 		[string]$file,
 		[string]$table
 	)
-	$global:command = "bcp $table in $file -S $server -d $database -U $sqlUser -P $sqlPass -q -c -t ',' -F 2"
+	$global:command = "bcp $table in $file -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -F 2 -t ',' -q"
 	Write-Debug -Message $command
 	Write-Verbose -Message "Inserting $file into AzureDB..."
 	$result = Invoke-Expression -Command $command
