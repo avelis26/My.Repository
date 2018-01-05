@@ -1,5 +1,6 @@
 $VerbosePreference = 'Continue'
 $DebugPreference = 'Continue'
+$startTime = Get-Date
 Try {
 	Write-Verbose -Message 'Importing AzureRm module...'
 	Import-Module AzureRM -ErrorAction Stop
@@ -213,7 +214,8 @@ If ($continue -eq 'y') {
 		Write-Verbose -Message "Cleaning up $destinationRoot ..."
 		Write-Debug -Message "Last good file inserted: $goodFile"
 		Remove-Item -Path $destinationRoot -Recurse -Force
-		Write-Output $(Get-Date)
+		Write-Output "Start Time: $($startTime.DateTime)"
+		Write-Output "End Time: $($(Get-Date).DateTime)"
 		Write-Output '------------------------------------------------------------------'
 	}
 }
