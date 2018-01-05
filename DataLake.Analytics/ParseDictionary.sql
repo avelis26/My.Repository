@@ -75,7 +75,7 @@ AS
  Substring( [column 0], 115, 004 ) AS SalesPrice,
  Substring( [column 0], 119, 004 ) AS MUBasePrice,
  Substring( [column 0], 123, 014 ) AS HostItemId,
- Substring( [column 0], 137, 010 ) AS CouponCount
+ Substring( [column 0], 137, 002 ) AS CouponCount
  FROM [Ext].[POS]
  WHERE Substring( [column 0], 009, 003 ) = '122'AND
  Substring( [column 0], 001, 002 ) = 'D1';
