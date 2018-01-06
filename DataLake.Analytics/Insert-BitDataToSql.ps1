@@ -9,10 +9,12 @@ Catch {
 	throw $_
 }
 Try {
+###########################################################################
 	$global:startDate = '10-23-2017'
-	$global:endDate = '10-23-2017'
-	$global:expected = 1
-	$global:searchPattern = "*d1*121*output.csv"
+	$global:endDate = '11-28-2017'
+	$global:expected = 3
+	$global:searchPattern = "*d1*12*output.csv"
+###########################################################################
 	$global:userName = 'gpink003'
 	$global:dataLakeStoreName = 'mscrmprodadls'
 	$global:subscription = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -36,8 +38,8 @@ Try {
 	$global:foundFiles = $null
 	$global:goodFile = $null
 	$continue = $null
-	#$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
-	#$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	If (!(Test-Path -LiteralPath $destinationRoot)) {
 		Write-Verbose -Message "Creating folder:  $destinationRoot ..."
 		New-Item -ItemType Directory -Path $destinationRoot -Force
@@ -48,8 +50,7 @@ Catch {
 }
 Try {
 	Write-Verbose -Message 'Logging into Azure...'
-	#Login-AzureRmAccount -Credential $credential -Subscription $subscription -ErrorAction Stop
-	Login-AzureRmAccount -Subscription $subscription -ErrorAction Stop
+	Login-AzureRmAccount -Credential $credential -Subscription $subscription -ErrorAction Stop
 }
 Catch {
 	throw $_
@@ -146,20 +147,33 @@ If ($continue -eq 'y') {
 			$structuredFiles = Get-ChildItem -Path $destinationRootPath -ErrorAction Stop
 			$table = $null
 			ForEach ($file in $structuredFiles) {
-				If ($file.Name -like "*d1_136*") {
-					$table = 'Temp136'
-				}
-				ElseIf ($file.Name -like "*d1_121*") {
+				If ($file.Name -like "*d1_121*") {
 					$table = 'stg_TXNHeader_121'
+					$formatFile = "C:\Scripts\XML\format121.xml"
+				}
+				ElseIf ($file.Name -like "*d1_122*") {
+					$table = 'stg_TXNDetails_122'
+					$formatFile = "C:\Scripts\XML\format122.xml"
+				}
+				ElseIf ($file.Name -like "*d1_124*") {
+					$table = 'stg_Media_124'
+					$formatFile = "C:\Scripts\XML\format124.xml"
+				}
+				ElseIf ($file.Name -like "*d1_136*") {
+					$table = 'stg_PromoSales_136'
+					$formatFile = "C:\Scripts\XML\format136.xml"
 				}
 				ElseIf ($file.Name -like "*d1_137*") {
-					$table = 'Temp137'
+					$table = 'stg_PromoSalesDetails_137'
+					$formatFile = "C:\Scripts\XML\format137.xml"
 				}	
 				ElseIf ($file.Name -like "*d1_409*") {
-					$table = 'Temp409'
+					$table = 'stg_CouponSales_409'
+					$formatFile = "C:\Scripts\XML\format409.xml"
 				}
 				ElseIf ($file.Name -like "*d1_410*") {
-					$table = 'Temp410'
+					$table = 'stg_CouponSalesDetails_410'
+					$formatFile = "C:\Scripts\XML\format410.xml"
 				}
 				Else {
 					throw New-Object -TypeName System.FormatException
