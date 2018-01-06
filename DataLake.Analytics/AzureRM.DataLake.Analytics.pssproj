@@ -38,6 +38,9 @@
     <Compile Include="Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="format121.xml" />
+    <Content Include="format122.xml" />
+    <Content Include="format124.xml" />
     <Content Include="ParseDictionary.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
