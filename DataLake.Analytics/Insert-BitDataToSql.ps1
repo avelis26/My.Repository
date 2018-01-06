@@ -1,12 +1,9 @@
 $startTime = Get-Date
-Try {
+Function Initiate-Vars {
+	[CmdletBinding()]
+	Param()
 	Write-Verbose -Message 'Importing AzureRm module...'
 	Import-Module AzureRM -ErrorAction Stop
-}
-Catch {
-	throw $_
-}
-Try {
 ###########################################################################
 	$global:startDate = '10-23-2017'
 	$global:endDate = '11-28-2017'
@@ -43,16 +40,8 @@ Try {
 		Write-Verbose -Message "Creating folder:  $destinationRoot ..."
 		New-Item -ItemType Directory -Path $destinationRoot -Force
 	}
-}
-Catch {
-	throw $_
-}
-Try {
 	Write-Verbose -Message 'Logging into Azure...'
 	Login-AzureRmAccount -Credential $credential -Subscription $subscription -ErrorAction Stop
-}
-Catch {
-	throw $_
 }
 Function Get-DataLakeStructuredFiles {
 	[CmdletBinding()]
@@ -132,6 +121,7 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to kick off $($range*$expected) jobs? (y/n)"
 	Return $answer
 }
+Initiate-Vars -Verbose
 $continue = Confirm-Run
 If ($continue -eq 'y') {
 	Try {	
