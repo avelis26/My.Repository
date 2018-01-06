@@ -29,6 +29,7 @@ Try {
 	$global:startDateObj = Get-Date -Date $startDate
 	$global:endDateObj = Get-Date -Date $endDate
 	$global:range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
+	$global:exitCode = 0
 	$i = 0
 	$command = $null
 	$result = $null
@@ -193,6 +194,7 @@ If ($continue -eq 'y') {
 		}
 		Write-Error @errorParams
 		Write-Debug -Message "Files: $foundFiles"
+		$exitCode = 1
 	}
 	Catch [System.FormatException] {
 		$errorParams = @{
@@ -203,6 +205,7 @@ If ($continue -eq 'y') {
 		}
 		Write-Error @errorParams
 		Write-Debug -Message "Files: $foundFiles"
+		$exitCode = 2
 	}
 	Catch [System.ArgumentOutOfRangeException],[System.Management.Automation.RuntimeException] {
 		$errorParams = @{
@@ -213,6 +216,7 @@ If ($continue -eq 'y') {
 		}
 		Write-Error @errorParams
 		Write-Debug -Message "Result: $bcpResult"
+		$exitCode = 3
 	}
 	Catch {
 		$errorParams = @{
@@ -222,6 +226,7 @@ If ($continue -eq 'y') {
 			ErrorId = 444;
 		}
 		Write-Error @errorParams
+		$exitCode = 4
 	}
 	Finally {
 		Write-Output '------------------------------------------------------------------'
@@ -231,6 +236,7 @@ If ($continue -eq 'y') {
 		Write-Output "Start Time: $($startTime.DateTime)"
 		Write-Output "End Time: $($(Get-Date).DateTime)"
 		Write-Output '------------------------------------------------------------------'
+		Exit $exitCode
 	}
 }
 Else {
