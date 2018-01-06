@@ -26,7 +26,7 @@
   <FIELD ID="23" xsi:type="CharTerm" TERMINATOR="," LENGTH="004"/>
   <FIELD ID="24" xsi:type="CharTerm" TERMINATOR="," LENGTH="004"/>
   <FIELD ID="25" xsi:type="CharTerm" TERMINATOR="," LENGTH="014"/>
-  <FIELD ID="26" xsi:type="CharTerm" TERMINATOR="," LENGTH="002"/>
+  <FIELD ID="26" xsi:type="CharTerm" TERMINATOR="\r\n" LENGTH="002"/>
  </RECORD>
  <ROW>
   <COLUMN SOURCE="1" NAME="RecordID" xsi:type="SQLCHAR"/>
