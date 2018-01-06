@@ -1,5 +1,3 @@
-$VerbosePreference = 'Continue'
-$DebugPreference = 'Continue'
 $startTime = Get-Date
 Try {
 	Write-Verbose -Message 'Importing AzureRm module...'
