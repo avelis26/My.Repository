@@ -29,31 +29,31 @@
   <FIELD ID="26" xsi:type="CharTerm" TERMINATOR="," LENGTH="002"/>
  </RECORD>
  <ROW>
-  <COLUMN SOURCE="1" NAME="RecordID" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="2" NAME="StoreNumber" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="3" NAME="TransactionType" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="4" NAME="DayNumber" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="5" NAME="ShiftNumber" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="6" NAME="TransactionUID" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="7" NAME="SequenceNumber" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="8" NAME="ProductNumber" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="9" NAME="PLUNumber" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="10" NAME="RecordAmount" xsi:type="SQLMONEY"/>
-  <COLUMN SOURCE="11" NAME="RecordCount" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="12" NAME="RecordType" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="13" NAME="SizeIndx" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="14" NAME="ErrorCorrectionFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="15" NAME="PriceOverideFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="16" NAME="TaxableFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="17" NAME="VoidFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="18" NAME="RecommendedFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="19" NAME="PriceMultiple" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="20" NAME="CarryStatus" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="21" NAME="TaxOverideFlag" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="22" NAME="PromotionCount" xsi:type="SQLINT"/>
-  <COLUMN SOURCE="23" NAME="SalesPrice" xsi:type="SQLMONEY"/>
-  <COLUMN SOURCE="24" NAME="MUBasePrice" xsi:type="SQLMONEY"/>
-  <COLUMN SOURCE="25" NAME="HostItemId" xsi:type="SQLVARYCHAR"/>
-  <COLUMN SOURCE="26" NAME="CouponCount" xsi:type="SQLINT"/>
+  <COLUMN SOURCE="1" NAME="RecordID" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="2" NAME="StoreNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="3" NAME="TransactionType" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="4" NAME="DayNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="5" NAME="ShiftNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="6" NAME="TransactionUID" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="7" NAME="SequenceNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="8" NAME="ProductNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="9" NAME="PLUNumber" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="10" NAME="RecordAmount" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="11" NAME="RecordCount" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="12" NAME="RecordType" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="13" NAME="SizeIndx" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="14" NAME="ErrorCorrectionFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="15" NAME="PriceOverideFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="16" NAME="TaxableFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="17" NAME="VoidFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="18" NAME="RecommendedFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="19" NAME="PriceMultiple" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="20" NAME="CarryStatus" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="21" NAME="TaxOverideFlag" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="22" NAME="PromotionCount" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="23" NAME="SalesPrice" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="24" NAME="MUBasePrice" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="25" NAME="HostItemId" xsi:type="SQLCHAR"/>
+  <COLUMN SOURCE="26" NAME="CouponCount" xsi:type="SQLCHAR"/>
  </ROW>
 </BCPFORMAT>
