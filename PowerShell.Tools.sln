@@ -11,7 +11,7 @@ Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.DataLake.Analytics"
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "Server.Health.Monitor", "Server.Health.Monitor\Server.Health.Monitor.pssproj", "{C8D0AD1E-8BE0-4D23-8FE8-A9F7FB4A4EBF}"
 EndProject
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AzureRM.Generic.Tools", "AzureRM.Generic.Tools\AzureRM.Generic.Tools.pssproj", "{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}"
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "PowerShell.Generic.Tools", "AzureRM.Generic.Tools\PowerShell.Generic.Tools.pssproj", "{37B57550-2A45-4BEE-82D9-CF0BF3FDB043}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

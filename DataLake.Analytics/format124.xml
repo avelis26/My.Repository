@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
 <BCPFORMAT xmlns="http://schemas.microsoft.com/sqlserver/2004/bulkload/format" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <RECORD>
-  <FIELD ID="1" xsi:type="CharTerm" TERMINATOR="," LENGTH="002"/>
-  <FIELD ID="2" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="3" xsi:type="CharTerm" TERMINATOR="," LENGTH="003"/>
-  <FIELD ID="4" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="5" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="6" xsi:type="CharTerm" TERMINATOR="," LENGTH="011"/>
-  <FIELD ID="7" xsi:type="CharTerm" TERMINATOR="," LENGTH="011"/>
-  <FIELD ID="8" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="9" xsi:type="CharTerm" TERMINATOR="," LENGTH="011"/>
-  <FIELD ID="10" xsi:type="CharTerm" TERMINATOR="," LENGTH="002"/>
-  <FIELD ID="11" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="12" xsi:type="CharTerm" TERMINATOR="," LENGTH="011"/>
-  <FIELD ID="13" xsi:type="CharTerm" TERMINATOR="," LENGTH="006"/>
-  <FIELD ID="14" xsi:type="CharTerm" TERMINATOR="," LENGTH="001"/>
-  <FIELD ID="15" xsi:type="CharTerm" TERMINATOR="," LENGTH="001"/>
-  <FIELD ID="16" xsi:type="CharTerm" TERMINATOR="," LENGTH="005"/>
-  <FIELD ID="17" xsi:type="CharTerm" TERMINATOR="\r\n" LENGTH="011"/>
+  <FIELD ID="1" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="2" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="3" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="4" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="5" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="6" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="7" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="8" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="9" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="10" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="11" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="12" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="13" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="14" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="15" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="16" xsi:type="CharTerm" TERMINATOR=","/>
+  <FIELD ID="17" xsi:type="CharTerm" TERMINATOR="\r\n"/>
  </RECORD>
  <ROW>
   <COLUMN SOURCE="1" NAME="RecordId" xsi:type="SQLVARYCHAR"/>
