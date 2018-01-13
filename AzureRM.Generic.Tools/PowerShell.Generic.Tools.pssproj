@@ -32,6 +32,7 @@
     <Compile Include="Create-base64Creds.ps1" />
     <Compile Include="Create-DbCredObj.ps1" />
     <Compile Include="Create-EncryptedCreds.ps1" />
+    <Compile Include="Test-CustomExceptions.ps1" />
     <Compile Include="Test-Progrss.ps1" />
     <Compile Include="Test-SendMailMessage.ps1" />
     <Compile Include="Trust-AllCerts.ps1" />
