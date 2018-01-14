@@ -378,7 +378,7 @@ If ($continue -eq 'y') {
 			$smtpServer = '10.128.1.125'
 			$port = 25
 			$fromAddr = 'noreply@7-11.com'
-			$toAddr = 'graham.pinkston@ansira.com'
+			$toAddr = 'graham.pinkston@ansira.com; megan.morace@ansira.com; digitalops@ansira.com'
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
