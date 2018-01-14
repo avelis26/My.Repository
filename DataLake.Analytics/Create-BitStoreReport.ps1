@@ -113,6 +113,7 @@ Function Split-FilesIntoFolders {
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
 		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName)
+		Start-Sleep -Seconds 1
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
@@ -190,16 +191,20 @@ Function Add-CsvsToSql {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $file.BaseName + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -x -F 2 -t ',' -q -e '$errLogFile'"
+		$command = "bcp $table in $($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -F 2 -t ',' -q -e '$errLogFile'"
 		$message = "$(Create-TimeStamp)  $command"
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
 		$result = Invoke-Expression -Command $command
 		$global:bcpResult = $result
-		If ([int]$($result[3].SubString(0, 1)) -gt 0) {
-			Write-Verbose $result[3]
-			Write-Verbose "Deleting $file ..."
-			Remove-Item -Path $file -Force -ErrorAction Stop
+		$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog
+		If ([int]$($result[$($result.Length - 3)].SubString(0, 1)) -gt 0) {
+			$message = "Deleting $($file.FullName) ..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
+			Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
 		}
 		Else {
 			throw [System.ArgumentOutOfRangeException] $bcpResult
@@ -235,7 +240,7 @@ Function Confirm-Run {
 ##   Enter your 7-11 user name without domain:
 [string]$userName = 'gpink003'
 ##   Enter $true for verbose information output, $false faster speed:
-[bool]$verbose = $true
+[bool]$verbose = $false
 #######################################################################################################
 #######################################################################################################
 $startTime = Get-Date
@@ -379,6 +384,7 @@ If ($continue -eq 'y') {
 	Catch {
 		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].CategoryInfo.ToString()) -Path $opsLog
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
@@ -390,7 +396,11 @@ If ($continue -eq 'y') {
 			From = $fromAddr;
 			To = $toAddr;
 			Subject = 'ERROR:: BITC FAILED!!!';
-			Body = "Something bad happened!!!"
+			Body = """
+			Something bad happened!!!
+			$($Error[0].Exception.ToString())
+			$($Error[0].CategoryInfo.ToString())
+			"""
 		}
 		Send-MailMessage @params
 	}
