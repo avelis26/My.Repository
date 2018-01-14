@@ -213,7 +213,7 @@ Function Add-CsvsToSql {
 			Add-Content -Value $message -Path $($args[9])
 			$message = "Deleting $($file.FullName) ..."
 			Add-Content -Value $message -Path $($args[9])
-			Remove-Item -Path $($args[3]) -Force -ErrorAction Stop
+			#Remove-Item -Path $($args[3]) -Force -ErrorAction Stop
 		}
 		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog"
 		Start-Sleep -Seconds 1
