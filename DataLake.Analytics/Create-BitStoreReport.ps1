@@ -46,33 +46,6 @@ Function Get-DataLakeRawFiles {
 		throw $_
 	}
 }
-Function DeGZip-File {
-	[CmdletBinding()]
-	Param(
-		[string]$inFile,
-		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
-	)
-	$outfile = $inFile -replace '\.gz$',''
-	$message = "$(Create-TimeStamp)  Uncompressing $inFile..."
-	Write-Verbose -Message $message
-	$input = New-Object System.IO.FileStream $inFile, ([IO.FileMode]::Open), ([IO.FileAccess]::Read), ([IO.FileShare]::Read)
-	$output = New-Object System.IO.FileStream $outFile, ([IO.FileMode]::Create), ([IO.FileAccess]::Write), ([IO.FileShare]::None)
-	$outputFile = $output.Name
-	$gzipStream = New-Object System.IO.Compression.GzipStream $input, ([IO.Compression.CompressionMode]::Decompress)
-	$buffer = New-Object byte[](1024)
-	while($true) {
-		$read = $gzipstream.Read($buffer, 0, 1024)
-		if ($read -le 0){break}
-		$output.Write($buffer, 0, $read)
-	}
-	$gzipStream.Close()
-	$output.Close()
-	$input.Close()
-	$message = "$(Create-TimeStamp)  Deleting $inFile..."
-	Write-Verbose -Message $message
-	Remove-Item -Path $inFile -Force -ErrorAction Stop
-	Return $outputFile
-}
 Function Split-FilesIntoFolders {
 	[CmdletBinding()]
 	Param(
@@ -122,11 +95,13 @@ Function Split-FilesIntoFolders {
 			$movePath = $inFolder + $folderPreFix + '5'
 		}
 		Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
+		Write-Verbose -Message $i
 		$i++
 	}
 	$folders = Get-ChildItem -Path $inFolder -Directory
 	ForEach ($folder in $folders) {
 		$block = {
+			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 			$path = $args[0]
 			$files = Get-ChildItem -Path $path -Filter '*.gz' -File
 			ForEach ($file in $files) {
@@ -161,13 +136,15 @@ Function Convert-BitFilesToCsv {
 			New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
 		}
 		$block = {
-			& "$extractorExe" $args;
-			Remove-Item -Path $($args[0]) -Recurse -Force;
+			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+			& $args[0] $args[1..4];
+			Remove-Item -Path $($args[1]) -Recurse -Force;
 		}
-		$message = "$(Create-TimeStamp)  Starting job:  $($folder.Name)..."
+		$message = "$(Create-TimeStamp)  Starting job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
-		Start-Job -ScriptBlock $block -ArgumentList "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix"
+		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix"
+		Start-Sleep -Seconds 1
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
@@ -213,7 +190,7 @@ Function Add-CsvsToSql {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $file.BaseName + '_BCP_Error.log'
-		$command = "bcp $table in #($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -x -F 2 -t ',' -q -e '$errLogFile'"
+		$command = "bcp $table in $($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -x -F 2 -t ',' -q -e '$errLogFile'"
 		$message = "$(Create-TimeStamp)  $command"
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
@@ -235,6 +212,7 @@ Function Confirm-Run {
 	Write-Host "Start Date          :: $startDate"
 	Write-Host "End Date            :: $endDate"
 	Write-Host "Transactions        :: $transTypes"
+	Write-Host "Verbose             :: $verbose"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
@@ -256,6 +234,8 @@ Function Confirm-Run {
 [string]$transTypes = 'D1121,D1122,D1124'
 ##   Enter your 7-11 user name without domain:
 [string]$userName = 'gpink003'
+##   Enter $true for verbose information output, $false faster speed:
+[bool]$verbose = $true
 #######################################################################################################
 #######################################################################################################
 $startTime = Get-Date
@@ -283,6 +263,7 @@ $i = 0
 $table = $null
 $file = $null
 $goodFile = $null
+Get-ChildItem -Path $errLogRootPath | Remove-Item -Force
 Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
@@ -309,6 +290,7 @@ $continue = Confirm-Run
 If ($continue -eq 'y') {
 	Try {
 # Get raw files
+		$milestone_1 = Get-Date
 		$startDateObj = Get-Date -Date $startDate
 		$endDateObj = Get-Date -Date $endDate
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
@@ -323,33 +305,36 @@ If ($continue -eq 'y') {
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
 				dataLakeStoreName = $dataLakeStoreName;
 				opsLog = $opsLog;
-				Verbose = $true;
+				Verbose = $verbose;
 			}
 			Get-DataLakeRawFiles @getDataLakeRawFilesParams
 # Seperate files into 5 seperate folders for paralell processing
+			$milestone_2 = Get-Date
 			$splitFilesIntoFoldersParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				opsLog = $opsLog;
-				Verbose = $true;
+				Verbose = $verbose;
 			}
 			Split-FilesIntoFolders @splitFilesIntoFoldersParams
 # Execute C# app as job on raw files to create CSV's
+			$milestone_3 = Get-Date
 			$convertBitFilesToCsvParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				transTypes = $transTypes;
 				extractorExe = $extractorExe;
 				filePrefix = $processDate;
 				opsLog = $opsLog;
-				Verbose = $true;
+				Verbose = $verbose;
 			}
 			Convert-BitFilesToCsv @convertBitFilesToCsvParams
 # Insert CSV's to DB
+			$milestone_4 = Get-Date
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
 				errLogRoot = $errLogRootPath;
 				opsLog = $opsLog;
-				Verbose = $true;
+				Verbose = $verbose;
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
 			$i++
@@ -359,17 +344,68 @@ If ($continue -eq 'y') {
 		Write-Error -Exception $Error[0].Exception
 		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		$smtpServer = '10.128.1.125'
+		$port = 25
+		$fromAddr = 'noreply@7-11.com'
+		$toAddr = 'graham.pinkston@ansira.com'
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $toAddr;
+			Subject = 'ERROR:: BITC FAILED!!!';
+			Body = "$($Error[0].Exception)"
+		}
+		Send-MailMessage @params
 	}
 	Catch [System.ArgumentOutOfRangeException] {
 		Write-Error -Exception $Error[0].Exception
 		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		$smtpServer = '10.128.1.125'
+		$port = 25
+		$fromAddr = 'noreply@7-11.com'
+		$toAddr = 'graham.pinkston@ansira.com'
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $toAddr;
+			Subject = 'ERROR:: BITC FAILED!!!';
+			Body = "$($Error[0].Exception)"
+		}
+		Send-MailMessage @params
 	}
 	Catch {
 		Write-Error -Message 'Something bad happened!!!'
+		$smtpServer = '10.128.1.125'
+		$port = 25
+		$fromAddr = 'noreply@7-11.com'
+		$toAddr = 'graham.pinkston@ansira.com'
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $toAddr;
+			Subject = 'ERROR:: BITC FAILED!!!';
+			Body = "Something bad happened!!!"
+		}
+		Send-MailMessage @params
 	}
 }
-Write-Output "Start Time: $($startTime.DateTime)"
 $endTime = Get-Date
+$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
+$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
+$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
+$totTime = New-TimeSpan -Start $startTime -End $endTime
+Write-Out "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+Write-Out "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+Write-Out "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+Write-Out "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+Write-Output "Start Time: $($startTime.DateTime)"
 Write-Output "End Time: $($endTime.DateTime)"
-New-TimeSpan -Start $startTime -End $endTime
+Write-Output "Total RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
