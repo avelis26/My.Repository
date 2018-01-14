@@ -55,7 +55,6 @@ Function DeGZip-File {
 	$outfile = $inFile -replace '\.gz$',''
 	$message = "$(Create-TimeStamp)  Uncompressing $inFile..."
 	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog
 	$input = New-Object System.IO.FileStream $inFile, ([IO.FileMode]::Open), ([IO.FileAccess]::Read), ([IO.FileShare]::Read)
 	$output = New-Object System.IO.FileStream $outFile, ([IO.FileMode]::Create), ([IO.FileAccess]::Write), ([IO.FileShare]::None)
 	$outputFile = $output.Name
@@ -71,8 +70,7 @@ Function DeGZip-File {
 	$input.Close()
 	$message = "$(Create-TimeStamp)  Deleting $inFile..."
 	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog
-	Remove-Item -Path $inFile -Force
+	Remove-Item -Path $inFile -Force -ErrorAction Stop
 	Return $outputFile
 }
 Function Split-FilesIntoFolders {
@@ -104,7 +102,7 @@ Function Split-FilesIntoFolders {
 	}
 	[int]$divider = $($files.Count / $count) - 0.5
 	$i = 0
-	$message = "$(Create-TimeStamp)  Seperating files into bucket folders..."
+	$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
 	Write-Verbose -Message $message
 	Add-Content -Value $message -Path $opsLog
 	While ($i -lt $($files.Count)) {
@@ -124,9 +122,25 @@ Function Split-FilesIntoFolders {
 			$movePath = $inFolder + $folderPreFix + '5'
 		}
 		Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
-		DeGZip-File -inFile $($movePath + '\' + $($files[$i].Name)) -opsLog $opsLog
 		$i++
 	}
+	$folders = Get-ChildItem -Path $inFolder -Directory
+	ForEach ($folder in $folders) {
+		$block = {
+			$path = $args[0]
+			$files = Get-ChildItem -Path $path -Filter '*.gz' -File
+			ForEach ($file in $files) {
+				Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
+				Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+			}
+		}
+		$message = "$(Create-TimeStamp)  Starting job:  $($folder.FullName)..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog
+		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName)
+	}
+	Get-Job | Wait-Job
+	Get-Job | Remove-Job
 }
 Function Convert-BitFilesToCsv {
 	[CmdletBinding()]
@@ -148,10 +162,7 @@ Function Convert-BitFilesToCsv {
 		}
 		$block = {
 			& "$extractorExe" $args;
-			$message = "$(Create-TimeStamp)  Deleting folder:  $($folder.FullName)..."
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
-			Remove-Item -Path $($folder.FullName) -Recurse -Force
+			Remove-Item -Path $($args[0]) -Recurse -Force;
 		}
 		$message = "$(Create-TimeStamp)  Starting job:  $($folder.Name)..."
 		Write-Verbose -Message $message
@@ -199,9 +210,7 @@ Function Add-CsvsToSql {
 			$formatFile = "C:\Scripts\XML\format410.xml"
 		}
 		Else {
-			$message = "$(Create-TimeStamp)  ERROR:: $($file.FullName) didn't mach any patteren!"
-			Write-Error -Message $message
-			Add-Content -Value $message -Path $opsLog
+			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $file.BaseName + '_BCP_Error.log'
 		$command = "bcp $table in #($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -x -F 2 -t ',' -q -e '$errLogFile'"
@@ -216,7 +225,7 @@ Function Add-CsvsToSql {
 			Remove-Item -Path $file -Force -ErrorAction Stop
 		}
 		Else {
-			throw New-Object -TypeName System.ArgumentOutOfRangeException
+			throw [System.ArgumentOutOfRangeException] $bcpResult
 		}
 		$global:goodFile = $file.FullName
 	}
@@ -274,8 +283,9 @@ $i = 0
 $table = $null
 $file = $null
 $goodFile = $null
-Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm module..."
+Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
+Import-Module 7Zip -ErrorAction Stop
 $password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 Write-Verbose -Message "$(Create-TimeStamp)  Logging into Azure..."
@@ -345,7 +355,21 @@ If ($continue -eq 'y') {
 			$i++
 		}
 	}
+	Catch [System.FormatException] {
+		Write-Error -Exception $Error[0].Exception
+		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	}
+	Catch [System.ArgumentOutOfRangeException] {
+		Write-Error -Exception $Error[0].Exception
+		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	}
 	Catch {
 		Write-Error -Message 'Something bad happened!!!'
 	}
 }
+Write-Output "Start Time: $($startTime.DateTime)"
+$endTime = Get-Date
+Write-Output "End Time: $($endTime.DateTime)"
+New-TimeSpan -Start $startTime -End $endTime
