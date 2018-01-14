@@ -401,10 +401,24 @@ $sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
 $exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 $insTime = New-TimeSpan -Start $milestone_4 -End $endTime
 $totTime = New-TimeSpan -Start $startTime -End $endTime
-Write-Output "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
-Write-Output "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
-Write-Output "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
-Write-Output "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
-Write-Output "Start Time: $($startTime.DateTime)"
-Write-Output "End Time: $($endTime.DateTime)"
-Write-Output "Total RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+$message = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "Start Time: $($startTime.DateTime)"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "End Time: $($endTime.DateTime)"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
+$message = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
+Write-Output $message
+Add-Content -Value $message -Path $opsLog
