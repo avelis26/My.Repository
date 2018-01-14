@@ -190,27 +190,35 @@ Function Add-CsvsToSql {
 		Else {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
-		$errLogFile = $errLogRoot + $file.BaseName + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $server -d $database -U $sqlUser -P $sqlPass -f $formatFile -F 2 -t ',' -q -e '$errLogFile'"
-		$message = "$(Create-TimeStamp)  $command"
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
-		Write-Output "Inserting $($file.FullName)..."
-		$result = Invoke-Expression -Command $command
-		$global:bcpResult = $result
-		$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
-		If ([int]$($result[$($result.Length - 3)].SubString(0, 1)) -gt 0) {
+		$block = {
+			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+			Function Create-TimeStamp {
+				$now = Get-Date
+				$day = $now.day.ToString("00")
+				$month = $now.month.ToString("00")
+				$year = $now.year.ToString("0000")
+				$hour = $now.hour.ToString("00")
+				$minute = $now.minute.ToString("00")
+				$second = $now.second.ToString("00")
+				$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+				Return $timeStamp
+			}
+			$errLogFile = $args[0] + $args[1] + '_BCP_Error.log'
+			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
+			$message = "$(Create-TimeStamp)  $command"
+			Start-Sleep -Seconds $(Get-Random -Minimum 1.0 -Maximum 3.9)
+			Add-Content -Value $message -Path $($args[9])
+			$result = Invoke-Expression -Command $command
+			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
+			Add-Content -Value $message -Path $($args[9])
 			$message = "Deleting $($file.FullName) ..."
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
-			Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+			Add-Content -Value $message -Path $($args[9])
+			Remove-Item -Path $($args[3]) -Force -ErrorAction Stop
 		}
-		Else {
-			throw [System.ArgumentOutOfRangeException] $bcpResult
-		}
-		$global:goodFile = $file.FullName
+		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog"
+		Start-Sleep -Seconds 1
+		Get-Job | Wait-Job
+		Get-Job | Remove-Job
 	}
 }
 Function Confirm-Run {
@@ -270,7 +278,6 @@ $i = 0
 $table = $null
 $file = $null
 $goodFile = $null
-Get-ChildItem -Path $errLogRootPath | Remove-Item -Force
 Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
@@ -281,9 +288,6 @@ Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-b
 Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $destinationRootPath..."
 If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 	New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
-}
-Else {
-	Get-ChildItem -Path $destinationRootPath | Remove-Item -Recurse -Force
 }
 Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $opsLogRootPath..."
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
@@ -412,6 +416,9 @@ If ($continue -eq 'y') {
 		$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 		$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
+		$message = "Start Time: $($startTime.DateTime)"
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog
 		$message = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog
@@ -422,9 +429,6 @@ If ($continue -eq 'y') {
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog
 		$message = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "Start Time: $($startTime.DateTime)"
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog
 		$message = "End Time: $($endTime.DateTime)"
