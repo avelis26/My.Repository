@@ -109,7 +109,7 @@ Function Split-FilesIntoFolders {
 				Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
 			}
 		}
-		$message = "$(Create-TimeStamp)  Starting job:  $($folder.FullName)..."
+		$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
 		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName)
@@ -141,7 +141,7 @@ Function Convert-BitFilesToCsv {
 			& $args[0] $args[1..4];
 			Remove-Item -Path $($args[1]) -Recurse -Force;
 		}
-		$message = "$(Create-TimeStamp)  Starting job:  $($folder.FullName)..."
+		$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
 		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix"
@@ -195,6 +195,7 @@ Function Add-CsvsToSql {
 		$message = "$(Create-TimeStamp)  $command"
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
+		Write-Output "Inserting $($file.FullName)..."
 		$result = Invoke-Expression -Command $command
 		$global:bcpResult = $result
 		$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
@@ -243,6 +244,7 @@ Function Confirm-Run {
 [bool]$verbose = $false
 #######################################################################################################
 #######################################################################################################
+$continue = Confirm-Run
 $startTime = Get-Date
 add-type @"
     using System.Net;
@@ -291,7 +293,6 @@ Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $errLogRootPath..
 If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 	New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
 }
-$continue = Confirm-Run
 If ($continue -eq 'y') {
 	Try {
 # Get raw files
