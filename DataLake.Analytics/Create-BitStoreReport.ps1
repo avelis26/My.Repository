@@ -46,7 +46,7 @@ Function Get-DataLakeRawFiles {
 		throw $_
 	}
 }
-Function Split-FilesIntoFolders {
+Function Split-FilesAmongFolders {
 	[CmdletBinding()]
 	Param(
 		[string]$inFolder, # H:\BIT_CRM\20171216\
@@ -320,12 +320,12 @@ If ($continue -eq 'y') {
 			Get-DataLakeRawFiles @getDataLakeRawFilesParams
 # Seperate files into 5 seperate folders for paralell processing
 			$milestone_2 = Get-Date
-			$splitFilesIntoFoldersParams = @{
+			$splitFilesAmongFoldersParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				opsLog = $opsLog;
 				Verbose = $verbose;
 			}
-			Split-FilesIntoFolders @splitFilesIntoFoldersParams
+			Split-FilesAmongFolders @splitFilesAmongFoldersParams
 # Execute C# app as job on raw files to create CSV's
 			$milestone_3 = Get-Date
 			$convertBitFilesToCsvParams = @{
@@ -416,26 +416,48 @@ If ($continue -eq 'y') {
 		$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 		$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
-		$message = "Start Time: $($startTime.DateTime)"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "End Time: $($endTime.DateTime)"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
-		$message = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog
+		$message1 = "Start Time: $($startTime.DateTime)"
+		Write-Output $message1
+		Add-Content -Value $message1 -Path $opsLog
+		$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+		Write-Output $message2
+		Add-Content -Value $message2 -Path $opsLog
+		$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+		Write-Output $message3
+		Add-Content -Value $message3 -Path $opsLog
+		$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+		Write-Output $message4
+		Add-Content -Value $message4 -Path $opsLog
+		$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+		Write-Output $message5
+		Add-Content -Value $message5 -Path $opsLog
+		$message6 = "End Time: $($endTime.DateTime)"
+		Write-Output $message6
+		Add-Content -Value $message6 -Path $opsLog
+		$message7 = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
+		Write-Output $message7
+		Add-Content -Value $message7 -Path $opsLog
+		$smtpServer = '10.128.1.125'
+		$port = 25
+		$fromAddr = 'noreply@7-11.com'
+		$toAddr = 'graham.pinkston@ansira.com'
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $toAddr;
+			Subject = "BITC Finished Processing $startDate to $endDate";
+			Body = """
+			$message1
+			$message2
+			$message3
+			$message4
+			$message5
+			$message6
+			$message7
+			"""
+		}
+		Send-MailMessage @params
 	}
 }
