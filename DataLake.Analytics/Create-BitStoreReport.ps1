@@ -386,7 +386,7 @@ If ($continue -eq 'y') {
 				From = $fromAddr;
 				To = $toAddr;
 				Subject = "BITC Finished Processing $processDate";
-				Body = """
+				Body = @"
 				$message1
 				$message2
 				$message3
@@ -394,7 +394,7 @@ If ($continue -eq 'y') {
 				$message5
 				$message6
 				$message7
-				"""
+"@
 			}
 			Send-MailMessage @params
 		}
@@ -450,11 +450,11 @@ If ($continue -eq 'y') {
 			From = $fromAddr;
 			To = $toAddr;
 			Subject = 'ERROR:: BITC FAILED!!!';
-			Body = """
+			Body = @"
 			Something bad happened!!!
 			$($Error[0].Exception.ToString())
 			$($Error[0].CategoryInfo.ToString())
-			"""
+"@
 		}
 		Send-MailMessage @params
 	}
