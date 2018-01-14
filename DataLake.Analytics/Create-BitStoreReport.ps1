@@ -298,8 +298,8 @@ If ($continue -eq 'y') {
 			$day = $($startDateObj.AddDays($i)).day.ToString("00")
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
-			$processDate = $year + $month + $day
-			$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
+			$global:processDate = $year + $month + $day
+			$global:opsLog = $opsLogRootPath + $processDate + '_BITC.log'
 			$getDataLakeRawFilesParams = @{
 				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
@@ -342,7 +342,6 @@ If ($continue -eq 'y') {
 	}
 	Catch [System.FormatException] {
 		Write-Error -Exception $Error[0].Exception
-		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
 		$smtpServer = '10.128.1.125'
 		$port = 25
@@ -361,7 +360,6 @@ If ($continue -eq 'y') {
 	}
 	Catch [System.ArgumentOutOfRangeException] {
 		Write-Error -Exception $Error[0].Exception
-		$opsLog = $opsLogRootPath + $processDate + '_BITC.log'
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
 		$smtpServer = '10.128.1.125'
 		$port = 25
@@ -379,7 +377,8 @@ If ($continue -eq 'y') {
 		Send-MailMessage @params
 	}
 	Catch {
-		Write-Error -Message 'Something bad happened!!!'
+		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
@@ -402,10 +401,10 @@ $sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
 $exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 $insTime = New-TimeSpan -Start $milestone_4 -End $endTime
 $totTime = New-TimeSpan -Start $startTime -End $endTime
-Write-Out "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
-Write-Out "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
-Write-Out "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
-Write-Out "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+Write-Output "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+Write-Output "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+Write-Output "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+Write-Output "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
 Write-Output "Start Time: $($startTime.DateTime)"
 Write-Output "End Time: $($endTime.DateTime)"
 Write-Output "Total RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
