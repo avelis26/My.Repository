@@ -46,17 +46,15 @@ Function Get-DataLakeRawFiles {
 				Path = $dataLakeSearchPath;
 				ErrorAction = 'SilentlyContinue';
 			}
-			$dataLakeFiles = Get-AzureRmDataLakeStoreChildItem @getParams
-			ForEach ($file in $dataLakeFiles) {
-				Write-Verbose "Downloading file $($file.Name)..."
-				$exportParams = @{
-					Account = $dataLakeStoreName;
-					Path = $($file.Path);
-					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name));
-					Force = $true
-				}
-				Export-AzureRmDataLakeStoreItem @exportParams
+			$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
+			Write-Verbose "Downloading folder $($dataLakeFolder.Path)..."
+			$exportParams = @{
+				Account = $dataLakeStoreName;
+				Path = $($dataLakeFolder.Path);
+				Destination = $($destinationRootPath + $processDate + '\');
+				Force = $true
 			}
+				Export-AzureRmDataLakeStoreItem @exportParams
 			$i++
 		}
 		Write-Output "All files downloaded successfully."
