@@ -348,6 +348,55 @@ If ($continue -eq 'y') {
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
 			$i++
+			$endTime = Get-Date
+			$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
+			$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
+			$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+			$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
+			$totTime = New-TimeSpan -Start $startTime -End $endTime
+			$message1 = "Start Time: $($startTime.DateTime)"
+			Write-Output $message1
+			Add-Content -Value $message1 -Path $opsLog
+			$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+			Write-Output $message2
+			Add-Content -Value $message2 -Path $opsLog
+			$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+			Write-Output $message3
+			Add-Content -Value $message3 -Path $opsLog
+			$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+			Write-Output $message4
+			Add-Content -Value $message4 -Path $opsLog
+			$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+			Write-Output $message5
+			Add-Content -Value $message5 -Path $opsLog
+			$message6 = "End Time: $($endTime.DateTime)"
+			Write-Output $message6
+			Add-Content -Value $message6 -Path $opsLog
+			$message7 = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
+			Write-Output $message7
+			Add-Content -Value $message7 -Path $opsLog
+			$smtpServer = '10.128.1.125'
+			$port = 25
+			$fromAddr = 'noreply@7-11.com'
+			$toAddr = 'graham.pinkston@ansira.com'
+			$params = @{
+				SmtpServer = $smtpServer;
+				Port = $port;
+				UseSsl = 0;
+				From = $fromAddr;
+				To = $toAddr;
+				Subject = "BITC Finished Processing $processDate";
+				Body = """
+				$message1
+				$message2
+				$message3
+				$message4
+				$message5
+				$message6
+				$message7
+				"""
+			}
+			Send-MailMessage @params
 		}
 	}
 	Catch [System.FormatException] {
@@ -405,57 +454,6 @@ If ($continue -eq 'y') {
 			Something bad happened!!!
 			$($Error[0].Exception.ToString())
 			$($Error[0].CategoryInfo.ToString())
-			"""
-		}
-		Send-MailMessage @params
-	}
-	Finally {
-		$endTime = Get-Date
-		$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
-		$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-		$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-		$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
-		$totTime = New-TimeSpan -Start $startTime -End $endTime
-		$message1 = "Start Time: $($startTime.DateTime)"
-		Write-Output $message1
-		Add-Content -Value $message1 -Path $opsLog
-		$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
-		Write-Output $message2
-		Add-Content -Value $message2 -Path $opsLog
-		$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
-		Write-Output $message3
-		Add-Content -Value $message3 -Path $opsLog
-		$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
-		Write-Output $message4
-		Add-Content -Value $message4 -Path $opsLog
-		$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
-		Write-Output $message5
-		Add-Content -Value $message5 -Path $opsLog
-		$message6 = "End Time: $($endTime.DateTime)"
-		Write-Output $message6
-		Add-Content -Value $message6 -Path $opsLog
-		$message7 = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
-		Write-Output $message7
-		Add-Content -Value $message7 -Path $opsLog
-		$smtpServer = '10.128.1.125'
-		$port = 25
-		$fromAddr = 'noreply@7-11.com'
-		$toAddr = 'graham.pinkston@ansira.com'
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $toAddr;
-			Subject = "BITC Finished Processing $startDate to $endDate";
-			Body = """
-			$message1
-			$message2
-			$message3
-			$message4
-			$message5
-			$message6
-			$message7
 			"""
 		}
 		Send-MailMessage @params
