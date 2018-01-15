@@ -268,18 +268,20 @@ add-type @"
     }
 "@
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+$global:smtpServer = '10.128.1.125'
+$global:port = 25
+$global:fromAddr = 'noreply@7-11.com'
 $global:database = '7ELE'
 $global:sqlUser = 'sqladmin'
 $global:sqlPass = 'Password20!7!'
 $global:server = 'mstestsqldw.database.windows.net'
-$user = $userName + '@7-11.com'
-$dataLakeSearchPathRoot = '/BIT_CRM/'
-$dataLakeStoreName = '711dlprodcons01'
-$extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
+$global:user = $userName + '@7-11.com'
+$global:dataLakeSearchPathRoot = '/BIT_CRM/'
+$global:dataLakeStoreName = '711dlprodcons01'
+$global:extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
 $i = 0
 $table = $null
 $file = $null
-$goodFile = $null
 Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
@@ -386,9 +388,11 @@ If ($continue -eq 'y') {
 				Port = $port;
 				UseSsl = 0;
 				From = $fromAddr;
-				To = $toAddr;
-				Subject = "BITC Finished Processing $processDate";
+				To = $emailList;
+				Subject = "BITC Finished Processing and Inserting $processDate";
 				Body = @"
+Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.
+
 				$message1
 				$message2
 				$message3
@@ -413,7 +417,7 @@ If ($continue -eq 'y') {
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $toAddr;
+			To = $emailList;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
@@ -431,7 +435,7 @@ If ($continue -eq 'y') {
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $toAddr;
+			To = $emailList;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
@@ -444,13 +448,12 @@ If ($continue -eq 'y') {
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
-		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $toAddr;
+			To = $emailList;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = @"
 Something bad happened!!!
