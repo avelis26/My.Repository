@@ -236,22 +236,22 @@ Function Confirm-Run {
 #######################################################################################################
 #######################################################################################################
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$destinationRootPath = 'H:\BIT_CRM\'
+[string]$global:destinationRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the operations logs to be stored:
-[string]$opsLogRootPath = 'H:\Ops_Log\'
+[string]$global:opsLogRootPath = 'H:\Ops_Log\'
 ##   Enter the path where you want the error logs to be stored:
-[string]$errLogRootPath = 'H:\Err_Log\'
+[string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$startDate = '01-14-2018'
-[string]$endDate = '01-15-2018'
+[string]$global:startDate = '01-14-2018'
+[string]$global:endDate = '01-15-2018'
 ##   Enter the transactions you would like to filter for:
-[string]$transTypes = 'D1121,D1122,D1124'
+[string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter your 7-11 user name without domain:
-[string]$userName = 'gpink003'
+[string]$global:userName = 'gpink003'
 ##   Enter $true for verbose information output, $false faster speed:
-[bool]$verbose = $false
+[bool]$global:verbose = $false
 ##   Enter the email address desired for notifications:
-[string[]]$emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
 #######################################################################################################
 #######################################################################################################
 $continue = Confirm-Run
@@ -376,13 +376,9 @@ If ($continue -eq 'y') {
 			$message6 = "End Time: $($endTime.DateTime)"
 			Write-Output $message6
 			Add-Content -Value $message6 -Path $opsLog
-			$message7 = "Total RunTime: $($totTime.Minutes) min $($totTime.Seconds) sec"
+			$message7 = "Total RunTime: $($totTime.Hours) hour $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
 			Write-Output $message7
 			Add-Content -Value $message7 -Path $opsLog
-			$smtpServer = '10.128.1.125'
-			$port = 25
-			$fromAddr = 'noreply@7-11.com'
-			$toAddr = $emailList
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
@@ -408,10 +404,6 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 	Catch [System.FormatException] {
 		Write-Error -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		$smtpServer = '10.128.1.125'
-		$port = 25
-		$fromAddr = 'noreply@7-11.com'
-		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -426,10 +418,6 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 	Catch [System.ArgumentOutOfRangeException] {
 		Write-Error -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		$smtpServer = '10.128.1.125'
-		$port = 25
-		$fromAddr = 'noreply@7-11.com'
-		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -445,9 +433,6 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
 		Add-Content -Value $($Error[0].CategoryInfo.ToString()) -Path $opsLog
-		$smtpServer = '10.128.1.125'
-		$port = 25
-		$fromAddr = 'noreply@7-11.com'
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
