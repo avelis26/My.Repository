@@ -1,3 +1,25 @@
+# Init
+#######################################################################################################
+#######################################################################################################
+##   Enter the path where you want the raw files to be downloaded on your local machine:
+[string]$global:destinationRootPath = 'H:\BIT_CRM\'
+##   Enter the path where you want the operations logs to be stored:
+[string]$global:opsLogRootPath = 'H:\Ops_Log\'
+##   Enter the path where you want the error logs to be stored:
+[string]$global:errLogRootPath = 'H:\Err_Log\'
+##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
+[string]$global:startDate = '01-14-2018'
+[string]$global:endDate = '01-15-2018'
+##   Enter the transactions you would like to filter for:
+[string]$global:transTypes = 'D1121,D1122,D1124'
+##   Enter your 7-11 user name without domain:
+[string]$global:userName = 'gpink003'
+##   Enter $true for verbose information output, $false faster speed:
+[bool]$global:verbose = $false
+##   Enter the email address desired for notifications:
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
+#######################################################################################################
+#######################################################################################################
 Function Create-TimeStamp {
 	$now = Get-Date
 	$day = $now.day.ToString("00")
@@ -231,29 +253,6 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
-
-# Init
-#######################################################################################################
-#######################################################################################################
-##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$global:destinationRootPath = 'H:\BIT_CRM\'
-##   Enter the path where you want the operations logs to be stored:
-[string]$global:opsLogRootPath = 'H:\Ops_Log\'
-##   Enter the path where you want the error logs to be stored:
-[string]$global:errLogRootPath = 'H:\Err_Log\'
-##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-14-2018'
-[string]$global:endDate = '01-15-2018'
-##   Enter the transactions you would like to filter for:
-[string]$global:transTypes = 'D1121,D1122,D1124'
-##   Enter your 7-11 user name without domain:
-[string]$global:userName = 'gpink003'
-##   Enter $true for verbose information output, $false faster speed:
-[bool]$global:verbose = $false
-##   Enter the email address desired for notifications:
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
-#######################################################################################################
-#######################################################################################################
 $continue = Confirm-Run
 $startTime = Get-Date
 add-type @"
