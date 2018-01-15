@@ -242,14 +242,16 @@ Function Confirm-Run {
 ##   Enter the path where you want the error logs to be stored:
 [string]$errLogRootPath = 'H:\Err_Log\'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$startDate = '12-16-2017'
-[string]$endDate = '12-16-2017'
+[string]$startDate = '01-14-2018'
+[string]$endDate = '01-15-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$transTypes = 'D1121,D1122,D1124'
 ##   Enter your 7-11 user name without domain:
 [string]$userName = 'gpink003'
 ##   Enter $true for verbose information output, $false faster speed:
 [bool]$verbose = $false
+##   Enter the email address desired for notifications:
+[string[]]$emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
 #######################################################################################################
 #######################################################################################################
 $continue = Confirm-Run
@@ -378,7 +380,7 @@ If ($continue -eq 'y') {
 			$smtpServer = '10.128.1.125'
 			$port = 25
 			$fromAddr = 'noreply@7-11.com'
-			$toAddr = 'graham.pinkston@ansira.com; megan.morace@ansira.com; digitalops@ansira.com'
+			$toAddr = $emailList
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
@@ -405,14 +407,14 @@ If ($continue -eq 'y') {
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
-		$toAddr = 'graham.pinkston@ansira.com'
+		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $toAddr;
-			Subject = 'ERROR:: BITC FAILED!!!';
+			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
 		Send-MailMessage @params
@@ -423,14 +425,14 @@ If ($continue -eq 'y') {
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
-		$toAddr = 'graham.pinkston@ansira.com'
+		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $toAddr;
-			Subject = 'ERROR:: BITC FAILED!!!';
+			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
 		Send-MailMessage @params
@@ -442,18 +444,18 @@ If ($continue -eq 'y') {
 		$smtpServer = '10.128.1.125'
 		$port = 25
 		$fromAddr = 'noreply@7-11.com'
-		$toAddr = 'graham.pinkston@ansira.com'
+		$toAddr = $emailList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $toAddr;
-			Subject = 'ERROR:: BITC FAILED!!!';
+			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = @"
-			Something bad happened!!!
-			$($Error[0].Exception.ToString())
-			$($Error[0].CategoryInfo.ToString())
+Something bad happened!!!
+$($Error[0].Exception.ToString())
+$($Error[0].CategoryInfo.ToString())
 "@
 		}
 		Send-MailMessage @params
