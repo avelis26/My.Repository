@@ -20,19 +20,20 @@
 [string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
 #######################################################################################################
 #######################################################################################################
-##   Trans Type 121
+##   Enter the table names you would like the data inserted to by transaction type:
+##   Trans Type D1 121
 [string]$table121 = 'stg_TXNHeader_121'
-##   Trans Type 122
+##   Trans Type D1 122
 [string]$table122 = 'stg_TXNDetails_122'
-##   Trans Type 124
+##   Trans Type D1 124
 [string]$table124 = 'stg_Media_124'
-##   Trans Type 136
+##   Trans Type D1 136
 [string]$table136 = 'stg_PromoSales_136'
-##   Trans Type 137
+##   Trans Type D1 137
 [string]$table137 = 'stg_PromoSalesDetails_137'
-##   Trans Type 409
+##   Trans Type D1 409
 [string]$table409 = 'stg_CouponSales_409'
-##   Trans Type 410
+##   Trans Type D1 410
 [string]$table410 = 'stg_CouponSalesDetails_410'
 #######################################################################################################
 #######################################################################################################
@@ -266,17 +267,17 @@ Function Add-CsvsToSql {
 }
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
-	Write-Host "Start Date          :: $startDate"
-	Write-Host "End Date            :: $endDate"
-	Write-Host "Transactions        :: $transTypes"
-	Write-Host "Verbose             :: $verbose"
-	Write-Host "Table121            :: $table121"
-	Write-Host "Table122            :: $table122"
-	Write-Host "Table124            :: $table124"
-	Write-Host "Table136            :: $table136"
-	Write-Host "Table137            :: $table137"
-	Write-Host "Table409            :: $table409"
-	Write-Host "Table410            :: $table410"
+	Write-Host "Start Date    ::  $startDate"
+	Write-Host "End Date      ::  $endDate"
+	Write-Host "Transactions  ::  $transTypes"
+	Write-Host "Verbose       ::  $verbose"
+	Write-Host "Table121      ::  $table121"
+	Write-Host "Table122      ::  $table122"
+	Write-Host "Table124      ::  $table124"
+	Write-Host "Table136      ::  $table136"
+	Write-Host "Table137      ::  $table137"
+	Write-Host "Table409      ::  $table409"
+	Write-Host "Table410      ::  $table410"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
