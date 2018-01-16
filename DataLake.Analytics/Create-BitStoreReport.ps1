@@ -270,6 +270,13 @@ Function Confirm-Run {
 	Write-Host "End Date            :: $endDate"
 	Write-Host "Transactions        :: $transTypes"
 	Write-Host "Verbose             :: $verbose"
+	Write-Host "Table121            :: $table121"
+	Write-Host "Table122            :: $table122"
+	Write-Host "Table124            :: $table124"
+	Write-Host "Table136            :: $table136"
+	Write-Host "Table137            :: $table137"
+	Write-Host "Table409            :: $table409"
+	Write-Host "Table410            :: $table410"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
