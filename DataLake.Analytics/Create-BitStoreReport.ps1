@@ -20,6 +20,22 @@
 [string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
 #######################################################################################################
 #######################################################################################################
+##   Trans Type 121
+[string]$table121 = 'stg_TXNHeader_121'
+##   Trans Type 122
+[string]$table122 = 'stg_TXNDetails_122'
+##   Trans Type 124
+[string]$table124 = 'stg_Media_124'
+##   Trans Type 136
+[string]$table136 = 'stg_PromoSales_136'
+##   Trans Type 137
+[string]$table137 = 'stg_PromoSalesDetails_137'
+##   Trans Type 409
+[string]$table409 = 'stg_CouponSales_409'
+##   Trans Type 410
+[string]$table410 = 'stg_CouponSalesDetails_410'
+#######################################################################################################
+#######################################################################################################
 Function Create-TimeStamp {
 	$now = Get-Date
 	$day = $now.day.ToString("00")
@@ -180,33 +196,32 @@ Function Add-CsvsToSql {
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
 	ForEach ($file in $structuredFiles) {
-	## move hard code outside of fuction with global var's
 		If ($file.Name -like "*D1_121*") {
-			$table = 'stg_TXNHeader_121'
+			$table = $table121
 			$formatFile = "C:\Scripts\XML\format121.xml"
 		}
 		ElseIf ($file.Name -like "*D1_122*") {
-			$table = 'stg_TXNDetails_122'
+			$table = $table122
 			$formatFile = "C:\Scripts\XML\format122.xml"
 		}
 		ElseIf ($file.Name -like "*D1_124*") {
-			$table = 'stg_Media_124'
+			$table = $table124
 			$formatFile = "C:\Scripts\XML\format124.xml"
 		}
 		ElseIf ($file.Name -like "*D1_136*") {
-			$table = 'stg_PromoSales_136'
+			$table = $table124
 			$formatFile = "C:\Scripts\XML\format136.xml"
 		}
 		ElseIf ($file.Name -like "*D1_137*") {
-			$table = 'stg_PromoSalesDetails_137'
+			$table = $table136
 			$formatFile = "C:\Scripts\XML\format137.xml"
 		}	
 		ElseIf ($file.Name -like "*D1_409*") {
-			$table = 'stg_CouponSales_409'
+			$table = $table409
 			$formatFile = "C:\Scripts\XML\format409.xml"
 		}
 		ElseIf ($file.Name -like "*D1_410*") {
-			$table = 'stg_CouponSalesDetails_410'
+			$table = $table410
 			$formatFile = "C:\Scripts\XML\format410.xml"
 		}
 		Else {
