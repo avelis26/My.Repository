@@ -37,6 +37,10 @@
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
+	[CmdletBinding()]
+	Param(
+		[switch]$forFileName
+	)
 	$now = Get-Date
 	$day = $now.day.ToString("00")
 	$month = $now.month.ToString("00")
@@ -44,7 +48,12 @@ Function Create-TimeStamp {
 	$hour = $now.hour.ToString("00")
 	$minute = $now.minute.ToString("00")
 	$second = $now.second.ToString("00")
-	$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	If ($forFileName -eq $true) {
+		$timeStamp = '_' + $year + $month + $day + '_' + $hour + $minute + $second + '_'
+	}
+	Else {
+		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	}
 	Return $timeStamp
 }
 Function Get-DataLakeRawFiles {
@@ -248,15 +257,12 @@ Function Add-CsvsToSql {
 			$result = Invoke-Expression -Command $command
 			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
 			Add-Content -Value $message -Path $($args[9])
-			$message = "Deleting $($file.FullName) ..."
-			Add-Content -Value $message -Path $($args[9])
-			#Remove-Item -Path $($args[3]) -Force -ErrorAction Stop
 		}
 		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog"
-		Start-Sleep -Seconds 1
-		Get-Job | Wait-Job
-		Get-Job | Remove-Job
+		Start-Sleep -Seconds 30
 	}
+	Get-Job | Wait-Job
+	Get-Job | Remove-Job
 }
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -327,7 +333,7 @@ If ($continue -eq 'y') {
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$global:processDate = $year + $month + $day
-			$global:opsLog = $opsLogRootPath + $processDate + '_BITC.log'
+			$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
 			$getDataLakeRawFilesParams = @{
 				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
