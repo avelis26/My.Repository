@@ -35,6 +35,7 @@
     <Compile Include="Get-DataLakeRawFiles.ps1" />
     <Compile Include="Get-DataLakeStructuredFiles.ps1" />
     <Compile Include="Insert-BitDataToSql.ps1" />
+    <Compile Include="Scale-AzureDB.ps1" />
     <Compile Include="Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
