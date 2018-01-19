@@ -392,22 +392,22 @@ If ($continue -eq 'y') {
 			$message1 = "Start Time: $($startTime.DateTime)"
 			Write-Output $message1
 			Add-Content -Value $message1 -Path $opsLog
-			$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+			$message2 = "raw RunTime: $($rawTime.Hours) hours $($rawTime.Minutes) min $($rawTime.Seconds) sec"
 			Write-Output $message2
 			Add-Content -Value $message2 -Path $opsLog
-			$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+			$message3 = "sep RunTime: $($sepTime.Hours) hours $($sepTime.Minutes) min $($sepTime.Seconds) sec"
 			Write-Output $message3
 			Add-Content -Value $message3 -Path $opsLog
-			$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+			$message4 = "exe RunTime: $($exeTime.Hours) hours $($exeTime.Minutes) min $($exeTime.Seconds) sec"
 			Write-Output $message4
 			Add-Content -Value $message4 -Path $opsLog
-			$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+			$message5 = "int RunTime: $($insTime.Hours) hours $($insTime.Minutes) min $($insTime.Seconds) sec"
 			Write-Output $message5
 			Add-Content -Value $message5 -Path $opsLog
 			$message6 = "End Time: $($endTime.DateTime)"
 			Write-Output $message6
 			Add-Content -Value $message6 -Path $opsLog
-			$message7 = "Total RunTime: $($totTime.Hours) hour $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
+			$message7 = "Total RunTime: $($totTime.Hours) hours $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
 			Write-Output $message7
 			Add-Content -Value $message7 -Path $opsLog
 			$params = @{

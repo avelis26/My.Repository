@@ -1,42 +1,16 @@
-# Init
-#######################################################################################################
-#######################################################################################################
-##   Enter your 7-11 user name without domain:
-[string]$global:userName = 'gpink003'
-##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-16-2018'
-[string]$global:endDate = '01-19-2018'
-##   Enter the transactions you would like to filter for:
-[string]$global:transTypes = 'D1121,D1122,D1124'
-##   Enter $true for verbose information output, $false faster speed:
-[bool]$global:verbose = $false
-##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$global:destinationRootPath = 'H:\BIT_CRM\'
-##   Enter the path where you want the operations logs to be stored:
-[string]$global:opsLogRootPath = 'H:\Ops_Log\'
-##   Enter the path where you want the error logs to be stored:
-[string]$global:errLogRootPath = 'H:\Err_Log\'
-##   Enter the email address desired for notifications:
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com'
-#######################################################################################################
-#######################################################################################################
-##   Enter the table names you would like the data inserted to by transaction type:
-##   Trans Type D1 121
-[string]$table121 = 'stg_TXNHeader_121'
-##   Trans Type D1 122
-[string]$table122 = 'stg_TXNDetails_122'
-##   Trans Type D1 124
-[string]$table124 = 'stg_Media_124'
-##   Trans Type D1 136
-[string]$table136 = 'stg_PromoSales_136'
-##   Trans Type D1 137
-[string]$table137 = 'stg_PromoSalesDetails_137'
-##   Trans Type D1 409
-[string]$table409 = 'stg_CouponSales_409'
-##   Trans Type D1 410
-[string]$table410 = 'stg_CouponSalesDetails_410'
-#######################################################################################################
-#######################################################################################################
+$startTime = Get-Date
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 Function Create-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -268,51 +242,31 @@ Function Add-CsvsToSql {
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
 }
-Function Confirm-Run {
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-	Write-Host "Start Date    ::  $startDate"
-	Write-Host "End Date      ::  $endDate"
-	Write-Host "Transactions  ::  $transTypes"
-	Write-Host "Verbose       ::  $verbose"
-	Write-Host "Table121      ::  $table121"
-	Write-Host "Table122      ::  $table122"
-	Write-Host "Table124      ::  $table124"
-	Write-Host "Table136      ::  $table136"
-	Write-Host "Table137      ::  $table137"
-	Write-Host "Table409      ::  $table409"
-	Write-Host "Table410      ::  $table410"
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-    $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
-	Return $answer
-}
-$continue = Confirm-Run
-$startTime = Get-Date
-add-type @"
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
-    public class TrustAllCertsPolicy : ICertificatePolicy {
-        public bool CheckValidationResult(
-            ServicePoint srvPoint, X509Certificate certificate,
-            WebRequest request, int certificateProblem) {
-            return true;
-        }
-    }
-"@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-$global:smtpServer = '10.128.1.125'
-$global:port = 25
-$global:fromAddr = 'noreply@7-11.com'
-$global:database = '7ELE'
-$global:sqlUser = 'sqladmin'
-$global:sqlPass = 'Password20!7!'
-$global:server = 'mstestsqldw.database.windows.net'
-$global:user = $userName + '@7-11.com'
-$global:dataLakeSearchPathRoot = '/BIT_CRM/'
-$global:dataLakeStoreName = '711dlprodcons01'
-$global:extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
-$i = 0
-$table = $null
-$file = $null
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com'
+[string]$global:userName = 'gpink003'
+[string]$global:transTypes = 'D1121,D1122,D1124'
+[string]$global:destinationRootPath = 'H:\BIT_CRM\'
+[string]$global:opsLogRootPath = 'H:\Ops_Log\'
+[string]$global:errLogRootPath = 'H:\Err_Log\'
+[string]$global:table121 = 'stg_TXNHeader_121'
+[string]$global:table122 = 'stg_TXNDetails_122'
+[string]$global:table124 = 'stg_Media_124'
+[string]$global:table136 = 'stg_PromoSales_136'
+[string]$global:table137 = 'stg_PromoSalesDetails_137'
+[string]$global:table409 = 'stg_CouponSales_409'
+[string]$global:table410 = 'stg_CouponSalesDetails_410'
+[string]$global:smtpServer = '10.128.1.125'
+[string]$global:fromAddr = 'noreply@7-11.com'
+[string]$global:database = '7ELE'
+[string]$global:sqlUser = 'sqladmin'
+[string]$global:sqlPass = 'Password20!7!'
+[string]$global:server = 'mstestsqldw.database.windows.net'
+[string]$global:user = $userName + '@7-11.com'
+[string]$global:dataLakeSearchPathRoot = '/BIT_CRM/'
+[string]$global:dataLakeStoreName = '711dlprodcons01'
+[string]$global:extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
+[bool]$global:verbose = $false
+[int]$global:port = 25
 Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
@@ -332,165 +286,159 @@ Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $errLogRootPath..
 If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 	New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
 }
-If ($continue -eq 'y') {
-	Try {
+Try {
 # Get raw files
-		$milestone_1 = Get-Date
-		$startDateObj = Get-Date -Date $startDate
-		$endDateObj = Get-Date -Date $endDate
-		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
-		While ($i -lt $range) {
-			$day = $($startDateObj.AddDays($i)).day.ToString("00")
-			$month = $($startDateObj.AddDays($i)).month.ToString("00")
-			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
-			$global:processDate = $year + $month + $day
-			$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
-			$getDataLakeRawFilesParams = @{
-				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
-				destinationRootPath = $($destinationRootPath + $processDate + '\');
-				dataLakeStoreName = $dataLakeStoreName;
-				opsLog = $opsLog;
-				Verbose = $verbose;
-			}
-			Get-DataLakeRawFiles @getDataLakeRawFilesParams
+	$milestone_1 = Get-Date
+	$startDateObj = $milestone_1
+	$day = $startDateObj.day.ToString("00")
+	$month = $startDateObj.month.ToString("00")
+	$year = $startDateObj.year.ToString("0000")
+	$global:processDate = $year + $month + $day
+	$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
+	$getDataLakeRawFilesParams = @{
+		dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
+		destinationRootPath = $($destinationRootPath + $processDate + '\');
+		dataLakeStoreName = $dataLakeStoreName;
+		opsLog = $opsLog;
+		Verbose = $verbose;
+	}
+	Get-DataLakeRawFiles @getDataLakeRawFilesParams
 # Seperate files into 5 seperate folders for paralell processing
-			$milestone_2 = Get-Date
-			$splitFilesAmongFoldersParams = @{
-				inFolder = $($destinationRootPath + $processDate + '\');
-				opsLog = $opsLog;
-				Verbose = $verbose;
-			}
-			Split-FilesAmongFolders @splitFilesAmongFoldersParams
+	$milestone_2 = Get-Date
+	$splitFilesAmongFoldersParams = @{
+		inFolder = $($destinationRootPath + $processDate + '\');
+		opsLog = $opsLog;
+		Verbose = $verbose;
+	}
+	Split-FilesAmongFolders @splitFilesAmongFoldersParams
 # Execute C# app as job on raw files to create CSV's
-			$milestone_3 = Get-Date
-			$convertBitFilesToCsvParams = @{
-				inFolder = $($destinationRootPath + $processDate + '\');
-				transTypes = $transTypes;
-				extractorExe = $extractorExe;
-				filePrefix = $processDate;
-				opsLog = $opsLog;
-				Verbose = $verbose;
-			}
-			Convert-BitFilesToCsv @convertBitFilesToCsvParams
+	$milestone_3 = Get-Date
+	$convertBitFilesToCsvParams = @{
+		inFolder = $($destinationRootPath + $processDate + '\');
+		transTypes = $transTypes;
+		extractorExe = $extractorExe;
+		filePrefix = $processDate;
+		opsLog = $opsLog;
+		Verbose = $verbose;
+	}
+	Convert-BitFilesToCsv @convertBitFilesToCsvParams
 # Insert CSV's to DB
-			$milestone_4 = Get-Date
-			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
-			$addCsvsToSqlParams = @{
-				structuredFiles = $structuredFiles;
-				errLogRoot = $errLogRootPath;
-				opsLog = $opsLog;
-				Verbose = $verbose;
-			}
-			Add-CsvsToSql @addCsvsToSqlParams
-			$i++
-			$endTime = Get-Date
-			$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
-			$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-			$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-			$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
-			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message1 = "Start Time: $($startTime.DateTime)"
-			Write-Output $message1
-			Add-Content -Value $message1 -Path $opsLog
-			$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
-			Write-Output $message2
-			Add-Content -Value $message2 -Path $opsLog
-			$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
-			Write-Output $message3
-			Add-Content -Value $message3 -Path $opsLog
-			$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
-			Write-Output $message4
-			Add-Content -Value $message4 -Path $opsLog
-			$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
-			Write-Output $message5
-			Add-Content -Value $message5 -Path $opsLog
-			$message6 = "End Time: $($endTime.DateTime)"
-			Write-Output $message6
-			Add-Content -Value $message6 -Path $opsLog
-			$message7 = "Total RunTime: $($totTime.Hours) hour $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
-			Write-Output $message7
-			Add-Content -Value $message7 -Path $opsLog
-			$params = @{
-				SmtpServer = $smtpServer;
-				Port = $port;
-				UseSsl = 0;
-				From = $fromAddr;
-				To = $emailList;
-				Subject = "BITC Finished Processing and Inserting $processDate";
-				Body = @"
+	$milestone_4 = Get-Date
+	$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
+	$addCsvsToSqlParams = @{
+		structuredFiles = $structuredFiles;
+		errLogRoot = $errLogRootPath;
+		opsLog = $opsLog;
+		Verbose = $verbose;
+	}
+	Add-CsvsToSql @addCsvsToSqlParams
+	$endTime = Get-Date
+	$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
+	$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
+	$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+	$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
+	$totTime = New-TimeSpan -Start $startTime -End $endTime
+	$message1 = "Start Time: $($startTime.DateTime)"
+	Write-Output $message1
+	Add-Content -Value $message1 -Path $opsLog
+	$message2 = "raw RunTime: $($rawTime.Minutes) min $($rawTime.Seconds) sec"
+	Write-Output $message2
+	Add-Content -Value $message2 -Path $opsLog
+	$message3 = "sep RunTime: $($sepTime.Minutes) min $($sepTime.Seconds) sec"
+	Write-Output $message3
+	Add-Content -Value $message3 -Path $opsLog
+	$message4 = "exe RunTime: $($exeTime.Minutes) min $($exeTime.Seconds) sec"
+	Write-Output $message4
+	Add-Content -Value $message4 -Path $opsLog
+	$message5 = "int RunTime: $($insTime.Minutes) min $($insTime.Seconds) sec"
+	Write-Output $message5
+	Add-Content -Value $message5 -Path $opsLog
+	$message6 = "End Time: $($endTime.DateTime)"
+	Write-Output $message6
+	Add-Content -Value $message6 -Path $opsLog
+	$message7 = "Total RunTime: $($totTime.Hours) hour $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
+	Write-Output $message7
+	Add-Content -Value $message7 -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "BITC Finished Processing and Inserting $processDate";
+		Body = @"
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.
 
-				$message1
-				$message2
-				$message3
-				$message4
-				$message5
-				$message6
-				$message7
+		$message1
+		$message2
+		$message3
+		$message4
+		$message5
+		$message6
+		$message7
 "@
-			}
-			Send-MailMessage @params
-		}
 	}
-	Catch [System.DirectoryNotFoundException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $emailList;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
-		}
-		Send-MailMessage @params
+	Send-MailMessage @params
+}
+Catch [System.DirectoryNotFoundException] {
+	Write-Error -Exception $Error[0].Exception
+	Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "ERROR:: BITC FAILED For $processDate!!!";
+		Body = "$($Error[0].Exception)"
 	}
-	Catch [System.FormatException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $emailList;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
-		}
-		Send-MailMessage @params
+	Send-MailMessage @params
+}
+Catch [System.FormatException] {
+	Write-Error -Exception $Error[0].Exception
+	Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "ERROR:: BITC FAILED For $processDate!!!";
+		Body = "$($Error[0].Exception)"
 	}
-	Catch [System.ArgumentOutOfRangeException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $emailList;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
-		}
-		Send-MailMessage @params
+	Send-MailMessage @params
+}
+Catch [System.ArgumentOutOfRangeException] {
+	Write-Error -Exception $Error[0].Exception
+	Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "ERROR:: BITC FAILED For $processDate!!!";
+		Body = "$($Error[0].Exception)"
 	}
-	Catch {
-		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		Add-Content -Value $($Error[0].CategoryInfo.ToString()) -Path $opsLog
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $emailList;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = @"
+	Send-MailMessage @params
+}
+Catch {
+	Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
+	Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	Add-Content -Value $($Error[0].CategoryInfo.ToString()) -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "ERROR:: BITC FAILED For $processDate!!!";
+		Body = @"
 Something bad happened!!!
 $($Error[0].Exception.ToString())
 $($Error[0].CategoryInfo.ToString())
 "@
-		}
-		Send-MailMessage @params
 	}
+	Send-MailMessage @params
 }
+
