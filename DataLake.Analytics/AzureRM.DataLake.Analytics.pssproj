@@ -29,11 +29,10 @@
   <ItemGroup>
     <Compile Include="Concatinate-AggregateFiles.ps1" />
     <Compile Include="Convert-BitDataFiles.ps1" />
-    <Compile Include="Convert-BitDataFiles_121_122_124.ps1" />
-    <Compile Include="Create-BitStoreReport.ps1" />
     <Compile Include="Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="Get-DataLakeRawFiles.ps1" />
     <Compile Include="Get-DataLakeStructuredFiles.ps1" />
+    <Compile Include="Insert-AutoBitDataToSql.ps1" />
     <Compile Include="Insert-BitDataToSql.ps1" />
     <Compile Include="Scale-AzureDB.ps1" />
     <Compile Include="Start-AzureRmAdlaJobs.ps1" />
