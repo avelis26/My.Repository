@@ -17,9 +17,9 @@ add-type @"
     }
 "@
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-$params = {
+$params = @{
     ResourceGroupName = 'CRM-TEST-RG';
-    ServerName = 'mstestsqldw.database.windows.net';
+    ServerName = 'mstestsqldw';
     DatabaseName = '7ELE';
     Edition = 'Premium';
     RequestedServiceObjectiveName = 'P10';
