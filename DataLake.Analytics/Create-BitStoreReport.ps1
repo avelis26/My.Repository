@@ -4,8 +4,8 @@
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-14-2018'
-[string]$global:endDate = '01-15-2018'
+[string]$global:startDate = '01-16-2018'
+[string]$global:endDate = '01-19-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter $true for verbose information output, $false faster speed:
@@ -17,7 +17,7 @@
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com'
 #######################################################################################################
 #######################################################################################################
 ##   Enter the table names you would like the data inserted to by transaction type:
@@ -75,6 +75,9 @@ Function Get-DataLakeRawFiles {
 			ErrorAction = 'SilentlyContinue';
 		}
 		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
+		If ($dataLakeFolder -eq $null) {
+			throw [DirectoryNotFoundException] "$dataLakeSearchPath NOT FOUND!!!"
+		}
 		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
@@ -428,6 +431,20 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			}
 			Send-MailMessage @params
 		}
+	}
+	Catch [System.DirectoryNotFoundException] {
+		Write-Error -Exception $Error[0].Exception
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $emailList;
+			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
+			Body = "$($Error[0].Exception)"
+		}
+		Send-MailMessage @params
 	}
 	Catch [System.FormatException] {
 		Write-Error -Exception $Error[0].Exception
