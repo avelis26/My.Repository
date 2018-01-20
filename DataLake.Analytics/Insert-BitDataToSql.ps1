@@ -253,7 +253,7 @@ Function Add-CsvsToSql {
 				$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
 				Return $timeStamp
 			}
-			$errLogFile = $args[0] + $args[1] + '_BCP_Error.log'
+			$errLogFile = $args[0] + $args[1] + '_' + $args[11] + '_BCP_Error.log'
 			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
 			$message = "$(Create-TimeStamp)  $command"
 			Start-Sleep -Seconds $(Get-Random -Minimum 1.0 -Maximum 3.9)
@@ -262,8 +262,8 @@ Function Add-CsvsToSql {
 			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
 			Add-Content -Value $message -Path $($args[9])
 		}
-		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog"
-		Start-Sleep -Seconds 30
+		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog", "$($file.Directory.Name)"
+		Start-Sleep -Seconds 5
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
