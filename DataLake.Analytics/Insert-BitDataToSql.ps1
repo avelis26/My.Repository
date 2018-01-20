@@ -334,7 +334,6 @@ If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 If ($continue -eq 'y') {
 	Try {
 # Get raw files
-		$milestone_1 = Get-Date
 		$startDateObj = Get-Date -Date $startDate
 		$endDateObj = Get-Date -Date $endDate
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
@@ -354,7 +353,7 @@ If ($continue -eq 'y') {
 			}
 			Get-DataLakeRawFiles @getDataLakeRawFilesParams
 # Seperate files into 5 seperate folders for paralell processing
-			$milestone_2 = Get-Date
+			$milestone_1 = Get-Date
 			$splitFilesAmongFoldersParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				opsLog = $opsLog;
@@ -362,7 +361,7 @@ If ($continue -eq 'y') {
 			}
 			Split-FilesAmongFolders @splitFilesAmongFoldersParams
 # Execute C# app as job on raw files to create CSV's
-			$milestone_3 = Get-Date
+			$milestone_2 = Get-Date
 			$convertBitFilesToCsvParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				transTypes = $transTypes;
@@ -373,7 +372,7 @@ If ($continue -eq 'y') {
 			}
 			Convert-BitFilesToCsv @convertBitFilesToCsvParams
 # Insert CSV's to DB
-			$milestone_4 = Get-Date
+			$milestone_3 = Get-Date
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
@@ -384,10 +383,10 @@ If ($continue -eq 'y') {
 			Add-CsvsToSql @addCsvsToSqlParams
 			$i++
 			$endTime = Get-Date
-			$rawTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
-			$sepTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-			$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-			$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
+			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
+			$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
+			$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
+			$insTime = New-TimeSpan -Start $milestone_3 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
 			$message1 = "Start Time----------:  $($startTime.DateTime)"
 			$message2 = "End Time------------:  $($endTime.DateTime)"
@@ -419,15 +418,16 @@ If ($continue -eq 'y') {
 				BodyAsHtml = $true;
 				Subject = "BITC Finished Processing and Inserting $processDate";
 				Body = @"
-Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.
+Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
+<br>
 <font face='consolas'>
-				$message1
-				$message2
-				$message3
-				$message4
-				$message5
-				$message6
-				$message7
+				$message1<br>
+				$message2<br>
+				$message3<br>
+				$message4<br>
+				$message5<br>
+				$message6<br>
+				$message7<br>
 </font>
 "@
 			}
