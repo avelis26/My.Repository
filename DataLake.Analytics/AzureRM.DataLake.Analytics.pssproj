@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="Concatinate-AggregateFiles.ps1" />
     <Compile Include="Convert-BitDataFiles.ps1" />
+    <Compile Include="Execute-SqlStoredProcedure.ps1" />
     <Compile Include="Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="Get-DataLakeRawFiles.ps1" />
     <Compile Include="Get-DataLakeStructuredFiles.ps1" />
