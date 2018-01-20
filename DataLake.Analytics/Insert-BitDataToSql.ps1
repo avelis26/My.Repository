@@ -286,7 +286,6 @@ Function Confirm-Run {
 	Return $answer
 }
 $continue = Confirm-Run
-$startTime = Get-Date
 add-type @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
@@ -340,6 +339,7 @@ If ($continue -eq 'y') {
 		$endDateObj = Get-Date -Date $endDate
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 		While ($i -lt $range) {
+			$startTime = Get-Date
 			$day = $($startDateObj.AddDays($i)).day.ToString("00")
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
@@ -389,26 +389,26 @@ If ($continue -eq 'y') {
 			$exeTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 			$insTime = New-TimeSpan -Start $milestone_4 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message1 = "Start Time: $($startTime.DateTime)"
+			$message1 = "Start Time----------:  $($startTime.DateTime)"
+			$message2 = "End Time------------:  $($endTime.DateTime)"
+			$message3 = "Raw File Download---:  $($rawTime.Hours.ToString("00")) hours $($rawTime.Minutes.ToString("00")) minutes $($rawTime.Seconds.ToString("00")) seconds"
+			$message4 = "File Decompression--:  $($sepTime.Hours.ToString("00")) hours $($sepTime.Minutes.ToString("00")) minutes $($sepTime.Seconds.ToString("00")) seconds"
+			$message5 = "File Processing-----:  $($exeTime.Hours.ToString("00")) hours $($exeTime.Minutes.ToString("00")) minutes $($exeTime.Seconds.ToString("00")) seconds"
+			$message6 = "Insert To SQL DB----:  $($insTime.Hours.ToString("00")) hours $($insTime.Minutes.ToString("00")) minutes $($insTime.Seconds.ToString("00")) seconds"
+			$message7 = "Total Run Time------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
 			Write-Output $message1
-			Add-Content -Value $message1 -Path $opsLog
-			$message2 = "raw RunTime: $($rawTime.Hours) hours $($rawTime.Minutes) min $($rawTime.Seconds) sec"
 			Write-Output $message2
-			Add-Content -Value $message2 -Path $opsLog
-			$message3 = "sep RunTime: $($sepTime.Hours) hours $($sepTime.Minutes) min $($sepTime.Seconds) sec"
 			Write-Output $message3
-			Add-Content -Value $message3 -Path $opsLog
-			$message4 = "exe RunTime: $($exeTime.Hours) hours $($exeTime.Minutes) min $($exeTime.Seconds) sec"
 			Write-Output $message4
-			Add-Content -Value $message4 -Path $opsLog
-			$message5 = "int RunTime: $($insTime.Hours) hours $($insTime.Minutes) min $($insTime.Seconds) sec"
 			Write-Output $message5
-			Add-Content -Value $message5 -Path $opsLog
-			$message6 = "End Time: $($endTime.DateTime)"
 			Write-Output $message6
-			Add-Content -Value $message6 -Path $opsLog
-			$message7 = "Total RunTime: $($totTime.Hours) hours $($totTime.Minutes) minutes $($totTime.Seconds) seconds"
 			Write-Output $message7
+			Add-Content -Value $message1 -Path $opsLog
+			Add-Content -Value $message2 -Path $opsLog
+			Add-Content -Value $message3 -Path $opsLog
+			Add-Content -Value $message4 -Path $opsLog
+			Add-Content -Value $message5 -Path $opsLog
+			Add-Content -Value $message6 -Path $opsLog
 			Add-Content -Value $message7 -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
@@ -416,10 +416,11 @@ If ($continue -eq 'y') {
 				UseSsl = 0;
 				From = $fromAddr;
 				To = $emailList;
+				BodyAsHtml = $true;
 				Subject = "BITC Finished Processing and Inserting $processDate";
 				Body = @"
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.
-
+<font face='consolas'>
 				$message1
 				$message2
 				$message3
@@ -427,6 +428,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message5
 				$message6
 				$message7
+</font>
 "@
 			}
 			Send-MailMessage @params
@@ -441,6 +443,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $emailList;
+			BodyAsHtml = $true;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
@@ -455,6 +458,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $emailList;
+			BodyAsHtml = $true;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
@@ -469,6 +473,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $emailList;
+			BodyAsHtml = $true;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = "$($Error[0].Exception)"
 		}
@@ -484,6 +489,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			UseSsl = 0;
 			From = $fromAddr;
 			To = $emailList;
+			BodyAsHtml = $true;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
 			Body = @"
 Something bad happened!!!
