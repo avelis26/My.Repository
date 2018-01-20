@@ -195,7 +195,7 @@ Database------------:  [7ELE]<br>
 Tables--------------:  [dbo].[Agg2_StoreTxnItems]<br>
 $message1<br>
 $message2<br>
-$spandOutput<br>
+$message3<br>
 <br>
 </font>
 "@
