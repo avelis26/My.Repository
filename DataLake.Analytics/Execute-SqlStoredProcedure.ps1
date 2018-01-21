@@ -121,6 +121,8 @@ $message3<br>
 	Send-MailMessage @params
 }
 Start-Job -ScriptBlock $block -ArgumentList "$start", "$end"
+Get-Job | Wait-Job
+Get-Job | Remove-Job
 $block = {
 	add-type @"
 using System.Net;

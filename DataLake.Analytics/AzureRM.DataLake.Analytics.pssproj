@@ -43,6 +43,7 @@
     <Content Include="format122.xml" />
     <Content Include="format124.xml" />
     <Content Include="ParseDictionary.sql" />
+    <Content Include="Tmp_Header_SP.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
