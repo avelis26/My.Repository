@@ -1,6 +1,8 @@
-# Init  --  v1.0.0.2
+# Init  --  v1.0.1.2
 #######################################################################################################
 #######################################################################################################
+[CmdletBinding()]
+Param(
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
@@ -22,19 +24,20 @@
 #######################################################################################################
 ##   Enter the table names you would like the data inserted to by transaction type:
 ##   Trans Type D1 121
-[string]$table121 = 'stg_TXNHeader_121'
+[string]$global:table121 = 'stg_TXNHeader_121'
 ##   Trans Type D1 122
-[string]$table122 = 'stg_TXNDetails_122'
+[string]$global:table122 = 'stg_TXNDetails_122'
 ##   Trans Type D1 124
-[string]$table124 = 'stg_Media_124'
+[string]$global:table124 = 'stg_Media_124'
 ##   Trans Type D1 136
-[string]$table136 = 'stg_PromoSales_136'
+[string]$global:table136 = 'stg_PromoSales_136'
 ##   Trans Type D1 137
-[string]$table137 = 'stg_PromoSalesDetails_137'
+[string]$global:table137 = 'stg_PromoSalesDetails_137'
 ##   Trans Type D1 409
-[string]$table409 = 'stg_CouponSales_409'
+[string]$global:table409 = 'stg_CouponSales_409'
 ##   Trans Type D1 410
-[string]$table410 = 'stg_CouponSalesDetails_410'
+[string]$global:table410 = 'stg_CouponSalesDetails_410'
+)
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
@@ -286,18 +289,22 @@ Function Confirm-Run {
 	Return $answer
 }
 $continue = Confirm-Run
-add-type @"
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
-    public class TrustAllCertsPolicy : ICertificatePolicy {
-        public bool CheckValidationResult(
-            ServicePoint srvPoint, X509Certificate certificate,
-            WebRequest request, int certificateProblem) {
-            return true;
-        }
-    }
+$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+If ($policy -ne 'TrustAllCertsPolicy') {
+	add-type @"
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+public class TrustAllCertsPolicy : ICertificatePolicy {
+	public bool CheckValidationResult(
+		ServicePoint srvPoint, X509Certificate certificate,
+		WebRequest request, int certificateProblem
+	) {
+		return true;
+	}
+}
 "@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
 $global:smtpServer = '10.128.1.125'
 $global:port = 25
 $global:fromAddr = 'noreply@7-11.com'
