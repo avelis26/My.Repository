@@ -1,15 +1,13 @@
-# Init
+# Init  --  v1.0.0.2
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 [string]$global:startDate = '01-16-2018'
-[string]$global:endDate = '01-19-2018'
+[string]$global:endDate   = '01-19-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
-##   Enter $true for verbose information output, $false faster speed:
-[bool]$global:verbose = $false
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 [string]$global:destinationRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the operations logs to be stored:
@@ -18,6 +16,8 @@
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
 [string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'tyler.bailey@ansira.com'
+##   Enter $true for verbose information output, $false faster speed:
+[bool]$global:verbose = $false
 #######################################################################################################
 #######################################################################################################
 ##   Enter the table names you would like the data inserted to by transaction type:
