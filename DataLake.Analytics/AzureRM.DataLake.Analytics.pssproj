@@ -27,23 +27,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Concatinate-AggregateFiles.ps1" />
-    <Compile Include="Convert-BitDataFiles.ps1" />
-    <Compile Include="Execute-SqlStoredProcedure.ps1" />
-    <Compile Include="Get-DataLakeAggregateFiles.ps1" />
-    <Compile Include="Get-DataLakeRawFiles.ps1" />
-    <Compile Include="Get-DataLakeStructuredFiles.ps1" />
-    <Compile Include="Insert-AutoBitDataToSql.ps1" />
-    <Compile Include="Insert-BitDataToSql.ps1" />
-    <Compile Include="Scale-AzureDB.ps1" />
-    <Compile Include="Start-AzureRmAdlaJobs.ps1" />
+    <Compile Include="PowerShell\Concatinate-AggregateFiles.ps1" />
+    <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
+    <Compile Include="PowerShell\Execute-SqlStoredProcedure.ps1" />
+    <Compile Include="PowerShell\Get-DataLakeAggregateFiles.ps1" />
+    <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
+    <Compile Include="PowerShell\Get-DataLakeStructuredFiles.ps1" />
+    <Compile Include="PowerShell\Create-BitStoreReport.ps1" />
+    <Compile Include="PowerShell\Insert-BitDataToSql.ps1" />
+    <Compile Include="PowerShell\Scale-AzureDB.ps1" />
+    <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="format121.xml" />
-    <Content Include="format122.xml" />
-    <Content Include="format124.xml" />
-    <Content Include="ParseDictionary.sql" />
-    <Content Include="Tmp_Header_SP.sql" />
+    <Content Include="XML\format121.xml" />
+    <Content Include="XML\format122.xml" />
+    <Content Include="XML\format124.xml" />
+    <Content Include="SQL\ParseDictionary.sql" />
+    <Content Include="SQL\Tmp_Header_SP.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SQL\" />
+    <Folder Include="XML\" />
+    <Folder Include="PowerShell\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
