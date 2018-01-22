@@ -127,4 +127,3 @@ Catch {
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog
 }
-
