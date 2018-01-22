@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="PowerShell\Concatinate-AggregateFiles.ps1" />
     <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
+    <Compile Include="PowerShell\Create-TmpHeaderTable.ps1" />
     <Compile Include="PowerShell\Execute-SqlStoredProcedure.ps1" />
     <Compile Include="PowerShell\Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
