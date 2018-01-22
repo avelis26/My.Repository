@@ -8,7 +8,7 @@ $global:smtpServer = '10.128.1.125'
 $global:port = 25
 $global:fromAddr = 'noreply@7-11.com'
 $global:toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
-$global:finalAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com'
+$global:finalAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'anna.behle@ansira.com', 'ben.smith@ansira.com', 'megan.morace@ansira.com'
 ##########################################
 ##########################################
 Try {
@@ -246,7 +246,7 @@ $message3<br>
 		Exit 1
 	}
 }
-Start-Job -ScriptBlock $block -ArgumentList "$start", "$end", "$smtpServer", "$port", "$fromAddr", "$toAddr"
+Start-Job -ScriptBlock $block -ArgumentList "$start", "$end", "$smtpServer", "$port", "$fromAddr", (,$toAddr)
 Get-Job | Wait-Job
 Get-Job | Remove-Job
 $block = {
@@ -369,6 +369,6 @@ $message3<br>
 		Exit 1
 	}
 }
-Start-Job -ScriptBlock $block -ArgumentList "$start", "$end", "$smtpServer", "$port", "$fromAddr", "$toAddr", "$finalAddr"
+Start-Job -ScriptBlock $block -ArgumentList "$start", "$end", "$smtpServer", "$port", "$fromAddr", (,$toAddr), (,$finalAddr)
 Get-Job | Wait-Job
 Get-Job | Remove-Job
