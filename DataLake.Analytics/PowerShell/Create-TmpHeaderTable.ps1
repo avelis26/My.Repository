@@ -12,7 +12,6 @@ $global:toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.
 ##########################################
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
-
 $global:start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
 If ($endDate.DayOfWeek -ne 'Sunday') {
 	throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"

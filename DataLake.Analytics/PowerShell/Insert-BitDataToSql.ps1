@@ -1,8 +1,6 @@
-# Init  --  v1.0.1.2
+# Init  --  v1.0.1.3
 #######################################################################################################
 #######################################################################################################
-[CmdletBinding()]
-Param(
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
@@ -37,7 +35,6 @@ Param(
 [string]$global:table409 = 'stg_CouponSales_409'
 ##   Trans Type D1 410
 [string]$global:table410 = 'stg_CouponSalesDetails_410'
-)
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
