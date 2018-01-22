@@ -108,6 +108,7 @@ $message3<br>
 	Send-MailMessage @params
 }
 Catch {
+	Start-Sleep -Seconds 2
 	$message = "Creating temp header table for date range: $start - $end FAILED!!!!!!!!"
 	$smtpServer = '10.128.1.125'
 	$port = 25
