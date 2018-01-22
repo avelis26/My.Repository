@@ -1,7 +1,14 @@
 ##########################################
 ##########################################
-$start = '2017-12-16'
-$end = '2018-01-14'
+$global:start = '2017-12-16'
+$global:end = '2018-01-14'
+##########################################
+##########################################
+$global:opsLog = "H:\Ops_Log\usp_Create_Tmp_Header_Table.log"
+$global:smtpServer = '10.128.1.125'
+$global:port = 25
+$global:fromAddr = 'noreply@7-11.com'
+$global:toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 ##########################################
 ##########################################
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -32,12 +39,9 @@ Function Create-TimeStamp {
 	$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
 	Return $timeStamp
 }
-$opsLog = "H:\Ops_Log\usp_Create_Tmp_Header_Table.log"
-$message = "Starting stored procedure create partitioned and indexed temp header table for date range: $start - $end"
-$smtpServer = '10.128.1.125'
-$port = 25
-$fromAddr = 'noreply@7-11.com'
-$toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+$message = "Creating Temp Header Table for date range: $start - $end"
+Write-Output $message
+Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 $params = @{
 	SmtpServer = $smtpServer;
 	Port = $port;
@@ -45,12 +49,10 @@ $params = @{
 	From = $fromAddr;
 	To = $toAddr;
 	BodyAsHtml = $true;
-	Subject = $message;
+	Subject = "BITC: $message";
 	Body = "Start Time: $(Get-Date)"
 }
 Send-MailMessage @params
-Write-Output $message
-Add-Content -Value $message -Path $opsLog
 Try {
 	$server = 'Server=tcp:mstestsqldw.database.windows.net,1433;'
 	$catalog = 'Initial Catalog=7ELE;'
@@ -70,19 +72,15 @@ Try {
 	$sqlCommand.CommandTimeout = 0
 	$result = $sqlCommand.ExecuteNonQuery()
 	$sqlConnection.Close()
-	$message = "$(Create-TimeStamp)  Temp header table created successfully."
+	$message = "Temp Header Table For Date Range: $start - $end Created"
 	Write-Output $message
-	Add-Content -Value $message -Path $opsLog
-	Add-Content -Value $result -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
 	$message2 = "End Time------------:  $($endTime.DateTime)"
 	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
-	$smtpServer = '10.128.1.125'
-	$port = 25
-	$fromAddr = 'noreply@7-11.com'
-	$toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -90,7 +88,7 @@ Try {
 		From = $fromAddr;
 		To = $toAddr;
 		BodyAsHtml = $true;
-		Subject = "BITC: Temp Header Table For Date Range: $start - $wnd Completed";
+		Subject = "BITC: $message";
 		Body = @"
 <font face='consolas'>
 The results have been loaded into:<br>
@@ -109,11 +107,9 @@ $message3<br>
 }
 Catch {
 	Start-Sleep -Seconds 2
-	$message = "Creating temp header table for date range: $start - $end FAILED!!!!!!!!"
-	$smtpServer = '10.128.1.125'
-	$port = 25
-	$fromAddr = 'noreply@7-11.com'
-	$toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+	$message = "Temp header table creation for date range: $start - $end FAILED!!!!!!!!"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -121,10 +117,8 @@ Catch {
 		From = $fromAddr;
 		To = $toAddr;
 		BodyAsHtml = $true;
-		Subject = $message;
+		Subject = "BITC: $message";
 		Body = "Something bad happened!!!"
 	}
 	Send-MailMessage @params
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog
 }
