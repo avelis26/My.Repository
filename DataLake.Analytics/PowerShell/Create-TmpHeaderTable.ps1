@@ -1,7 +1,6 @@
 ##########################################
 ##########################################
-$global:start = '2017-12-16'
-$global:end = '2018-01-14'
+$global:end = '2018-01-21'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\usp_Create_Tmp_Header_Table.log"
@@ -11,6 +10,13 @@ $global:fromAddr = 'noreply@7-11.com'
 $global:toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 ##########################################
 ##########################################
+[DateTime]$endDate = Get-Date -Date $end
+[DateTime]$startDate = $endDate.AddDays(-29)
+
+$global:start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+If ($endDate.DayOfWeek -ne 'Sunday') {
+	throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
+}
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($policy -ne 'TrustAllCertsPolicy') {
 	add-type @"
@@ -68,7 +74,7 @@ Try {
 	$sqlConnection.Open()
 	$sqlCommand = New-Object System.Data.SqlClient.SqlCommand
 	$sqlCommand.Connection = $sqlConnection
-	$sqlCommand.CommandText= "[dbo].[usp_Create_Tmp_Header_Table] @StartDate = '$start', @EndDate = '$end'"
+	$sqlCommand.CommandText= "EXECUTE [dbo].[usp_Create_Tmp_Header_Table] @StartDate = '$start', @EndDate = '$end'"
 	$sqlCommand.CommandTimeout = 0
 	$result = $sqlCommand.ExecuteNonQuery()
 	$sqlConnection.Close()
@@ -105,9 +111,24 @@ $message3<br>
 	}
 	Send-MailMessage @params
 }
+Catch [System.ArgumentOutOfRangeException] {
+	Write-Error -Exception $Error[0].Exception
+	Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		BodyAsHtml = $true;
+		Subject = "BITC: Temp header table creation for date range: $start - $end FAILED!!!";
+		Body = "$($Error[0].Exception)"
+	}
+	Send-MailMessage @params
+}
 Catch {
 	Start-Sleep -Seconds 2
-	$message = "Temp header table creation for date range: $start - $end FAILED!!!!!!!!"
+	$message = "Temp header table creation for date range: $start - $end FAILED!!!"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$params = @{
@@ -118,7 +139,10 @@ Catch {
 		To = $toAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Something bad happened!!!"
+		Body = @"
+Something bad happened!!!
+$result
+"@
 	}
 	Send-MailMessage @params
 }

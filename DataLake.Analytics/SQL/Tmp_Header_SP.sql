@@ -74,8 +74,12 @@ SET							@Day28 =				DATEADD(dd, -27, @EndDate)
 SET							@Day29 =				DATEADD(dd, -28, @EndDate)
 SET							@Day30 =				DATEADD(dd, -29, @EndDate)
 
--- Drop current partition function and scheme
+-- Drop current temp header table, partition function, and scheme
 
+IF EXISTS					(SELECT * FROM sys.tables WHERE name = 'tmp_header_table')
+BEGIN
+DROP TABLE					[dbo].[tmp_header_table]
+END
 IF EXISTS					(SELECT * FROM sys.partition_schemes WHERE name = 'Ps_EndDate_By_Day')
 BEGIN
 DROP PARTITION SCHEME		[Ps_EndDate_By_Day]
@@ -127,12 +131,8 @@ CREATE PARTITION SCHEME		[Ps_EndDate_By_Day]
 AS PARTITION				[Pf_EndDate_By_Day]
 ALL TO						([PRIMARY])
 
--- drop and create tmp header table table on partition enddate day level scheme
+-- create tmp header table table on partition enddate day level scheme
 
-IF EXISTS					(SELECT * FROM sys.tables WHERE name = 'tmp_header_table')
-BEGIN
-DROP TABLE					[dbo].[tmp_header_table]
-END
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 CREATE TABLE				[dbo].[tmp_header_table]	(
