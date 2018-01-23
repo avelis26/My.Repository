@@ -1,1 +1,0 @@
-﻿SELECT Store_Id FROM STOR_Master WHERE Store_Id < 1
