@@ -40,6 +40,7 @@
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\Stg_Details_ID.sql" />
     <Content Include="XML\format121.xml" />
     <Content Include="XML\format122.xml" />
     <Content Include="XML\format124.xml" />
