@@ -36,6 +36,7 @@ Try {
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'gpink003@7-11.com', $password
 	Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
 	Write-Output "Starting $server... please wait..."
+	Write-Output "This could take as much as 10 minutes so get some coffee or something..."
 	Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server
 	$params = @{
 		SmtpServer = $smtpServer;
