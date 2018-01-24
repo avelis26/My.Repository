@@ -1,7 +1,5 @@
-$server = 'ms-ssw-crm-bitc'
+$server = 'MS-SSW-CRM-BITC'
 $resourceGroup = 'CRM-Production-RG'
-$user = $userName + '@7-11.com'
-$userName = 'gpink003'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -32,18 +30,42 @@ $params = @{
 	Body = "$server is starting up."
 }
 Send-MailMessage @params
-Import-Module AzureRM -ErrorAction Stop
-$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
-$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
-Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server -Force
-$params = @{
-	SmtpServer = $smtpServer;
-	Port = $port;
-	UseSsl = 0;
-	From = $fromAddr;
-	To = $emailList;
-	Subject = "$server Startup Successful";
-	Body = "Have a nice day."
+Try {
+	Import-Module AzureRM -ErrorAction Stop
+	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\gpink003\Documents\Secrets\gpink003.cred")
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'gpink003@7-11.com', $password
+	Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
+	Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server -Force
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		Subject = "$server Startup Successful";
+		Body = "Have a nice day."
+	}
+	Send-MailMessage @params
 }
-Send-MailMessage @params
+Catch {
+	Write-Error -Message 'Something bad happened!!!' -Exception $($Error[0].Exception)
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		BodyAsHtml = $true;
+		Subject = "$server FAILED TO START UP!!!";
+		Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+<br>
+         Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
+	}
+	Start-Sleep -Seconds 2
+	Send-MailMessage @params
+}
