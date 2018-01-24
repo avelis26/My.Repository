@@ -35,7 +35,7 @@ Try {
 	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\gpink003\Documents\Secrets\gpink003.cred")
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'gpink003@7-11.com', $password
 	Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
-	Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server -Force
+	Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
