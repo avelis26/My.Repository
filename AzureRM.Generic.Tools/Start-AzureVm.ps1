@@ -36,13 +36,7 @@ Import-Module AzureRM -ErrorAction Stop
 $password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
-$continue = Read-Host -Prompt "Are you super super sure you want to SHUTDOWN $server? (y/n)"
-If ($continue -eq 'y') {
-	Stop-AzureRmVM -ResourceGroupName $resourceGroup -Name $server -Force
-}
-Else {
-	Write-Output "You choose something other than 'y' sooooo have a nice day :)"
-}
+Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server -Force
 $params = @{
 	SmtpServer = $smtpServer;
 	Port = $port;
