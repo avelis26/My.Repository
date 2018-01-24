@@ -35,6 +35,7 @@ Try {
 	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\gpink003\Documents\Secrets\gpink003.cred")
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'gpink003@7-11.com', $password
 	Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
+	Write-Output "Starting $server... please wait..."
 	Start-AzureRmVM -ResourceGroupName $resourceGroup -Name $server
 	$params = @{
 		SmtpServer = $smtpServer;
@@ -46,6 +47,7 @@ Try {
 		Body = "Have a nice day."
 	}
 	Send-MailMessage @params
+	Write-Output "$server is now on, have a nice day :)"
 }
 Catch {
 	Write-Error -Message 'Something bad happened!!!' -Exception $($Error[0].Exception)
