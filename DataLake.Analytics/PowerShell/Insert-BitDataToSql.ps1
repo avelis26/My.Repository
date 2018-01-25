@@ -1,4 +1,4 @@
-# Init  --  v1.0.1.5
+# Init  --  v1.0.2.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -119,7 +119,7 @@ Function Split-FilesAmongFolders {
 		If ($(Test-Path -Path $dirPath) -eq $false) {
 			$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			#Add-Content -Value $message -Path $opsLog
 			New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
 		}
 		Else {
@@ -187,7 +187,7 @@ Function Convert-BitFilesToCsv {
 		If ($(Test-Path -Path $outputPath) -eq $false) {
 			$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			#Add-Content -Value $message -Path $opsLog
 			New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
 		}
 		$block = {
@@ -256,7 +256,7 @@ Function Add-CsvsToSql {
 				$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
 				Return $timeStamp
 			}
-			$errLogFile = $args[0] + $args[1] + '_' + $args[11] + '_BCP_Error.log'
+			$errLogFile = $args[0] + $args[1] + '_' + $args[10] + '_BCP_Error.log'
 			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
 			$message = "$(Create-TimeStamp)  $command"
 			Start-Sleep -Seconds $(Get-Random -Minimum 1.0 -Maximum 3.9)
@@ -265,8 +265,19 @@ Function Add-CsvsToSql {
 			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
 			Add-Content -Value $message -Path $($args[9])
 		}
-		Start-Job -ScriptBlock $block -ArgumentList "$errLogRoot", "$($file.BaseName)", "$table", "$($file.FullName)", "$server", "$database", "$sqlUser", "$sqlPass", "$formatFile", "$opsLog", "$($file.Directory.Name)"
-		Start-Sleep -Seconds 5
+		Start-Job -ScriptBlock $block -ArgumentList `
+		"$errLogRoot", ` #0
+		"$($file.BaseName)", ` #1
+		"$table", ` #2
+		"$($file.FullName)", ` #3
+		"$server", ` #4
+		"$database", ` #5
+		"$sqlUser", ` #6
+		"$sqlPass", ` #7
+		"$formatFile", ` #8
+		"$opsLog", ` #9
+		"$($file.Directory.Name)" #10
+		Start-Sleep -Seconds 1
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
