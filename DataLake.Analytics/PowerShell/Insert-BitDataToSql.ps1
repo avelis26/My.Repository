@@ -495,10 +495,13 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			To = $emailList;
 			BodyAsHtml = $true;
 			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = @"
-Something bad happened!!!
-$($Error[0].Exception.ToString())
-$($Error[0].CategoryInfo.ToString())
+		Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+<br>
+Error:  $($Error[0].Exception.Message)<br>
+</font>
 "@
 		}
 		Send-MailMessage @params
