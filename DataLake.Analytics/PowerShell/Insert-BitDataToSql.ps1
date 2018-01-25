@@ -1,4 +1,4 @@
-# Init  --  v1.0.1.4
+# Init  --  v1.0.1.5
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -15,7 +15,10 @@
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+######################################################
+## create failure email list and add megan and ravi ##
+######################################################
 ##   Enter $true for verbose information output, $false faster speed:
 [bool]$global:verbose = $false
 #######################################################################################################
