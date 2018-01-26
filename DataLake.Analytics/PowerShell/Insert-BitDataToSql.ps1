@@ -1,4 +1,4 @@
-# Init  --  v1.0.2.1
+# Init  --  v1.0.2.2
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -454,6 +454,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 "@
 			}
 			Send-MailMessage @params
+			Start-Sleep -Seconds 3
 		}
 	}
 	Catch [System.DirectoryNotFoundException] {
