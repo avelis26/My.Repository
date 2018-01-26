@@ -1,4 +1,4 @@
-# Init  --  v1.0.2.0
+# Init  --  v1.0.2.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -107,7 +107,11 @@ Function Split-FilesAmongFolders {
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
 	$files = Get-ChildItem -Path $inFolder -File -ErrorAction Stop
-	$message = "$(Create-TimeStamp)  Found $($files.Count) number of files..."
+	$message = "$(Create-TimeStamp)  Found $($files.Count) total files..."
+	Write-Verbose -Message $message
+	Add-Content -Value $message -Path $opsLog
+	$emptyfiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 1500}
+	$message = "$(Create-TimeStamp)  Found $($emptyfiles.Count) EMPTY files..."
 	Write-Verbose -Message $message
 	Add-Content -Value $message -Path $opsLog
 	$i = 1
