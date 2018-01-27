@@ -201,7 +201,7 @@ SELECT						[th].[RecordId],
 							[th].[TransactionSequence],
 							[th].[RewardMemberID],
 							[th].[Header_Id]
-FROM						[dbo].[stg_TXNHeader_121]	AS					[th]
+FROM						[dbo].[prod_121_Headers]	AS					[th]
 WHERE						[th].[StartDate]			>=					@StartDate
 AND							[th].[EndDate]				<=					@EndDate
 
