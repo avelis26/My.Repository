@@ -85,4 +85,3 @@ SELECT							[ProductMaster_Id],
 								[Created_Dttm]
 FROM							[dbo].[TRNS_ProductMaster]
 WHERE							[Depart_Cd]						NOT IN			('340202', '340101', '341003', '340821', '341103')
-GO
