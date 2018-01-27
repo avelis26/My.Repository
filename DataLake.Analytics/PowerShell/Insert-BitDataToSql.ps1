@@ -1,4 +1,4 @@
-# Init  --  v1.0.3.0
+# Init  --  v1.1.0.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -349,8 +349,10 @@ $global:table = $null
 $global:file = $null
 $global:fileCount = $null
 $global:emptyFileList = $null
+$global:storeCountResults = $null
 $i = 0
-Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
+Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+Import-Module SqlServer -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
 $password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
@@ -422,25 +424,53 @@ If ($continue -eq 'y') {
 				Verbose = $verbose;
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
+# Count stores by day in stg header table
+			$sqlStgToProdParams = @{
+				query = "SELECT CAST([EndDate] AS char(10)) AS [EndDate], COUNT(DISTINCT([StoreNumber])) AS [StoreCount] FROM [dbo].[stg_121_Headers] GROUP BY [EndDate] ORDER BY [EndDate] DESC";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+			}
+			$storeCountResults = Invoke-Sqlcmd @sqlStgToProdParams
+			$storeCountHtml = "<style>
+			table {
+				font-family: consolas;
+				border-collapse: collapse;
+			}
+			td, th {
+				border: 1px solid #dddddd;
+				text-align: left;
+				padding: 8px;
+			}
+			tr:nth-child(even) {
+				background-color: #dddddd;
+			}
+			</style>
+			<table>";
+			$storeCountHtml += "<tr><th>EndDate</th><th>StoreCount</th></tr>"
+			$j = 0
+			While ($j -lt $($storeCountResults.EndDate.Count)) {
+				$storeCountHtml += "<tr><td>$($storeCountResults.EndDate.Get($j))</td><td>$($storeCountResults.StoreCount.Get($j))</td></tr>"
+				$j++
+			}
+			$storeCountHtml += "</table>"
+			$t = 0
+			While ($t -lt $($storeCountResults.EndDate.Count)) {
+				Add-Content -Value "$($storeCountResults.EndDate.Get($t))  |  $($storeCountResults.StoreCount.Get($t))" -Path $opsLog
+				$t++
+			}
 # Move data in DB from stg to prod
-			$serverString = "Server=tcp:$sqlServer,1433;"
-			$catalogString = "Initial Catalog=$database;"
-			$secInfoString = 'Persist Security Info=False;'
-			$userString = "User ID=$sqlUser;"
-			$passString = "Password=$sqlPass;"
-			$setsString = 'MultipleActiveResultSets=False;'
-			$encryptString = 'Encrypt=True;'
-			$certString = 'TrustServerCertificate=True;'
-			$connectionString = $serverString + $catalogString + $secInfoString + $userString + $passString + $setsString + $encryptString + $certString
-			$sqlConnection = New-Object System.Data.SqlClient.SqlConnection
-			$sqlConnection.ConnectionString = $connectionString
-			$sqlConnection.Open()
-			$sqlCommand = New-Object System.Data.SqlClient.SqlCommand
-			$sqlCommand.Connection = $sqlConnection
-			$sqlCommand.CommandText= "EXECUTE [dbo].[usp_Move_STG_To_PROD]"
-			$sqlCommand.CommandTimeout = 0
-			$sqlCommand.ExecuteNonQuery()
-			$sqlConnection.Close()
+			$sqlStgToProdParams = @{
+				query = "EXECUTE [dbo].[usp_Move_STG_To_PROD]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+			}
+			Invoke-Sqlcmd @sqlStgToProdParams
 # Send report
 			$endTime = Get-Date
 			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
@@ -498,7 +528,9 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message9<br>
 				<br>
 				<br>
-				$emptyFileList
+				$storeCountHtml
+				<br>
+				$emptyFileList<br>
 </font>
 "@
 			}
