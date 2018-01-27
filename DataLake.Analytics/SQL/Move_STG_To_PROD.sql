@@ -51,9 +51,7 @@ SELECT
 								[TransactionSequence],
 								[RewardMemberID]
 FROM							[dbo].[stg_121_Headers]
-GO
 TRUNCATE TABLE					[dbo].[stg_121_Headers]
-GO
 INSERT INTO						[dbo].[prod_122_Details]
 (
 								[RecordID],
@@ -111,9 +109,7 @@ SELECT
 								[HostItemId],
 								[CouponCount]						
 FROM							[dbo].[stg_122_Details]
-GO
 TRUNCATE TABLE					[dbo].[stg_122_Details]
-GO
 INSERT INTO						[dbo].[prod_124_Media]
 (
 								[RecordId],
@@ -153,6 +149,4 @@ SELECT
 								[ExchangeRate],
 								[ForeignAmount]
 FROM							[dbo].[stg_124_Media]
-GO
 TRUNCATE TABLE					[dbo].[stg_124_Media]
-GO
