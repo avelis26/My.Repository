@@ -1,4 +1,4 @@
-# Init  --  v1.0.2.2
+# Init  --  v1.0.3.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -106,14 +106,22 @@ Function Split-FilesAmongFolders {
 		[string]$inFolder, # H:\BIT_CRM\20171216\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	$global:fileCount = $null
+	$global:emptyFileCount = $null
+	$global:emptyFileList = @{}
 	$files = Get-ChildItem -Path $inFolder -File -ErrorAction Stop
-	$message = "$(Create-TimeStamp)  Found $($files.Count) total files..."
+	$emptyFiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 1500}
+	$global:fileCount = $files.Count.ToString()
+	$global:emptyFileCount = $emptyFiles.Count.ToString()
+	$message = "$(Create-TimeStamp)  Found $fileCount total files..."
 	Write-Verbose -Message $message
 	Add-Content -Value $message -Path $opsLog
-	$emptyfiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 1500}
-	$message = "$(Create-TimeStamp)  Found $($emptyfiles.Count) EMPTY files..."
+	$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
 	Write-Verbose -Message $message
 	Add-Content -Value $message -Path $opsLog
+	ForEach ($emptyFile in $emptyFiles) {
+		$global:emptyFileList += $emptyFile.BaseName
+	}
 	$i = 1
 	$count = 5
 	$folderPreFix = 'bucket_'
@@ -331,9 +339,11 @@ $global:user = $userName + '@7-11.com'
 $global:dataLakeSearchPathRoot = '/BIT_CRM/'
 $global:dataLakeStoreName = '711dlprodcons01'
 $global:extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
+$global:table = $null
+$global:file = $null
+$global:fileCount = $null
+$global:emptyFileList = $null
 $i = 0
-$table = $null
-$file = $null
 Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm and 7Zip module..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip -ErrorAction Stop
@@ -417,6 +427,8 @@ If ($continue -eq 'y') {
 			$message5 = "File Processing-----:  $($exeTime.Hours.ToString("00")) hours $($exeTime.Minutes.ToString("00")) minutes $($exeTime.Seconds.ToString("00")) seconds"
 			$message6 = "Insert To SQL DB----:  $($insTime.Hours.ToString("00")) hours $($insTime.Minutes.ToString("00")) minutes $($insTime.Seconds.ToString("00")) seconds"
 			$message7 = "Total Run Time------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
+			$message8 = "Total File Count----:  $fileCount"
+			$message9 = "Empty File Count----:  $emptyFileCount"
 			Write-Output $message1
 			Write-Output $message2
 			Write-Output $message3
@@ -450,11 +462,25 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message5<br>
 				$message6<br>
 				$message7<br>
+				$message8<br>
+				$message9<br>
+				<br>
+				<br>
+				$emptyFileList
 </font>
 "@
 			}
 			Send-MailMessage @params
-			Start-Sleep -Seconds 3
+			Write-Output "Starting next day in 5..."
+			Start-Sleep -Seconds 1
+			Write-Output "4..."
+			Start-Sleep -Seconds 1
+			Write-Output "3..."
+			Start-Sleep -Seconds 1
+			Write-Output "2..."
+			Start-Sleep -Seconds 1
+			Write-Output "1..."
+			Start-Sleep -Seconds 1
 		}
 	}
 	Catch [System.DirectoryNotFoundException] {
