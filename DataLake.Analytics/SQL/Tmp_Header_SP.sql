@@ -155,12 +155,11 @@ CREATE TABLE				[dbo].[tmp_header_table]	(
 							[TransactionCode]			[int]				NULL,
 							[TransactionSequence]		[int]				NULL,
 							[RewardMemberID]			[varchar](20)		NULL,
-							[Header_Id]					[int] IDENTITY(1,1)	NOT NULL)
+							[Header_Id]					[int]				NOT NULL)
 ON							[Ps_EndDate_By_Day]			([EndDate])
 
 -- insert data to tmp table from prod table to have a smaller subset of data to query against
 
-SET IDENTITY_INSERT			[dbo].[tmp_header_table]	ON
 INSERT INTO					[dbo].[tmp_header_table]	(
 							[RecordId],
 							[StoreNumber],
@@ -202,7 +201,7 @@ SELECT						[th].[RecordId],
 							[th].[TransactionSequence],
 							[th].[RewardMemberID],
 							[th].[Header_Id]
-FROM						[dbo].[stg_TXNHeader_121]	AS					th
+FROM						[dbo].[stg_TXNHeader_121]	AS					[th]
 WHERE						[th].[StartDate]			>=					@StartDate
 AND							[th].[EndDate]				<=					@EndDate
 
@@ -221,9 +220,8 @@ ON							[dbo].[tmp_header_table]	(
 							[TransactionUID]			ASC
 														)
 WITH						(
-							STATISTICS_NORECOMPUTE = OFF,
-							DROP_EXISTING = OFF,
-							ONLINE = OFF
+							STATISTICS_NORECOMPUTE		= OFF,
+							DROP_EXISTING				= OFF,
+							ONLINE						= OFF
 							)
 ON							[Ps_EndDate_By_Day]			([EndDate]);
-GO
