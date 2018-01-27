@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\agg1.sql" />
+    <Content Include="SQL\Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_stg_CouponSalesDetails_410.sql" />
     <Content Include="SQL\Create_stg_CouponSales_409.sql" />
     <Content Include="SQL\Create_stg_PromoSalesDetails_137.sql" />
