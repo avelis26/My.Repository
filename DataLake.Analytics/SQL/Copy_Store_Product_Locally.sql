@@ -8,19 +8,14 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Copy_Store_Product_Locally]
 AS
 SET NOCOUNT ON
-GO
 SET ANSI_NULLS ON
-GO
 SET QUOTED_IDENTIFIER ON
-GO
-TRUNCATE TABLE					[dbo].[ext_productTable] 
-GO
+TRUNCATE TABLE					[dbo].[ext_productTable]
 TRUNCATE TABLE					[dbo].[ext_storeTable]
-GO
 INSERT INTO						[dbo].[ext_storeTable]
 SELECT							[SM].*,
 								[CA].[Country_Cd]
-FROM							[dbo].[STOR_Master]								AS							[SM] 
+FROM							[dbo].[STOR_Master]								AS							[SM]
 INNER JOIN						[dbo].[COMN_Address]							AS							[CA]
 ON								[SM].[PhysicalAddress_Id]		=				[CA].[Address_Id]
 WHERE							(
@@ -89,5 +84,5 @@ SELECT							[ProductMaster_Id],
 								[Modified_Dttm],
 								[Created_Dttm]
 FROM							[dbo].[TRNS_ProductMaster]
-WHERE							[Depart_Cd]						NOT IN			('340202', '340101', '341003', '340821', '341103')	
+WHERE							[Depart_Cd]						NOT IN			('340202', '340101', '341003', '340821', '341103')
 GO
