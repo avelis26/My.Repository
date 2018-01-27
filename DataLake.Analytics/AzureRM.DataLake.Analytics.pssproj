@@ -41,6 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\agg1.sql" />
+    <Content Include="SQL\Create_stg_CouponSalesDetails_410.sql" />
+    <Content Include="SQL\Create_stg_CouponSales_409.sql" />
+    <Content Include="SQL\Create_stg_PromoSalesDetails_137.sql" />
+    <Content Include="SQL\Create_stg_PromoSales_136.sql" />
     <Content Include="SQL\Stg_Details_ID.sql" />
     <Content Include="XML\format121.xml" />
     <Content Include="XML\format122.xml" />

@@ -64,14 +64,18 @@ Function Get-DataLakeRawFiles {
 	[CmdletBinding()]
 	Param(
 		[string]$dataLakeSearchPath, # /BIT_CRM/20171216
-		[string]$destinationRootPath, # H:\BIT_CRM\20171216
+		[string]$destinationRootPath, # H:\BIT_CRM\20171216\
 		[string]$dataLakeStoreName, # 711dlprodcons01
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
 	Try {
-		$message = "$(Create-TimeStamp)  Getting list of files in $dataLakeSearchPath ..."
+		$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
 		Write-Verbose -Message $message
 		Set-Content -Value $message -Path $opsLog
+		Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop
+		$message = "$(Create-TimeStamp)  Getting list of files in $dataLakeSearchPath ..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog
 		$getParams = @{
 			Account = $dataLakeStoreName;
 			Path = $dataLakeSearchPath;
@@ -79,7 +83,7 @@ Function Get-DataLakeRawFiles {
 		}
 		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
 		If ($dataLakeFolder -eq $null) {
-			throw [DirectoryNotFoundException] "$dataLakeSearchPath NOT FOUND!!!"
+			throw [System.IO.DirectoryNotFoundException] "$dataLakeSearchPath NOT FOUND!!!"
 		}
 		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
 		Write-Verbose -Message $message
@@ -483,7 +487,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Start-Sleep -Seconds 1
 		}
 	}
-	Catch [System.DirectoryNotFoundException] {
+	Catch [System.IO.DirectoryNotFoundException] {
 		Write-Error -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
 		$params = @{
