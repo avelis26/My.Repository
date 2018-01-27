@@ -69,10 +69,12 @@ Function Get-DataLakeRawFiles {
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
 	Try {
-		$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
-		Write-Verbose -Message $message
-		Set-Content -Value $message -Path $opsLog
-		Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop
+		If ($(Test-Path -Path $destinationRootPath) -eq $true) {
+			$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
+			Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop | Out-Null
+		}
 		$message = "$(Create-TimeStamp)  Getting list of files in $dataLakeSearchPath ..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
@@ -286,7 +288,7 @@ Function Add-CsvsToSql {
 		"$($file.BaseName)", ` #1
 		"$table", ` #2
 		"$($file.FullName)", ` #3
-		"$server", ` #4
+		"$sqlServer", ` #4
 		"$database", ` #5
 		"$sqlUser", ` #6
 		"$sqlPass", ` #7
@@ -338,7 +340,7 @@ $global:fromAddr = 'noreply@7-11.com'
 $global:database = '7ELE'
 $global:sqlUser = 'sqladmin'
 $global:sqlPass = 'Password20!7!'
-$global:server = 'mstestsqldw.database.windows.net'
+$global:sqlServer = 'mstestsqldw.database.windows.net'
 $global:user = $userName + '@7-11.com'
 $global:dataLakeSearchPathRoot = '/BIT_CRM/'
 $global:dataLakeStoreName = '711dlprodcons01'
@@ -380,6 +382,9 @@ If ($continue -eq 'y') {
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$global:processDate = $year + $month + $day
 			$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
+			$message = "$(Create-TimeStamp)  Range: $startDate - $endDate ..."
+			Write-Verbose -Message $message
+			Set-Content -Value $message -Path $opsLog
 			$getDataLakeRawFilesParams = @{
 				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
@@ -407,7 +412,7 @@ If ($continue -eq 'y') {
 				Verbose = $verbose;
 			}
 			Convert-BitFilesToCsv @convertBitFilesToCsvParams
-# Insert CSV's to DB
+# Insert CSV's to DB (stg tables)
 			$milestone_3 = Get-Date
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
 			$addCsvsToSqlParams = @{
@@ -417,7 +422,26 @@ If ($continue -eq 'y') {
 				Verbose = $verbose;
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
-			$i++
+# Move data in DB from stg to prod
+			$serverString = "Server=tcp:$sqlServer,1433;"
+			$catalogString = "Initial Catalog=$database;"
+			$secInfoString = 'Persist Security Info=False;'
+			$userString = "User ID=$sqlUser;"
+			$passString = "Password=$sqlPass;"
+			$setsString = 'MultipleActiveResultSets=False;'
+			$encryptString = 'Encrypt=True;'
+			$certString = 'TrustServerCertificate=True;'
+			$connectionString = $serverString + $catalogString + $secInfoString + $userString + $passString + $setsString + $encryptString + $certString
+			$sqlConnection = New-Object System.Data.SqlClient.SqlConnection
+			$sqlConnection.ConnectionString = $connectionString
+			$sqlConnection.Open()
+			$sqlCommand = New-Object System.Data.SqlClient.SqlCommand
+			$sqlCommand.Connection = $sqlConnection
+			$sqlCommand.CommandText= "EXECUTE [dbo].[usp_Move_STG_To_PROD]"
+			$sqlCommand.CommandTimeout = 0
+			$sqlCommand.ExecuteNonQuery()
+			$sqlConnection.Close()
+# Send report
 			$endTime = Get-Date
 			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
 			$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
@@ -440,6 +464,8 @@ If ($continue -eq 'y') {
 			Write-Output $message5
 			Write-Output $message6
 			Write-Output $message7
+			Write-Output $message8
+			Write-Output $message9
 			Add-Content -Value $message1 -Path $opsLog
 			Add-Content -Value $message2 -Path $opsLog
 			Add-Content -Value $message3 -Path $opsLog
@@ -447,6 +473,8 @@ If ($continue -eq 'y') {
 			Add-Content -Value $message5 -Path $opsLog
 			Add-Content -Value $message6 -Path $opsLog
 			Add-Content -Value $message7 -Path $opsLog
+			Add-Content -Value $message8 -Path $opsLog
+			Add-Content -Value $message9 -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
@@ -485,6 +513,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Start-Sleep -Seconds 1
 			Write-Output "1..."
 			Start-Sleep -Seconds 1
+			$i++
 		}
 	}
 	Catch [System.IO.DirectoryNotFoundException] {
@@ -534,8 +563,8 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 	}
 	Catch {
 		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
-		Add-Content -Value $($Error[0].CategoryInfo.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
