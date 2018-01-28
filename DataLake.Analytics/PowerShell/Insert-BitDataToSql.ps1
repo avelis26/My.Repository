@@ -1,11 +1,11 @@
-# Init  --  v1.2.0.0
+# Init  --  v1.2.0.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-26-2018'
-[string]$global:endDate   = '01-26-2018'
+[string]$global:startDate = '01-25-2018'
+[string]$global:endDate   = '01-25-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -75,7 +75,7 @@ Function Get-DataLakeRawFiles {
 			Add-Content -Value $message -Path $opsLog
 			Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop | Out-Null
 		}
-		$message = "$(Create-TimeStamp)  Getting list of files in $dataLakeSearchPath ..."
+		$message = "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
 		$getParams = @{
@@ -167,7 +167,6 @@ Function Split-FilesAmongFolders {
 			$movePath = $inFolder + $folderPreFix + '5'
 		}
 		Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
-		Write-Verbose -Message $i
 		$i++
 	}
 	$folders = Get-ChildItem -Path $inFolder -Directory
@@ -229,6 +228,9 @@ Function Add-CsvsToSql {
 		[string]$errLogRoot, # H:\BCP_Errors\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	###################################################
+	## Add logic to check bcp error file for content ##
+	###################################################
 	ForEach ($file in $structuredFiles) {
 		If ($file.Name -like "*D1_121*") {
 			$table = $table121
