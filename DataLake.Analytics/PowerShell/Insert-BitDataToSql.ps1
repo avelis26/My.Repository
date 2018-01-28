@@ -1,4 +1,4 @@
-# Init  --  v1.1.1.0
+# Init  --  v1.1.1.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -481,6 +481,10 @@ If ($continue -eq 'y') {
 			Invoke-Sqlcmd @sqlStgToProdParams
 # Send report
 			$endTime = Get-Date
+			$htmlEmptyFileList = @()
+			ForEach ($item in $emptyFileList) {
+				$htmlEmptyFileList += $item + '<br>'
+			}
 			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
 			$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 			$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
@@ -530,7 +534,7 @@ If ($continue -eq 'y') {
 				From = $fromAddr;
 				To = $emailList;
 				BodyAsHtml = $true;
-				Subject = "BITC Finished Processing and Inserting $processDate";
+				Subject = "BITC: Finished Processing and Inserting Files From The $processDate Folder";
 				Body = @"
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
 <br>
@@ -548,9 +552,11 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$messageZ<br>
 				<br>
 				<br>
+				Store Count By Day:<br>
 				$storeCountHtml
 				<br>
-				$emptyFileList
+				Empty File List:<br>
+				$htmlEmptyFileList<br>
 </font>
 "@
 			}
