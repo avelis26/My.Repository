@@ -1,4 +1,4 @@
-# Init  --  v1.1.1.1
+# Init  --  v1.2.0.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -277,7 +277,7 @@ Function Add-CsvsToSql {
 			$errLogFile = $args[0] + $args[1] + '_' + $args[10] + '_BCP_Error.log'
 			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
 			$message = "$(Create-TimeStamp)  $command"
-			Start-Sleep -Seconds $(Get-Random -Minimum 1.0 -Maximum 3.9)
+			Start-Sleep -Milliseconds $(Get-Random -Minimum 128 -Maximum 512)
 			Add-Content -Value $message -Path $($args[9])
 			$result = Invoke-Expression -Command $command
 			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
@@ -295,7 +295,6 @@ Function Add-CsvsToSql {
 		"$formatFile", ` #8
 		"$opsLog", ` #9
 		"$($file.Directory.Name)" #10
-		Start-Sleep -Milliseconds 64
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
@@ -424,11 +423,41 @@ If ($continue -eq 'y') {
 				Verbose = $verbose;
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
-# Count stores by day in stg header table
+# Count stores by day in stg header table and compare rows in database to rows in files
 			$milestone_4 = Get-Date
-			$message = "$(Create-TimeStamp)  Store Count By Day:"
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			$block1 = {
+				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*121*"}
+				$total = 0
+				ForEach ($file in $files) {
+					$count = 0
+					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
+					$total = $total + $count
+				}
+				Return $total
+			}
+			$block2 = {
+				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*122*"}
+				$total = 0
+				ForEach ($file in $files) {
+					$count = 0
+					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
+					$total = $total + $count
+				}
+				Return $total
+			}
+			$block3 = {
+				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*124*"}
+				$total = 0
+				ForEach ($file in $files) {
+					$count = 0
+					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
+					$total = $total + $count
+				}
+				Return $total
+			}
+			$job121 = Start-Job -ScriptBlock $block1
+			$job122 = Start-Job -ScriptBlock $block2
+			$job124 = Start-Job -ScriptBlock $block3
 			$sqlStgToProdParams = @{
 				query = "SELECT CAST([EndDate] AS char(10)) AS [EndDate], COUNT(DISTINCT([StoreNumber])) AS [StoreCount] FROM [dbo].[stg_121_Headers] GROUP BY [EndDate] ORDER BY [EndDate] DESC";
 				ServerInstance = $sqlServer;
@@ -460,10 +489,55 @@ If ($continue -eq 'y') {
 				$j++
 			}
 			$storeCountHtml += "</table>"
+			$message = "Store Count By Day:"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			$t = 0
 			While ($t -lt $($storeCountResults.EndDate.Count)) {
 				Add-Content -Value "$($storeCountResults.EndDate.Get($t))  |  $($storeCountResults.StoreCount.Get($t))" -Path $opsLog
 				$t++
+			}
+			$sql121Params = @{
+				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_121_Headers]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+			}
+			$121CountResults = Invoke-Sqlcmd @sql121Params
+			$sql122Params = @{
+				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_122_Details]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+			}
+			$122CountResults = Invoke-Sqlcmd @sql122Params
+			$sql124Params = @{
+				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_124_Media]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+			}
+			$124countResults = Invoke-Sqlcmd @sql124Params
+			Get-Job | Wait-Job
+			$121count = $(Receive-Job $job121) - 5
+			$122count = $(Receive-Job $job122) - 5
+			$124count = $(Receive-Job $job124) - 5
+			Get-Job | Remove-Job
+			$totalFileRowCount = $121count + $122count + $124count
+			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count) + $($124countResults.Count)
+			If ($totalFileRowCount -ne $totalSqlRowCount) {
+				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
+			}
+			Else {
+				$message = "$(Create-TimeStamp)  Total File Rows: $totalFileRowCount  |  Total DB Rows: $totalSqlRowCount"
+				Write-Verbose -Message $message
+				Add-Content -Value $message -Path $opsLog
 			}
 # Move data in DB from stg to prod
 			$milestone_5 = Get-Date
@@ -479,6 +553,9 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 			}
 			Invoke-Sqlcmd @sqlStgToProdParams
+			$message = "$(Create-TimeStamp)  Move complete!"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 # Send report
 			$endTime = Get-Date
 			$htmlEmptyFileList = @()
@@ -502,7 +579,8 @@ If ($continue -eq 'y') {
 			$message7 = "Move Data To Prod----:  $($movTime.Hours.ToString("00")) hours $($movTime.Minutes.ToString("00")) minutes $($movTime.Seconds.ToString("00")) seconds"
 			$message8 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
 			$message9 = "Total File Count-----:  $fileCount"
-			$messageZ = "Empty File Count-----:  $emptyFileCount"
+			$messageX = "Empty File Count-----:  $emptyFileCount"
+			$messageY = "Total Row Count------:  $totalFileRowCount"
 			Write-Output $message0
 			Write-Output $message1
 			Write-Output $message2
@@ -513,7 +591,8 @@ If ($continue -eq 'y') {
 			Write-Output $message7
 			Write-Output $message8
 			Write-Output $message9
-			Write-Output $messageZ
+			Write-Output $messageX
+			Write-Output $messageY
 			Write-Output $emptyFileList
 			Add-Content -Value $message0 -Path $opsLog
 			Add-Content -Value $message1 -Path $opsLog
@@ -525,7 +604,8 @@ If ($continue -eq 'y') {
 			Add-Content -Value $message7 -Path $opsLog
 			Add-Content -Value $message8 -Path $opsLog
 			Add-Content -Value $message9 -Path $opsLog
-			Add-Content -Value $messageZ -Path $opsLog
+			Add-Content -Value $messageX -Path $opsLog
+			Add-Content -Value $messageY -Path $opsLog
 			Add-Content -Value $emptyFileList -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
@@ -549,7 +629,8 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message7<br>
 				$message8<br>
 				$message9<br>
-				$messageZ<br>
+				$messageX<br>
+				$messageY<br>
 				<br>
 				<br>
 				Store Count By Day:<br>
@@ -574,6 +655,27 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			$i++
 		}
 	}
+	Catch [System.InvalidOperationException] {
+		Write-Error -Exception $Error[0].Exception
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $emailList;
+			BodyAsHtml = $true;
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
+<font face='consolas'>
+File row count doesn't match database row count!!! Please check the ops log!!!<br><br>
+<br>
+Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
+		}
+		Send-MailMessage @params
+	}
 	Catch [System.IO.DirectoryNotFoundException] {
 		Write-Error -Exception $Error[0].Exception
 		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
@@ -584,8 +686,15 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+<br>
+Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
 		}
 		Send-MailMessage @params
 	}
@@ -599,8 +708,15 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+<br>
+Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
 		}
 		Send-MailMessage @params
 	}
@@ -614,8 +730,15 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-			Body = "$($Error[0].Exception)"
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+<br>
+Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
 		}
 		Send-MailMessage @params
 	}
@@ -630,8 +753,8 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "ERROR:: BITC FAILED For Range: $startDate - $endDate!!!";
-		Body = @"
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
 <font face='consolas'>
 Something bad happened!!!<br><br>
 Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
