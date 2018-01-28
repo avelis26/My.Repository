@@ -1,11 +1,11 @@
-# Init  --  v1.1.0.0
+# Init  --  v1.1.1.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-16-2018'
-[string]$global:endDate   = '01-19-2018'
+[string]$global:startDate = '01-27-2018'
+[string]$global:endDate   = '01-27-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -25,11 +25,11 @@
 #######################################################################################################
 ##   Enter the table names you would like the data inserted to by transaction type:
 ##   Trans Type D1 121
-[string]$global:table121 = 'stg_TXNHeader_121'
+[string]$global:table121 = 'stg_121_Headers'
 ##   Trans Type D1 122
-[string]$global:table122 = 'stg_TXNDetails_122'
+[string]$global:table122 = 'stg_122_Details'
 ##   Trans Type D1 124
-[string]$global:table124 = 'stg_Media_124'
+[string]$global:table124 = 'stg_124_Media'
 ##   Trans Type D1 136
 [string]$global:table136 = 'stg_PromoSales_136'
 ##   Trans Type D1 137
@@ -114,7 +114,7 @@ Function Split-FilesAmongFolders {
 	)
 	$global:fileCount = $null
 	$global:emptyFileCount = $null
-	$global:emptyFileList = @{}
+	$global:emptyFileList = @()
 	$files = Get-ChildItem -Path $inFolder -File -ErrorAction Stop
 	$emptyFiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 1500}
 	$global:fileCount = $files.Count.ToString()
@@ -126,7 +126,7 @@ Function Split-FilesAmongFolders {
 	Write-Verbose -Message $message
 	Add-Content -Value $message -Path $opsLog
 	ForEach ($emptyFile in $emptyFiles) {
-		$global:emptyFileList += $emptyFile.BaseName
+		$global:emptyFileList += $emptyFile.Name
 	}
 	$i = 1
 	$count = 5
@@ -295,7 +295,7 @@ Function Add-CsvsToSql {
 		"$formatFile", ` #8
 		"$opsLog", ` #9
 		"$($file.Directory.Name)" #10
-		Start-Sleep -Seconds 1
+		Start-Sleep -Milliseconds 64
 	}
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
@@ -309,10 +309,10 @@ Function Confirm-Run {
 	Write-Host "Table121      ::  $table121"
 	Write-Host "Table122      ::  $table122"
 	Write-Host "Table124      ::  $table124"
-	Write-Host "Table136      ::  $table136"
-	Write-Host "Table137      ::  $table137"
-	Write-Host "Table409      ::  $table409"
-	Write-Host "Table410      ::  $table410"
+#	Write-Host "Table136      ::  $table136"
+#	Write-Host "Table137      ::  $table137"
+#	Write-Host "Table409      ::  $table409"
+#	Write-Host "Table410      ::  $table410"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
@@ -351,27 +351,27 @@ $global:fileCount = $null
 $global:emptyFileList = $null
 $global:storeCountResults = $null
 $i = 0
-Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
-Import-Module SqlServer -ErrorAction Stop
-Import-Module AzureRM -ErrorAction Stop
-Import-Module 7Zip -ErrorAction Stop
-$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
-$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-Write-Verbose -Message "$(Create-TimeStamp)  Logging into Azure..."
-Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
-Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $destinationRootPath..."
-If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
-}
-Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $opsLogRootPath..."
-If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
-}
-Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $errLogRootPath..."
-If ($(Test-Path -Path $errLogRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
-}
 If ($continue -eq 'y') {
+	Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+	Import-Module SqlServer -ErrorAction Stop
+	Import-Module AzureRM -ErrorAction Stop
+	Import-Module 7Zip -ErrorAction Stop
+	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	Write-Verbose -Message "$(Create-TimeStamp)  Logging into Azure..."
+	Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
+	If ($(Test-Path -Path $destinationRootPath) -eq $false) {
+		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $destinationRootPath..."
+		New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $opsLogRootPath..."
+		New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $errLogRootPath) -eq $false) {
+		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $errLogRootPath..."
+		New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
+	}
 	Try {
 # Get raw files
 		$startDateObj = Get-Date -Date $startDate
@@ -384,7 +384,7 @@ If ($continue -eq 'y') {
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$global:processDate = $year + $month + $day
 			$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
-			$message = "$(Create-TimeStamp)  Range: $startDate - $endDate ..."
+			$message = "Range: $startDate - $endDate"
 			Write-Verbose -Message $message
 			Set-Content -Value $message -Path $opsLog
 			$getDataLakeRawFilesParams = @{
@@ -425,6 +425,10 @@ If ($continue -eq 'y') {
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
 # Count stores by day in stg header table
+			$milestone_4 = Get-Date
+			$message = "$(Create-TimeStamp)  Store Count By Day:"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			$sqlStgToProdParams = @{
 				query = "SELECT CAST([EndDate] AS char(10)) AS [EndDate], COUNT(DISTINCT([StoreNumber])) AS [StoreCount] FROM [dbo].[stg_121_Headers] GROUP BY [EndDate] ORDER BY [EndDate] DESC";
 				ServerInstance = $sqlServer;
@@ -462,6 +466,10 @@ If ($continue -eq 'y') {
 				$t++
 			}
 # Move data in DB from stg to prod
+			$milestone_5 = Get-Date
+			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			$sqlStgToProdParams = @{
 				query = "EXECUTE [dbo].[usp_Move_STG_To_PROD]";
 				ServerInstance = $sqlServer;
@@ -476,17 +484,22 @@ If ($continue -eq 'y') {
 			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
 			$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 			$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-			$insTime = New-TimeSpan -Start $milestone_3 -End $endTime
+			$insTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+			$couTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
+			$movTime = New-TimeSpan -Start $milestone_5 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message1 = "Start Time----------:  $($startTime.DateTime)"
-			$message2 = "End Time------------:  $($endTime.DateTime)"
-			$message3 = "Raw File Download---:  $($rawTime.Hours.ToString("00")) hours $($rawTime.Minutes.ToString("00")) minutes $($rawTime.Seconds.ToString("00")) seconds"
-			$message4 = "File Decompression--:  $($sepTime.Hours.ToString("00")) hours $($sepTime.Minutes.ToString("00")) minutes $($sepTime.Seconds.ToString("00")) seconds"
-			$message5 = "File Processing-----:  $($exeTime.Hours.ToString("00")) hours $($exeTime.Minutes.ToString("00")) minutes $($exeTime.Seconds.ToString("00")) seconds"
-			$message6 = "Insert To SQL DB----:  $($insTime.Hours.ToString("00")) hours $($insTime.Minutes.ToString("00")) minutes $($insTime.Seconds.ToString("00")) seconds"
-			$message7 = "Total Run Time------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
-			$message8 = "Total File Count----:  $fileCount"
-			$message9 = "Empty File Count----:  $emptyFileCount"
+			$message0 = "Start Time-----------:  $($startTime.DateTime)"
+			$message1 = "End Time-------------:  $($endTime.DateTime)"
+			$message2 = "Raw File Download----:  $($rawTime.Hours.ToString("00")) hours $($rawTime.Minutes.ToString("00")) minutes $($rawTime.Seconds.ToString("00")) seconds"
+			$message3 = "File Decompression---:  $($sepTime.Hours.ToString("00")) hours $($sepTime.Minutes.ToString("00")) minutes $($sepTime.Seconds.ToString("00")) seconds"
+			$message4 = "File Processing------:  $($exeTime.Hours.ToString("00")) hours $($exeTime.Minutes.ToString("00")) minutes $($exeTime.Seconds.ToString("00")) seconds"
+			$message5 = "Insert To SQL DB-----:  $($insTime.Hours.ToString("00")) hours $($insTime.Minutes.ToString("00")) minutes $($insTime.Seconds.ToString("00")) seconds"
+			$message6 = "Count Stores---------:  $($couTime.Hours.ToString("00")) hours $($couTime.Minutes.ToString("00")) minutes $($couTime.Seconds.ToString("00")) seconds"
+			$message7 = "Move Data To Prod----:  $($movTime.Hours.ToString("00")) hours $($movTime.Minutes.ToString("00")) minutes $($movTime.Seconds.ToString("00")) seconds"
+			$message8 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
+			$message9 = "Total File Count-----:  $fileCount"
+			$messageZ = "Empty File Count-----:  $emptyFileCount"
+			Write-Output $message0
 			Write-Output $message1
 			Write-Output $message2
 			Write-Output $message3
@@ -496,6 +509,9 @@ If ($continue -eq 'y') {
 			Write-Output $message7
 			Write-Output $message8
 			Write-Output $message9
+			Write-Output $messageZ
+			Write-Output $emptyFileList
+			Add-Content -Value $message0 -Path $opsLog
 			Add-Content -Value $message1 -Path $opsLog
 			Add-Content -Value $message2 -Path $opsLog
 			Add-Content -Value $message3 -Path $opsLog
@@ -505,6 +521,8 @@ If ($continue -eq 'y') {
 			Add-Content -Value $message7 -Path $opsLog
 			Add-Content -Value $message8 -Path $opsLog
 			Add-Content -Value $message9 -Path $opsLog
+			Add-Content -Value $messageZ -Path $opsLog
+			Add-Content -Value $emptyFileList -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
@@ -517,6 +535,7 @@ If ($continue -eq 'y') {
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
 <br>
 <font face='consolas'>
+				$message0<br>
 				$message1<br>
 				$message2<br>
 				$message3<br>
@@ -526,11 +545,12 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message7<br>
 				$message8<br>
 				$message9<br>
+				$messageZ<br>
 				<br>
 				<br>
 				$storeCountHtml
 				<br>
-				$emptyFileList<br>
+				$emptyFileList
 </font>
 "@
 			}
