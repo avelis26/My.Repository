@@ -1,4 +1,4 @@
-# Init  --  v1.2.1.3
+# Init  --  v1.2.1.4
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -627,7 +627,6 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message9<br>
 				$messageX<br>
 				$messageY<br>
-				<br>
 				<br>
 				Store Count By Day:<br>
 				$storeCountHtml
