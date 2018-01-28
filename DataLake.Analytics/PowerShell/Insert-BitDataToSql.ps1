@@ -1,4 +1,4 @@
-# Init  --  v1.2.0.1
+# Init  --  v1.2.1.2
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -417,6 +417,22 @@ If ($continue -eq 'y') {
 			Convert-BitFilesToCsv @convertBitFilesToCsvParams
 # Insert CSV's to DB (stg tables)
 			$milestone_3 = Get-Date
+			$message = "$(Create-TimeStamp)  Truncating staging tables..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
+			$sqlTruncateParams = @{
+				query = "TRUNCATE TABLE [dbo].[stg_121_Headers]; TRUNCATE TABLE [dbo].[stg_122_Details]; TRUNCATE TABLE [dbo].[stg_124_Media];";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+				ErrorAction = Stop;
+			}
+			Invoke-Sqlcmd @sqlTruncateParams
+			$message = "$(Create-TimeStamp)  Truncating staging tables successful"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
@@ -427,8 +443,8 @@ If ($continue -eq 'y') {
 			Add-CsvsToSql @addCsvsToSqlParams
 # Count stores by day in stg header table and compare rows in database to rows in files
 			$milestone_4 = Get-Date
-			$block1 = {
-				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*121*"}
+			$block = {
+				$files = Get-ChildItem -Recurse -File -Path $($args[0])
 				$total = 0
 				ForEach ($file in $files) {
 					$count = 0
@@ -437,29 +453,7 @@ If ($continue -eq 'y') {
 				}
 				Return $total
 			}
-			$block2 = {
-				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*122*"}
-				$total = 0
-				ForEach ($file in $files) {
-					$count = 0
-					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
-					$total = $total + $count
-				}
-				Return $total
-			}
-			$block3 = {
-				$files = Get-ChildItem -Recurse -File -Path $($destinationRootPath + $processDate + '\') | Where-Object -FilterScript {$_.Name -like "*124*"}
-				$total = 0
-				ForEach ($file in $files) {
-					$count = 0
-					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
-					$total = $total + $count
-				}
-				Return $total
-			}
-			$job121 = Start-Job -ScriptBlock $block1
-			$job122 = Start-Job -ScriptBlock $block2
-			$job124 = Start-Job -ScriptBlock $block3
+			$job121122124 = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')"
 			$sqlStgToProdParams = @{
 				query = "SELECT CAST([EndDate] AS char(10)) AS [EndDate], COUNT(DISTINCT([StoreNumber])) AS [StoreCount] FROM [dbo].[stg_121_Headers] GROUP BY [EndDate] ORDER BY [EndDate] DESC";
 				ServerInstance = $sqlServer;
@@ -467,6 +461,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
+				ErrorAction = Stop;
 			}
 			$storeCountResults = Invoke-Sqlcmd @sqlStgToProdParams
 			$storeCountHtml = "<style>
@@ -506,6 +501,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
+				ErrorAction = Stop;
 			}
 			$121CountResults = Invoke-Sqlcmd @sql121Params
 			$sql122Params = @{
@@ -515,6 +511,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
+				ErrorAction = Stop;
 			}
 			$122CountResults = Invoke-Sqlcmd @sql122Params
 			$sql124Params = @{
@@ -524,22 +521,18 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
+				ErrorAction = Stop;
 			}
 			$124countResults = Invoke-Sqlcmd @sql124Params
 			Get-Job | Wait-Job
-			$121count = $(Receive-Job $job121) - 5
-			$122count = $(Receive-Job $job122) - 5
-			$124count = $(Receive-Job $job124) - 5
+			$totalFileRowCount = $(Receive-Job $job121122124) - 15
 			Get-Job | Remove-Job
-			$totalFileRowCount = $121count + $122count + $124count
 			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count) + $($124countResults.Count)
+			$message = "$(Create-TimeStamp)  Total File Rows: $totalFileRowCount  |  Total DB Rows: $totalSqlRowCount"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			If ($totalFileRowCount -ne $totalSqlRowCount) {
 				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
-			}
-			Else {
-				$message = "$(Create-TimeStamp)  Total File Rows: $totalFileRowCount  |  Total DB Rows: $totalSqlRowCount"
-				Write-Verbose -Message $message
-				Add-Content -Value $message -Path $opsLog
 			}
 # Move data in DB from stg to prod
 			$milestone_5 = Get-Date
@@ -553,6 +546,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
+				ErrorAction = Stop;
 			}
 			Invoke-Sqlcmd @sqlStgToProdParams
 			$message = "$(Create-TimeStamp)  Move complete!"
