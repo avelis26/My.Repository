@@ -1,4 +1,4 @@
-# Init  --  v1.2.1.2
+# Init  --  v1.2.1.3
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -427,7 +427,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			Invoke-Sqlcmd @sqlTruncateParams
 			$message = "$(Create-TimeStamp)  Truncating staging tables successful"
@@ -461,7 +461,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			$storeCountResults = Invoke-Sqlcmd @sqlStgToProdParams
 			$storeCountHtml = "<style>
@@ -501,7 +501,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			$121CountResults = Invoke-Sqlcmd @sql121Params
 			$sql122Params = @{
@@ -511,7 +511,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			$122CountResults = Invoke-Sqlcmd @sql122Params
 			$sql124Params = @{
@@ -521,7 +521,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			$124countResults = Invoke-Sqlcmd @sql124Params
 			Get-Job | Wait-Job
@@ -546,7 +546,7 @@ If ($continue -eq 'y') {
 				Username = $sqlUser;
 				Password = $sqlPass;
 				QueryTimeout = 0;
-				ErrorAction = Stop;
+				ErrorAction = 'Stop';
 			}
 			Invoke-Sqlcmd @sqlStgToProdParams
 			$message = "$(Create-TimeStamp)  Move complete!"
