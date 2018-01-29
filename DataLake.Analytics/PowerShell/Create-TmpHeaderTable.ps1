@@ -1,13 +1,13 @@
 ##########################################
 ##########################################
-$global:end = '2018-01-21'
+$global:end = '2018-01-28'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\usp_Create_Tmp_Header_Table.log"
 $global:smtpServer = '10.128.1.125'
 $global:port = 25
 $global:fromAddr = 'noreply@7-11.com'
-$global:toAddr = 'graham.pinkston@ansira.com', 'scott.hall@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+$global:toAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 ##########################################
 ##########################################
 [DateTime]$endDate = Get-Date -Date $end
