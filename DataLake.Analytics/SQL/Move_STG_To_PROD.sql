@@ -8,7 +8,7 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Move_STG_To_PROD]
 AS
 SET NOCOUNT ON
-INSERT INTO						[dbo].[prod_121_Headers]
+INSERT INTO						[dbo].[CCI_121_Header]
 (
 								[RecordId],
 								[StoreNumber],

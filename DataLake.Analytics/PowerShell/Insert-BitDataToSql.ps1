@@ -1,4 +1,4 @@
-# Init  --  v1.2.1.5
+# Init  --  v1.2.1.6
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -186,6 +186,7 @@ Function Split-FilesAmongFolders {
 		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName)
 		Start-Sleep -Seconds 1
 	}
+	Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
 }
@@ -218,6 +219,7 @@ Function Convert-BitFilesToCsv {
 		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix"
 		Start-Sleep -Seconds 1
 	}
+	Write-Output "$(Create-TimeStamp)  Converting..."
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
 }
@@ -298,6 +300,7 @@ Function Add-CsvsToSql {
 		"$opsLog", ` #9
 		"$($file.Directory.Name)" #10
 	}
+	Write-Output "$(Create-TimeStamp)  Inserting..."
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job
 }
@@ -524,6 +527,7 @@ If ($continue -eq 'y') {
 				ErrorAction = 'Stop';
 			}
 			$124countResults = Invoke-Sqlcmd @sql124Params
+			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
 			Get-Job | Wait-Job
 			$totalFileRowCount = $(Receive-Job $job121122124) - 15
 			Get-Job | Remove-Job
@@ -548,6 +552,7 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
+			Write-Output "$(Create-TimeStamp)  Moving..."
 			Invoke-Sqlcmd @sqlStgToProdParams
 			$message = "$(Create-TimeStamp)  Move complete!"
 			Write-Verbose -Message $message
