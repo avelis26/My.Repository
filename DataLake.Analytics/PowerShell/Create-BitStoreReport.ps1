@@ -1,4 +1,4 @@
-# Init  --  v0.9.0.0
+# Init  --  v0.9.0.1
 ##########################################
 ##########################################
 $global:end = '2018-02-04'
@@ -262,10 +262,10 @@ Function Execute-LocalStoreAndProduct {
 <font face='consolas'>
 The results have been loaded into:<br>
 <br>
-Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-Database------------:  [7ELE]<br>
-Tables--------------:  [dbo].[ext_productTable]<br>
-                       [dbo].[ext_storeTable]<br>
+Server--------------:   [MsTestSqlDw.Database.Windows.Net]<br>
+Database------------:   [7ELE]<br>
+Tables--------------:   [dbo].[ext_productTable]<br>
+						[dbo].[ext_storeTable]<br>
 $message1<br>
 $message2<br>
 $message3<br>
