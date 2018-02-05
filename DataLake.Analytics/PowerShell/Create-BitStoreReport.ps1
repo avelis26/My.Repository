@@ -215,6 +215,66 @@ $message3<br>
 	}
 	Send-MailMessage @params
 }
+Function Execute-LocalStoreAndProduct {
+	$startTime = Get-Date
+	$message = "Updating Local Store And Product Tables"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = "Start Time: $(Get-Date)"
+	}
+	Send-MailMessage @params
+	$sqlSandPParams = @{
+		query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	$result = Invoke-Sqlcmd @sqlSandPParams
+	$message = "Store And Product Tables Updated Successfully"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+	$endTime = Get-Date
+	$spandObj = New-TimeSpan -Start $startTime -End $endTime
+	$message1 = "Start Time----------:  $($startTime.DateTime)"
+	$message2 = "End Time------------:  $($endTime.DateTime)"
+	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = @"
+<font face='consolas'>
+The results have been loaded into:<br>
+<br>
+Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
+Database------------:  [7ELE]<br>
+Tables--------------:  [dbo].[ext_productTable]<br>
+                       [dbo].[ext_storeTable]<br>
+$message1<br>
+$message2<br>
+$message3<br>
+<br>
+</font>
+"@
+	}
+	Send-MailMessage @params
+}
 # Init
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
@@ -242,6 +302,8 @@ If ($(Confirm-Run) -eq 'y') {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
+# Update local store and product tables
+		Execute-LocalStoreAndProduct
 # Create temp header table
 		Create-TempHeaderTable
 # Run agg1
