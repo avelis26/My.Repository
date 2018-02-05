@@ -633,7 +633,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$messageX<br>
 				$messageY<br>
 				<br>
-				Store Count By Day Found In $processDate Folder:<br>
+				Store Count By Day In Folder $processDate :<br>
 				$storeCountHtml
 				<br>
 				Empty File List:<br>
