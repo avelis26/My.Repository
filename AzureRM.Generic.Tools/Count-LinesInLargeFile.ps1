@@ -6,7 +6,7 @@ $total = 0
 ForEach ($file in $files) {
     $c = 0
     Write-Output "Processing file $file..."
-    Get-Content -Path $file -ReadCount 1000 | ForEach-Object {
+    Get-Content -Path $file -ReadCount 250000 | ForEach-Object {
         $c += $_.Count
     }
     $total += $c

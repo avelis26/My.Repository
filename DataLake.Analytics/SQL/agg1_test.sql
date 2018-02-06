@@ -1,27 +1,98 @@
+/****** Object:  StoredProcedure [dbo].[uspAggregateTables_agg1]    Script Date: 2/6/2018 10:38:23 AM ******/
 USE								[7ELE]
 GO
-IF EXISTS						(SELECT * FROM sys.procedures WHERE name = 'uspAggregateTables_agg1')
+IF EXISTS						(SELECT * FROM sys.procedures WHERE name = 'uspAggregateTables_agg1_test')
 BEGIN
-DROP PROCEDURE					[dbo].[uspAggregateTables_agg1]
+DROP PROCEDURE					[dbo].[uspAggregateTables_agg1_test]
 END
 GO
-CREATE PROCEDURE				[dbo].[uspAggregateTables_agg1]
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[uspAggregateTables_agg1_test]
 	@StartDate date,
 	@EndDate date
 AS
-SET ANSI_NULLS ON
-SET QUOTED_IDENTIFIER ON
 SET NOCOUNT ON
-TRUNCATE TABLE					[dbo].[Agg1_DaypartAggregate]
---Using the last header table created, join that with details table to get the columns from it
-IF EXISTS						(SELECT * FROM sys.tables WHERE name = 'tmp_query_data_joined')
+TRUNCATE TABLE [dbo].[Agg1_DaypartAggregate_Backup]
+TRUNCATE TABLE [dbo].[tmp_query_data_joined]
+
+
+
+
+
+
+IF EXISTS					(SELECT * FROM sys.tables WHERE name = 'tmp_query_data_joined_test')
 BEGIN
-DROP TABLE						[dbo].[tmp_query_data_joined]
+DROP TABLE					[dbo].[tmp_query_data_joined_test]
+CREATE TABLE				[dbo].[tmp_query_data_joined_test]		(
+							[RecordId]								[varchar](2)		NULL,
+							[StoreNumber]							[int] NULL,
+							[TransactionType]						[int] NOT NULL,
+							[DayNumber]								[int] NOT NULL,
+							[ShiftNumber]							[int] NOT NULL,
+							[TransactionUID]						[int] NOT NULL,
+							[Aborted]								[bit] NULL,
+							[DeviceNumber]							[int] NULL,
+							[DeviceType]							[int] NULL,
+							[EmployeeNumber]						[int] NULL,
+							[EndDate]								[date] NULL,
+							[EndTime]								[time](7) NULL,
+							[StartDate]								[date] NOT NULL,
+							[StartTime]								[time](7) NULL,
+							[Status]								[tinyint] NULL,
+							[TotalAmount]							[money] NULL,
+							[TransactionCode]						[int] NULL,
+							[TransactionSequence]					[int] NULL,
+							[RewardMemberID]						[varchar](20) NULL,
+							[Header_Id]								[int] NOT NULL,
+							[SequenceNumber]						[int] NULL,
+							[ProductNumber]							[int] NULL,
+							[PLUNumber]								[varchar](14) NULL,
+							[RecordAmount]							[money] NULL,
+							[RecordCount]							[int] NULL,
+							[RecordType]							[int] NULL,
+							[SizeIndx]								[int] NULL,
+							[ErrorCorrectionFlag]					[bit] NULL,
+							[PriceOverideFlag]						[bit] NULL,
+							[TaxableFlag]							[bit] NULL,
+							[VoidFlag]								[bit] NULL,
+							[RecommendedFlag]						[bit] NULL,
+							[PriceMultiple]							[int] NULL,
+							[CarryStatus]							[int] NULL,
+							[TaxOverideFlag]						[bit] NULL,
+							[PromotionCount]						[int] NULL,
+							[SalesPrice]							[money] NULL,
+							[MUBasePrice]							[money] NULL,
+							[HostItemId]							[varchar](20) NULL,
+							[CouponCount]							[int] NULL,
+							[Detail_Id]								[int] NOT NULL
+) ON [PRIMARY]
 END
 
-/* Disable Index */ 
---ALTER INDEX ALL ON tmp_query_data_joined
---DISABLE;	 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER INDEX ALL ON tmp_query_data_joined
+DISABLE;	 
 	
 insert into tmp_query_data_joined
 	select 
@@ -44,9 +115,7 @@ insert into tmp_query_data_joined
       ,[TransactionCode]
       ,[TransactionSequence]
       ,[RewardMemberID]
-      ,[Header_Id]
-
-	  
+      ,[Header_Id] 
       ,[SequenceNumber]
       ,[ProductNumber]
       ,[PLUNumber]
@@ -69,8 +138,8 @@ insert into tmp_query_data_joined
       ,[CouponCount]
       ,[Detail_Id]
   
-	from 
-	[dbo].[stg_TXNDetails_122] AS td
+  from 
+	[dbo].[prod_122_Details] AS td
 	 INNER JOIN tmp_header_table AS th
 		  ON td.StoreNumber = th.StoreNumber  
 		  AND td.DayNumber = th.DayNumber  
@@ -80,8 +149,8 @@ insert into tmp_query_data_joined
 
 /* Enable Index */ 
 --16.47 mins
---ALTER INDEX ALL ON tmp_query_data_joined
---REBUILD;	
+ALTER INDEX ALL ON tmp_query_data_joined
+REBUILD;	
 
 
 
@@ -94,8 +163,8 @@ truncate table tmp_query_data_FINAL
 
 
 /* Disable Index */ 
---ALTER INDEX ALL ON tmp_query_data_FINAL
---DISABLE;
+ALTER INDEX ALL ON tmp_query_data_FINAL
+DISABLE;
 
 
 
@@ -108,12 +177,12 @@ SELECT
 	,PSA_Ds
 	,Category_Cd
 	,Category_Ds 
-	,SubCategory_Cd 
+	,SubCategory_Cd  
 FROM
 	 tmp_query_data_joined x
-	 INNER JOIN [dbo].[storeTable] AS sm
+	 INNER JOIN [dbo].[ext_storeTable] AS sm
 		  ON x.StoreNumber = sm.Store_Id
-	 INNER JOIN [dbo].[productTable] AS pr
+	 INNER JOIN [dbo].[ext_productTable] AS pr
 		  ON slin = x.ProductNumber
 		  AND UPC=x.PLUNumber 
 WHERE 1=1 
@@ -123,14 +192,14 @@ WHERE 1=1
 
 /* Enable Index */ 
 --36.24 mins
---ALTER INDEX ALL ON tmp_query_data_FINAL
---REBUILD;	
+ALTER INDEX ALL ON tmp_query_data_FINAL
+REBUILD;	
 
 
 --select * from [Agg1_DaypartAggregate]
 
 --STEP 4: DOING FINAL AGGREGATIONS FOR AGGREGATE 1 BASED ON THE TABLE CREATED IN LAST STEP
---truncate table [dbo].[Agg1_DaypartAggregate]
+truncate table [dbo].[Agg1_DaypartAggregate]
 
 --59.47 mins
 insert into [dbo].[Agg1_DaypartAggregate]
