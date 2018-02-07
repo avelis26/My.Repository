@@ -111,7 +111,7 @@ Function Execute-AggregateTwo {
 	}
 	Send-MailMessage @params
 	$sqlAggTwoParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_One_test]";
+		query = "EXECUTE [dbo].[usp_Aggregate_Two_test]";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
