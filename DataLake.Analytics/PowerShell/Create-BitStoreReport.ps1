@@ -1,13 +1,10 @@
-# Init  --  v0.9.0.1
+# Init  --  v0.9.1.1
 ##########################################
 ##########################################
 $global:end = '2018-02-04'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\BITC_$($end)_Store_Report.log"
-$global:smtpServer = '10.128.1.125'
-$global:port = 25
-$global:fromAddr = 'noreply@7-11.com'
 $global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com'
 $global:finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
@@ -38,65 +35,6 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
-Function Create-TempHeaderTable {
-	$startTime = Get-Date
-	$message = "Creating Temp Header Table For Date Range: $start - $end"
-	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $opsAddr;
-		BodyAsHtml = $true;
-		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
-	}
-	Send-MailMessage @params
-	$sqlTmpHeaderParams = @{
-		query = "EXECUTE [dbo].[usp_Create_Tmp_Header_Table] @StartDate = '$start', @EndDate = '$end'";
-		ServerInstance = $sqlServer;
-		Database = $database;
-		Username = $sqlUser;
-		Password = $sqlPass;
-		QueryTimeout = 0;
-		ErrorAction = 'Stop';
-	}
-	$result = Invoke-Sqlcmd @sqlTmpHeaderParams
-	$message = "Temp Header Table For Date Range: $start - $end Created"
-	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
-	$endTime = Get-Date
-	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $opsAddr;
-		BodyAsHtml = $true;
-		Subject = "BITC: $message";
-		Body = @"
-<font face='consolas'>
-The results have been loaded into:<br>
-<br>
-Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-Database------------:  [7ELE]<br>
-Tables--------------:  [dbo].[tmp_Header_Table]<br>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
-"@
-	}
-	Send-MailMessage @params
-}
 Function Execute-AggregateOne {
 	$startTime = Get-Date
 	$message = "Starting Aggregate One For Date Range: $start - $end"
@@ -114,7 +52,7 @@ Function Execute-AggregateOne {
 	}
 	Send-MailMessage @params
 	$sqlAggOneParams = @{
-		query = "EXECUTE [dbo].[uspAggregateTables_agg1] @StartDate = '$start', @EndDate = '$end'";
+		query = "EXECUTE [dbo].[usp_Aggregate_One_test] @StartDate = '$start', @EndDate = '$end'";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -173,7 +111,7 @@ Function Execute-AggregateTwo {
 	}
 	Send-MailMessage @params
 	$sqlAggTwoParams = @{
-		query = "EXECUTE [dbo].[uspAggregateTables_agg2]";
+		query = "EXECUTE [dbo].[usp_Aggregate_One_test]";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -304,8 +242,6 @@ If ($(Confirm-Run) -eq 'y') {
 		}
 # Update local store and product tables
 		Execute-LocalStoreAndProduct
-# Create temp header table
-		Create-TempHeaderTable
 # Run agg1
 		Execute-AggregateOne
 # Run agg2

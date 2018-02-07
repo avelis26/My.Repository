@@ -1,6 +1,6 @@
 USE								[7ELE]
 GO
-IF EXISTS						(SELECT * FROM sys.procedures WHERE name = 'usp_Move_STG_To_PROD')
+IF EXISTS						(SELECT * FROM sys.procedures WHERE [name] = 'usp_Move_STG_To_PROD')
 BEGIN
 DROP PROCEDURE					[dbo].[usp_Move_STG_To_PROD]
 END

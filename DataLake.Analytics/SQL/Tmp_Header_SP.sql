@@ -1,6 +1,6 @@
 USE							[7ELE]
 GO
-IF EXISTS					(SELECT * FROM sys.procedures WHERE name = 'usp_Create_Tmp_Header_Table')
+IF EXISTS					(SELECT * FROM sys.procedures WHERE [name] = 'usp_Create_Tmp_Header_Table')
 BEGIN
 DROP PROCEDURE				[dbo].[usp_Create_Tmp_Header_Table]
 END
@@ -76,15 +76,15 @@ SET							@Day30 =				DATEADD(dd, -29, @EndDate)
 
 -- Drop current temp header table, partition function, and scheme
 
-IF EXISTS					(SELECT * FROM sys.tables WHERE name = 'tmp_header_table')
+IF EXISTS					(SELECT * FROM sys.tables WHERE [name] = 'tmp_header_table')
 BEGIN
 DROP TABLE					[dbo].[tmp_header_table]
 END
-IF EXISTS					(SELECT * FROM sys.partition_schemes WHERE name = 'Ps_EndDate_By_Day')
+IF EXISTS					(SELECT * FROM sys.partition_schemes WHERE [name] = 'Ps_EndDate_By_Day')
 BEGIN
 DROP PARTITION SCHEME		[Ps_EndDate_By_Day]
 END
-IF EXISTS					(SELECT * FROM sys.partition_functions WHERE name = 'Pf_EndDate_By_Day')
+IF EXISTS					(SELECT * FROM sys.partition_functions WHERE [name] = 'Pf_EndDate_By_Day')
 BEGIN
 DROP PARTITION FUNCTION		[Pf_EndDate_By_Day]
 END
@@ -207,7 +207,7 @@ AND							[th].[EndDate]				<=					@EndDate
 
 -- rebuild indexs for tmp_header_table
 
-IF EXISTS					(SELECT * FROM sys.indexes WHERE name = 'idx1_joins')
+IF EXISTS					(SELECT * FROM sys.indexes WHERE [name] = 'idx1_joins')
 BEGIN
 DROP INDEX					[idx1_joins]
 ON							[dbo].[tmp_header_table]
