@@ -263,9 +263,9 @@ If ($(Confirm-Run) -eq 'y') {
 Ben (or Anna), please start the Alteryx process to create the store reports and drop them into the outbound 7Reports folder.<br>
 <br>
 <font face='consolas'>
-$message0
-$message1
-$message2
+$message0<br>
+$message1<br>
+$message2<br>
 </font>
 "@
 		}
@@ -288,7 +288,7 @@ $message2
 			BodyAsHtml = $true;
 			Subject = "BITC: $message";
 			Body = @"
-Something bad happened!!!
+Something bad happened!!!<br>
 $result
 "@
 		}
