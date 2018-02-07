@@ -242,10 +242,13 @@ If ($(Confirm-Run) -eq 'y') {
 		}
 # Update local store and product tables
 		Execute-LocalStoreAndProduct
+		Start-Sleep -Seconds 2
 # Run agg1
 		Execute-AggregateOne
+		Start-Sleep -Seconds 2
 # Run agg2
 		Execute-AggregateTwo
+		Start-Sleep -Seconds 2
 # Report
 		$totalEndTime = Get-Date
 		$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
