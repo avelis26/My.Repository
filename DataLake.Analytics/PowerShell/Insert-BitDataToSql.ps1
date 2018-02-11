@@ -1,11 +1,11 @@
-# Init  --  v1.2.1.6
+# Init  --  v1.2.2.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 [string]$global:startDate = '02-06-2018'
-[string]$global:endDate   = '02-11-2018'
+[string]$global:endDate   = '02-06-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -238,22 +238,6 @@ Function Add-CsvsToSql {
 			$table = $table124
 			$formatFile = "C:\Scripts\XML\format124.xml"
 		}
-		ElseIf ($file.Name -like "*D1_136*") {
-			$table = $table124
-			$formatFile = "C:\Scripts\XML\format136.xml"
-		}
-		ElseIf ($file.Name -like "*D1_137*") {
-			$table = $table136
-			$formatFile = "C:\Scripts\XML\format137.xml"
-		}	
-		ElseIf ($file.Name -like "*D1_409*") {
-			$table = $table409
-			$formatFile = "C:\Scripts\XML\format409.xml"
-		}
-		ElseIf ($file.Name -like "*D1_410*") {
-			$table = $table410
-			$formatFile = "C:\Scripts\XML\format410.xml"
-		}
 		Else {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
@@ -274,10 +258,11 @@ Function Add-CsvsToSql {
 			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
 			$message = "$(Create-TimeStamp)  $command"
 			Start-Sleep -Milliseconds $(Get-Random -Minimum 128 -Maximum 512)
-			Add-Content -Value $message -Path $($args[9])
+			#Add-Content -Value $message -Path $($args[9])
 			$result = Invoke-Expression -Command $command
-			$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
-			Add-Content -Value $message -Path $($args[9])
+			#$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
+			#Add-Content -Value $message -Path $($args[9])
+			Return $message
 		}
 		Start-Job -ScriptBlock $block -ArgumentList `
 		"$errLogRoot", ` #0
@@ -293,8 +278,7 @@ Function Add-CsvsToSql {
 		"$($file.Directory.Name)" #10
 	}
 	Write-Output "$(Create-TimeStamp)  Inserting..."
-	Get-Job | Wait-Job
-	Get-Job | Remove-Job
+	Get-Job | Wait-Job | Receive-Job | Add-Content -Value $message -Path $opsLog | Remove-Job
 }
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
