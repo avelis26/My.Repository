@@ -30,14 +30,6 @@
 [string]$global:table122 = 'stg_122_Details'
 ##   Trans Type D1 124
 [string]$global:table124 = 'stg_124_Media'
-##   Trans Type D1 136
-[string]$global:table136 = 'stg_PromoSales_136'
-##   Trans Type D1 137
-[string]$global:table137 = 'stg_PromoSalesDetails_137'
-##   Trans Type D1 409
-[string]$global:table409 = 'stg_CouponSales_409'
-##   Trans Type D1 410
-[string]$global:table410 = 'stg_CouponSalesDetails_410'
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
