@@ -12,3 +12,6 @@ AS
 SET NOCOUNT ON
 DELETE FROM						[dbo].[@Table]
 WHERE							[EndDate] < DATEADD(day, -31, @EndDate)
+
+
+[StoreNumber],[DayNumber],[ShiftNumber],[TransactionUID],[TransactionSequence]
