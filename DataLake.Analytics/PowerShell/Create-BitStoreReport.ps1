@@ -209,9 +209,6 @@ $message3<br>
 	}
 	Send-MailMessage @params
 }
-Function Execute-DeleteOldData {
-
-}
 # Init
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)

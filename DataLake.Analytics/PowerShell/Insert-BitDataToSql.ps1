@@ -4,8 +4,8 @@
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-25-2018'
-[string]$global:endDate   = '01-25-2018'
+[string]$global:startDate = '02-06-2018'
+[string]$global:endDate   = '02-11-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
