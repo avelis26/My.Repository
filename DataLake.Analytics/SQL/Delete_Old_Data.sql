@@ -6,9 +6,9 @@ DROP PROCEDURE					[dbo].[usp_Delete_Old_Data]
 END
 GO
 CREATE PROCEDURE				[dbo].[usp_Delete_Old_Data]
-								@StartDate								date,	
+								@EndDate								date,	
 								@Table									varchar
 AS
 SET NOCOUNT ON
 DELETE FROM						[dbo].[@Table]
-WHERE							[EndDate] < DATEADD(day, -31, @StartDate)
+WHERE							[EndDate] < DATEADD(day, -31, @EndDate)
