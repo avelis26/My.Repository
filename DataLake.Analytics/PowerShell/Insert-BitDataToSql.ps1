@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.1
+# Init  --  v1.3.1.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -38,7 +38,7 @@ Function Create-TimeStamp {
 	$minute = $now.minute.ToString("00")
 	$second = $now.second.ToString("00")
 	If ($forFileName -eq $true) {
-		$timeStamp = '_' + $year + $month + $day + '_' + $hour + $minute + $second + '_'
+		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
 	}
 	Else {
 		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
@@ -122,7 +122,6 @@ Function Split-FilesAmongFolders {
 		If ($(Test-Path -Path $dirPath) -eq $false) {
 			$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
 			Write-Verbose -Message $message
-			#Add-Content -Value $message -Path $opsLog
 			New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
 		}
 		Else {
@@ -190,7 +189,6 @@ Function Convert-BitFilesToCsv {
 		If ($(Test-Path -Path $outputPath) -eq $false) {
 			$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
 			Write-Verbose -Message $message
-			#Add-Content -Value $message -Path $opsLog
 			New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
 		}
 		$block = {
@@ -275,12 +273,7 @@ Function Add-CsvsToSql {
 	Get-Job | Remove-Job
 }
 Function Confirm-Run {
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-	Write-Host "Start Date    ::  $startDate"
-	Write-Host "End Date      ::  $endDate"
-	Write-Host "Transactions  ::  $transTypes"
-	Write-Host "Verbose       ::  $verbose"
-    $global:report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
+	$report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
 	If ($report -eq 's') {
 		$global:moveSp = 'sp_Move_STG_To_PROD'
 		$global:opsLogRootPath = 'H:\Ops_Log\'
@@ -292,9 +285,15 @@ Function Confirm-Run {
 	Else {
 		[System.ArgumentOutOfRangeException] "Only 's' or 'c' accepted!!!"
 	}
+	Write-Host '********************************************************************' -ForegroundColor Magenta
+	Write-Host "Start Date    ::  $startDate"
+	Write-Host "End Date      ::  $endDate"
+	Write-Host "Transactions  ::  $transTypes"
+	Write-Host "Verbose       ::  $verbose"
 	Write-Host "Table121      ::  $table121"
 	Write-Host "Table122      ::  $table122"
 	Write-Host "Table124      ::  $table124"
+	Write-Host "Move SP       ::  $moveSp"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
@@ -361,11 +360,12 @@ If ($continue -eq 'y') {
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 		While ($i -lt $range) {
 			$startTime = Get-Date
+			$startTimeText = $(Create-TimeStamp -forFileName)
 			$day = $($startDateObj.AddDays($i)).day.ToString("00")
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$global:processDate = $year + $month + $day
-			$global:opsLog = $opsLogRootPath + $processDate + $(Create-TimeStamp -forFileName) + '_BITC.log'
+			$global:opsLog = $opsLogRootPath + $processDate + '_' + $(Create-TimeStamp -forFileName) + '_BITC.log'
 			$message = "Range: $startDate - $endDate"
 			Write-Verbose -Message $message
 			Set-Content -Value $message -Path $opsLog
@@ -537,6 +537,7 @@ If ($continue -eq 'y') {
 			Add-Content -Value $message -Path $opsLog
 # Send report
 			$endTime = Get-Date
+			$endTimeText = $(Create-TimeStamp -forFileName)
 			$htmlEmptyFileList = @()
 			ForEach ($item in $emptyFileList) {
 				$htmlEmptyFileList += $item + '<br>'
@@ -548,18 +549,18 @@ If ($continue -eq 'y') {
 			$couTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
 			$movTime = New-TimeSpan -Start $milestone_5 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message0 = "Start Time-----------:  $($startTime.DateTime)"
-			$message1 = "End Time-------------:  $($endTime.DateTime)"
-			$message2 = "Raw File Download----:  $($rawTime.Hours.ToString("00")) hours $($rawTime.Minutes.ToString("00")) minutes $($rawTime.Seconds.ToString("00")) seconds"
-			$message3 = "File Decompression---:  $($sepTime.Hours.ToString("00")) hours $($sepTime.Minutes.ToString("00")) minutes $($sepTime.Seconds.ToString("00")) seconds"
-			$message4 = "File Processing------:  $($exeTime.Hours.ToString("00")) hours $($exeTime.Minutes.ToString("00")) minutes $($exeTime.Seconds.ToString("00")) seconds"
-			$message5 = "Insert To SQL DB-----:  $($insTime.Hours.ToString("00")) hours $($insTime.Minutes.ToString("00")) minutes $($insTime.Seconds.ToString("00")) seconds"
-			$message6 = "Count Stores---------:  $($couTime.Hours.ToString("00")) hours $($couTime.Minutes.ToString("00")) minutes $($couTime.Seconds.ToString("00")) seconds"
-			$message7 = "Move Data To Prod----:  $($movTime.Hours.ToString("00")) hours $($movTime.Minutes.ToString("00")) minutes $($movTime.Seconds.ToString("00")) seconds"
-			$message8 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
-			$message9 = "Total File Count-----:  $fileCount"
-			$messageX = "Empty File Count-----:  $emptyFileCount"
-			$messageY = "Total Row Count------:  $totalFileRowCount"
+			$message0 = "Start Time--------:  $startTimeText"
+			$message1 = "End Time----------:  $endTimeText"
+			$message2 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
+			$message3 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
+			$message4 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
+			$message5 = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
+			$message6 = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
+			$message7 = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
+			$message8 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+			$message9 = "Total File Count--:  $fileCount"
+			$messageX = "Empty File Count--:  $emptyFileCount"
+			$messageY = "Total Row Count---:  $totalFileRowCount"
 			Write-Output $message0
 			Write-Output $message1
 			Write-Output $message2
@@ -597,7 +598,7 @@ If ($continue -eq 'y') {
 				Body = @"
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
 <br>
-<font face='consolas'>
+<font face='courier'>
 				$message0<br>
 				$message1<br>
 				$message2<br>
@@ -610,13 +611,13 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message9<br>
 				$messageX<br>
 				$messageY<br>
+				</font>
 				<br>
 				Store Count By Day In Folder $processDate :<br>
 				$storeCountHtml
 				<br>
 				Empty File List:<br>
 				$htmlEmptyFileList<br>
-</font>
 "@
 			}
 			Send-MailMessage @params
