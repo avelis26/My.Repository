@@ -1,4 +1,4 @@
-# Init  --  v1.3.1.4
+# Init  --  v1.3.1.5
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -594,7 +594,7 @@ If ($continue -eq 'y') {
 				From = $fromAddr;
 				To = $emailList;
 				BodyAsHtml = $true;
-				Subject = "BITC: Finished Processing and Inserting Files From The $processDate Folder";
+				Subject = "BITC: $($processDate): ETL Process Finished";
 				Body = @"
 Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
 <br>
