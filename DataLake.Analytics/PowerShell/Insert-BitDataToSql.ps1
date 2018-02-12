@@ -1,4 +1,4 @@
-# Init  --  v1.3.1.1
+# Init  --  v1.3.1.2
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -510,7 +510,7 @@ If ($continue -eq 'y') {
 			$totalFileRowCount = $(Receive-Job $job121122124) - 15
 			Get-Job | Remove-Job
 			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count) + $($124countResults.Count)
-			$message = "$(Create-TimeStamp)  Total File Rows: $totalFileRowCount  |  Total DB Rows: $totalSqlRowCount"
+			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
 			If ($totalFileRowCount -ne $totalSqlRowCount) {
