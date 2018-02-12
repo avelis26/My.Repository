@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.0
+# Init  --  v1.3.0.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -10,8 +10,6 @@
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 [string]$global:destinationRootPath = 'H:\BIT_CRM\'
-##   Enter the path where you want the operations logs to be stored:
-[string]$global:opsLogRootPath = 'H:\Ops_Log\'
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
@@ -285,9 +283,11 @@ Function Confirm-Run {
     $global:report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
 	If ($report -eq 's') {
 		$global:moveSp = 'sp_Move_STG_To_PROD'
+		$global:opsLogRootPath = 'H:\Ops_Log\'
 	}
 	ElseIf ($report -eq 'c') {
 		$global:moveSp = 'sp_Move_STG_To_PROD_CEO'
+		$global:opsLogRootPath = 'H:\Ops_Log_CEO\'
 	}
 	Else {
 		[System.ArgumentOutOfRangeException] "Only 's' or 'c' accepted!!!"
