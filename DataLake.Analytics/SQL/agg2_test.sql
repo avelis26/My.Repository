@@ -1,20 +1,20 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_Two_test')
+IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_Two')
 BEGIN
-DROP PROCEDURE						[dbo].[usp_Aggregate_Two_test]
+DROP PROCEDURE						[dbo].[usp_Aggregate_Two]
 END
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE					[dbo].[usp_Aggregate_Two_test]
+CREATE PROCEDURE					[dbo].[usp_Aggregate_Two]
 AS
 SET NOCOUNT ON
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg2_StoreTxnItems_Backup')
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg2_StoreTxnItems')
 BEGIN
-DROP TABLE							[dbo].[Agg2_StoreTxnItems_Backup]
-CREATE TABLE						[dbo].[Agg2_StoreTxnItems_Backup]		(
+DROP TABLE							[dbo].[Agg2_StoreTxnItems]
+CREATE TABLE						[dbo].[Agg2_StoreTxnItems]		(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NOT NULL,
 									[Member_Status]							[varchar](10)				NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE						[dbo].[Agg2_StoreTxnItems_Backup]		(
 									[Unique_member_count]					[int]						NULL)
 ON									[PRIMARY]
 END
-INSERT INTO							[dbo].[Agg2_StoreTxnItems_Backup]		(
+INSERT INTO							[dbo].[Agg2_StoreTxnItems]		(
 									[EndDate],
 									[StoreNumber],
 									[Member_Status],

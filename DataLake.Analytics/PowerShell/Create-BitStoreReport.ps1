@@ -1,7 +1,7 @@
-# Init  --  v1.0.0.1
+# Init  --  v1.0.0.2
 ##########################################
 ##########################################
-$global:end = '2018-02-04'
+$global:end = '2018-02-11'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\BITC_$($end)_Store_Report.log"
@@ -258,11 +258,11 @@ If ($(Confirm-Run) -eq 'y') {
 			From = $fromAddr;
 			To = $finalAddr;
 			BodyAsHtml = $true;
-			Subject = "BITC: Store Report Data For Date Range: $start - $end Is Ready";
+			Subject = "BITC: Store Report Data For: $start - $end Is Ready";
 			Body = @"
 Ben (or Anna), please start the Alteryx process to create the store reports and drop them into the outbound 7Reports folder.<br>
 <br>
-<font face='consolas'>
+<font face='courier'>
 $message0<br>
 $message1<br>
 $message2<br>

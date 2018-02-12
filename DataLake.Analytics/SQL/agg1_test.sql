@@ -1,24 +1,24 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_One_test')
+IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_One')
 BEGIN
-DROP PROCEDURE						[dbo].[usp_Aggregate_One_test]
+DROP PROCEDURE						[dbo].[usp_Aggregate_One]
 END
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE					[dbo].[usp_Aggregate_One_test]
+CREATE PROCEDURE					[dbo].[usp_Aggregate_One]
 									@StartDate								date,
 									@EndDate								date
 AS
 SET NOCOUNT ON
 -- Rebuild tables rather than truncate to avoid errors
 -- Should be really short
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate_Backup')
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
 BEGIN
-DROP TABLE							[dbo].[Agg1_DaypartAggregate_Backup]
-CREATE TABLE						[dbo].[Agg1_DaypartAggregate_Backup]	(
+DROP TABLE							[dbo].[Agg1_DaypartAggregate]
+CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NULL,
 									[PSA_Cd]								[varchar](4)				NULL,
@@ -231,7 +231,7 @@ WITH								(DROP_EXISTING = OFF, COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
 -- Insert final results
 -- time
-INSERT INTO							[dbo].[Agg1_DaypartAggregate_Backup]
+INSERT INTO							[dbo].[Agg1_DaypartAggregate]
 SELECT								[EndDate],
 									[StoreNumber],
 									[PSA_Cd],
