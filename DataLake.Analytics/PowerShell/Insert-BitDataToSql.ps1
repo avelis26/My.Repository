@@ -1,11 +1,11 @@
-# Init  --  v1.2.2.0
+# Init  --  v1.2.2.3
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '02-06-2018'
-[string]$global:endDate   = '02-06-2018'
+[string]$global:startDate = '02-08-2018'
+[string]$global:endDate   = '02-11-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -21,15 +21,6 @@
 ######################################################
 ##   Enter $true for verbose information output, $false faster speed:
 [bool]$global:verbose = $false
-#######################################################################################################
-#######################################################################################################
-##   Enter the table names you would like the data inserted to by transaction type:
-##   Trans Type D1 121
-[string]$global:table121 = 'stg_121_Headers'
-##   Trans Type D1 122
-[string]$global:table122 = 'stg_122_Details'
-##   Trans Type D1 124
-[string]$global:table124 = 'stg_124_Media'
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
@@ -256,12 +247,11 @@ Function Add-CsvsToSql {
 			}
 			$errLogFile = $args[0] + $args[1] + '_' + $args[10] + '_BCP_Error.log'
 			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
-			$message = "$(Create-TimeStamp)  $command"
-			Start-Sleep -Milliseconds $(Get-Random -Minimum 128 -Maximum 512)
-			#Add-Content -Value $message -Path $($args[9])
 			$result = Invoke-Expression -Command $command
-			#$message = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
-			#Add-Content -Value $message -Path $($args[9])
+			$message1 = "$(Create-TimeStamp)  $command"
+			$message2 = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
+			Add-Content -Value $message1 -Path $($args[9])
+			Add-Content -Value $message2 -Path $($args[9])
 			Return $message
 		}
 		Start-Job -ScriptBlock $block -ArgumentList `
@@ -276,9 +266,11 @@ Function Add-CsvsToSql {
 		"$formatFile", ` #8
 		"$opsLog", ` #9
 		"$($file.Directory.Name)" #10
+		Start-Sleep -Seconds 3
 	}
 	Write-Output "$(Create-TimeStamp)  Inserting..."
-	Get-Job | Wait-Job | Receive-Job | Add-Content -Value $message -Path $opsLog | Remove-Job
+	Get-Job | Wait-Job
+	Get-Job | Remove-Job
 }
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -286,15 +278,25 @@ Function Confirm-Run {
 	Write-Host "End Date      ::  $endDate"
 	Write-Host "Transactions  ::  $transTypes"
 	Write-Host "Verbose       ::  $verbose"
+    $global:report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
+	If ($report -eq 's') {
+		[string]$global:table121 = 'stg_121_Headers'
+		[string]$global:table122 = 'stg_122_Details'
+		[string]$global:table124 = 'stg_124_Media'
+	}
+	ElseIf ($report -eq 'c') {
+		[string]$global:table121 = 'stg_121_Headers_CEO'
+		[string]$global:table122 = 'stg_122_Details_CEO'
+		[string]$global:table124 = 'stg_124_Media_CEO'
+	}
+	Else {
+		[System.ArgumentOutOfRangeException] "Only 's' or 'c' accepted!!!"
+	}
 	Write-Host "Table121      ::  $table121"
 	Write-Host "Table122      ::  $table122"
 	Write-Host "Table124      ::  $table124"
-#	Write-Host "Table136      ::  $table136"
-#	Write-Host "Table137      ::  $table137"
-#	Write-Host "Table409      ::  $table409"
-#	Write-Host "Table410      ::  $table410"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
-    $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
+	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
 $continue = Confirm-Run

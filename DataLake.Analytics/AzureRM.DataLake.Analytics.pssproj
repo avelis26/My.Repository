@@ -50,6 +50,7 @@
     <Content Include="SQL\Create_stg_PromoSales_136.sql" />
     <Content Include="SQL\Delete_Old_Data.sql" />
     <Content Include="SQL\Move_STG_To_PROD.sql" />
+    <Content Include="SQL\Move_STG_To_PROD_CEO.sql" />
     <Content Include="XML\format121.xml" />
     <Content Include="XML\format122.xml" />
     <Content Include="XML\format124.xml" />
