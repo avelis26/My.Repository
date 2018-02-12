@@ -1,11 +1,11 @@
-# Init  --  v1.2.2.3
+# Init  --  v1.3.0.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '02-08-2018'
-[string]$global:endDate   = '02-11-2018'
+[string]$global:startDate = '02-15-2017'
+[string]$global:endDate   = '03-21-2017'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -21,6 +21,10 @@
 ######################################################
 ##   Enter $true for verbose information output, $false faster speed:
 [bool]$global:verbose = $false
+## Name of staging tables to insert data to
+[string]$global:table121 = 'stg_121_Headers'
+[string]$global:table122 = 'stg_122_Details'
+[string]$global:table124 = 'stg_124_Media'
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
@@ -280,14 +284,10 @@ Function Confirm-Run {
 	Write-Host "Verbose       ::  $verbose"
     $global:report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
 	If ($report -eq 's') {
-		[string]$global:table121 = 'stg_121_Headers'
-		[string]$global:table122 = 'stg_122_Details'
-		[string]$global:table124 = 'stg_124_Media'
+		$global:moveSp = 'sp_Move_STG_To_PROD'
 	}
 	ElseIf ($report -eq 'c') {
-		[string]$global:table121 = 'stg_121_Headers_CEO'
-		[string]$global:table122 = 'stg_122_Details_CEO'
-		[string]$global:table124 = 'stg_124_Media_CEO'
+		$global:moveSp = 'sp_Move_STG_To_PROD_CEO'
 	}
 	Else {
 		[System.ArgumentOutOfRangeException] "Only 's' or 'c' accepted!!!"
@@ -522,7 +522,7 @@ If ($continue -eq 'y') {
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
 			$sqlStgToProdParams = @{
-				query = "EXECUTE [dbo].[usp_Move_STG_To_PROD]";
+				query = "EXECUTE [dbo].[$moveSp]";
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
