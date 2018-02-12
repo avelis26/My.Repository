@@ -1,4 +1,4 @@
-# Init  --  v1.3.1.0
+# Init  --  v1.3.1.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -275,11 +275,11 @@ Function Add-CsvsToSql {
 Function Confirm-Run {
 	$report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
 	If ($report -eq 's') {
-		$global:moveSp = 'sp_Move_STG_To_PROD'
+		$global:moveSp = 'usp_Move_STG_To_PROD'
 		$global:opsLogRootPath = 'H:\Ops_Log\'
 	}
 	ElseIf ($report -eq 'c') {
-		$global:moveSp = 'sp_Move_STG_To_PROD_CEO'
+		$global:moveSp = 'usp_Move_STG_To_PROD_CEO'
 		$global:opsLogRootPath = 'H:\Ops_Log_CEO\'
 	}
 	Else {
