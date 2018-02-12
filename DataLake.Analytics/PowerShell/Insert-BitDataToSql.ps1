@@ -1,4 +1,4 @@
-# Init  --  v1.3.1.2
+# Init  --  v1.3.1.3
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -560,7 +560,7 @@ If ($continue -eq 'y') {
 			$message8 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
 			$message9 = "Total File Count--:  $fileCount"
 			$messageX = "Empty File Count--:  $emptyFileCount"
-			$messageY = "Total Row Count---:  $totalFileRowCount"
+			$messageY = "Total Row Count---:  $($totalFileRowCount).ToString('N0')"
 			Write-Output $message0
 			Write-Output $message1
 			Write-Output $message2
