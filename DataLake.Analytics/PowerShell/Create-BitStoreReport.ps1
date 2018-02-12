@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.2
+# Init  --  v1.0.0.3
 ##########################################
 ##########################################
 $global:end = '2018-02-11'
@@ -52,7 +52,7 @@ Function Execute-AggregateOne {
 	}
 	Send-MailMessage @params
 	$sqlAggOneParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_One_test] @StartDate = '$start', @EndDate = '$end'";
+		query = "EXECUTE [dbo].[usp_Aggregate_One] @StartDate = '$start', @EndDate = '$end'";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -111,7 +111,7 @@ Function Execute-AggregateTwo {
 	}
 	Send-MailMessage @params
 	$sqlAggTwoParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_Two_test]";
+		query = "EXECUTE [dbo].[usp_Aggregate_Two]";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
