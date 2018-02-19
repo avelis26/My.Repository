@@ -1,11 +1,11 @@
-# Init  --  v1.3.1.5
+# Init  --  v1.3.1.6
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '02-15-2017'
-[string]$global:endDate   = '03-21-2017'
+[string]$global:startDate = '02-19-2018'
+[string]$global:endDate   = '02-19-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122,D1124'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -279,7 +279,7 @@ Function Confirm-Run {
 		$global:opsLogRootPath = 'H:\Ops_Log\'
 	}
 	ElseIf ($report -eq 'c') {
-		$global:moveSp = 'usp_Move_STG_To_PROD_CEO'
+		$global:moveSp = 'usp_Move_STG_To_PROD'
 		$global:opsLogRootPath = 'H:\Ops_Log_CEO\'
 	}
 	Else {
