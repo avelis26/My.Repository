@@ -13,6 +13,12 @@ CREATE PROCEDURE					[dbo].[usp_Aggregate_One]
 									@EndDate								date
 AS
 SET NOCOUNT ON
+-- Truncate transaction log to avoid error during large queries
+DBCC SHRINKFILE						(
+									log,
+									0
+									)
+WITH NO_INFOMSGS
 -- Rebuild tables rather than truncate to avoid errors
 -- Should be really short
 IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
