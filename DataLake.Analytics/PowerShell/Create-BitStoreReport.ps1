@@ -292,9 +292,11 @@ $aggTwoResult<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: $message";
 			Body = @"
+<font face='courier'>
 Something bad happened!!!<br>
 $aggOneResult<br>
 $aggTwoResult<br>
+</font>
 "@
 		}
 		Send-MailMessage @params
