@@ -30,7 +30,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 Import-Module -Name AzureRM -ErrorAction Stop
 Import-Module -Name SqlServer -ErrorAction Stop
 $sqlAggTwoParams = @{
-	query = "DBCC SHRINKFILE ( log, 0 ) WITH NO_INFOMSGS";
+	query = "DBCC SHRINKFILE (log, 0) WITH NO_INFOMSGS";
 	ServerInstance = $sqlServer;
 	Database = $database;
 	Username = $sqlUser;
