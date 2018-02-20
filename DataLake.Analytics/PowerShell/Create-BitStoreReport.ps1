@@ -1,5 +1,4 @@
-# Init  --  v1.0.1.0
-# needs better error handling to capture results from query when they error
+# Init  --  v1.0.1.1
 ##########################################
 ##########################################
 $global:end = '2018-02-11'
