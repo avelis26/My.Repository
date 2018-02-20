@@ -236,16 +236,16 @@ If ($(Confirm-Run) -eq 'y') {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
-# Update local store and product tables
+		# Update local store and product tables
 		Execute-LocalStoreAndProduct
 		Start-Sleep -Seconds 2
-# Run agg1
+		# Run agg1
 		Execute-AggregateOne
 		Start-Sleep -Seconds 2
-# Run agg2
+		# Run agg2
 		Execute-AggregateTwo
 		Start-Sleep -Seconds 2
-# Report
+		# Report
 		$totalEndTime = Get-Date
 		$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
 		$message0 = "Start Time-----------:  $($startTime.DateTime)"
