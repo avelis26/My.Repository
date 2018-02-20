@@ -1,4 +1,4 @@
-# Init  --  v1.0.1.1
+# Init  --  v1.0.1.2
 ##########################################
 ##########################################
 $global:end = '2018-02-11'
@@ -64,7 +64,7 @@ Function Execute-AggregateOne {
 	$message = "Aggregate One For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  aggOneResult" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -266,6 +266,8 @@ Ben (or Anna), please start the Alteryx process to create the store reports and 
 $message0<br>
 $message1<br>
 $message2<br>
+$aggOneResult<br>
+$aggTwoResult<br>
 </font>
 "@
 		}
@@ -279,6 +281,8 @@ $message2<br>
 		$message = "BIT Store Report Data For Date Range: $start - $end FAILED!!!"
 		Write-Output $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  $aggOneResult" -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -289,8 +293,8 @@ $message2<br>
 			Subject = "BITC: $message";
 			Body = @"
 Something bad happened!!!<br>
-$aggOneResult
-$aggTwoResult
+$aggOneResult<br>
+$aggTwoResult<br>
 "@
 		}
 		Send-MailMessage @params
