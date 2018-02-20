@@ -29,7 +29,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 Import-Module -Name AzureRM -ErrorAction Stop
 Import-Module -Name SqlServer -ErrorAction Stop
-$sqlAggTwoParams = @{
+$sqlShrinkParams = @{
 	query = "DBCC SHRINKFILE (log, 0) WITH NO_INFOMSGS";
 	ServerInstance = $sqlServer;
 	Database = $database;
@@ -38,7 +38,7 @@ $sqlAggTwoParams = @{
 	QueryTimeout = 0;
 	ErrorAction = 'Stop';
 }
-$result = Invoke-Sqlcmd @sqlAggTwoParams
+Invoke-Sqlcmd @sqlShrinkParams
 Login-AzureRmAccount -Credential $credential -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
 $params = @{
     ResourceGroupName = 'CRM-TEST-RG';
