@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.4
+# Init  --  v1.0.1.0
 # needs better error handling to capture results from query when they error
 ##########################################
 ##########################################
@@ -61,11 +61,11 @@ Function Execute-AggregateOne {
 		QueryTimeout = 0;
 		ErrorAction = 'Stop';
 	}
-	$result = Invoke-Sqlcmd @sqlAggOneParams
+	$global:aggOneResult = Invoke-Sqlcmd @sqlAggOneParams
 	$message = "Aggregate One For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  aggOneResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -120,11 +120,11 @@ Function Execute-AggregateTwo {
 		QueryTimeout = 0;
 		ErrorAction = 'Stop';
 	}
-	$result = Invoke-Sqlcmd @sqlAggTwoParams
+	$aggTwoResult = Invoke-Sqlcmd @sqlAggTwoParams
 	$message = "Aggregate Two For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -290,7 +290,8 @@ $message2<br>
 			Subject = "BITC: $message";
 			Body = @"
 Something bad happened!!!<br>
-$result
+$aggOneResult
+$aggTwoResult
 "@
 		}
 		Send-MailMessage @params
