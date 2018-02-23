@@ -9,6 +9,8 @@ SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE					[dbo].[usp_Aggregate_1_3]
+									@StartDate								date,
+									@EndDate								date
 AS
 SET NOCOUNT ON
 INSERT INTO							[dbo].[Agg1_DaypartAggregate]
@@ -97,6 +99,7 @@ SELECT								[EndDate],
 										WHEN [EndTime] >= '19:00:00.0000000' AND [EndTime] < '23:59:59.9999999' AND [RecordType] IN (1) THEN [RecordCount]
 										END),0)
 FROM								[dbo].[tmp_query_data_FINAL]
+WHERE								[EndDate]							BETWEEN						@StartDate AND @EndDate
 GROUP BY							[EndDate],
 									[StoreNumber],
 									[PSA_Cd],
