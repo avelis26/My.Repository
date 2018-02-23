@@ -1,7 +1,7 @@
-# Init  --  v1.0.1.2
+# Init  --  v1.1.0.0
 ##########################################
 ##########################################
-$global:end = '2018-02-11'
+$global:end = '2018-02-18'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\BITC_$($end)_Store_Report.log"
@@ -35,9 +35,9 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
-Function Execute-AggregateOne {
+Function Execute-AggregateOneOne {
 	$startTime = Get-Date
-	$message = "Starting Aggregate One For Date Range: $start - $end"
+	$message = "Starting Aggregate 1-1 For Date Range: $start - $end"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$params = @{
@@ -51,8 +51,8 @@ Function Execute-AggregateOne {
 		Body = "Start Time: $(Get-Date)"
 	}
 	Send-MailMessage @params
-	$sqlAggOneParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_One] @StartDate = '$start', @EndDate = '$end'";
+	$sqlAggOneOneParams = @{
+		query = "EXECUTE [dbo].[usp_Aggregate_1_1] @StartDate = '$start', @EndDate = '$end'";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -60,11 +60,119 @@ Function Execute-AggregateOne {
 		QueryTimeout = 0;
 		ErrorAction = 'Stop';
 	}
-	$global:aggOneResult = Invoke-Sqlcmd @sqlAggOneParams
-	$message = "Aggregate One For Date Range: $start - $end Completed Successfully"
+	$global:aggOneOneResult = Invoke-Sqlcmd @sqlAggOneOneParams
+	$message = "Aggregate 1-1 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneResult" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
+	$endTime = Get-Date
+	$spandObj = New-TimeSpan -Start $startTime -End $endTime
+	$message1 = "Start Time----------:  $($startTime.DateTime)"
+	$message2 = "End Time------------:  $($endTime.DateTime)"
+	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = @"
+<font face='consolas'>
+$message1<br>
+$message2<br>
+$message3<br>
+<br>
+</font>
+"@
+	}
+	Send-MailMessage @params
+}
+Function Execute-AggregateOneTwo {
+	$startTime = Get-Date
+	$message = "Starting Aggregate 1-2 For Date Range: $start - $end"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = "Start Time: $(Get-Date)"
+	}
+	Send-MailMessage @params
+	$sqlAggOneTwoParams = @{
+		query = "EXECUTE [dbo].[usp_Aggregate_1_2]";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	$global:aggOneTwoResult = Invoke-Sqlcmd @sqlAggOneTwoParams
+	$message = "Aggregate 1-2 For Date Range: $start - $end Completed Successfully"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
+	$endTime = Get-Date
+	$spandObj = New-TimeSpan -Start $startTime -End $endTime
+	$message1 = "Start Time----------:  $($startTime.DateTime)"
+	$message2 = "End Time------------:  $($endTime.DateTime)"
+	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = @"
+<font face='consolas'>
+$message1<br>
+$message2<br>
+$message3<br>
+<br>
+</font>
+"@
+	}
+	Send-MailMessage @params
+}
+Function Execute-AggregateOneThree {
+	$startTime = Get-Date
+	$message = "Starting Aggregate 1-3 For Date Range: $start - $end"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = "Start Time: $(Get-Date)"
+	}
+	Send-MailMessage @params
+	$sqlAggOneThreeParams = @{
+		query = "EXECUTE [dbo].[usp_Aggregate_1_3]";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	$global:aggOneThreeResult = Invoke-Sqlcmd @sqlAggOneThreeParams
+	$message = "Aggregate 1-3 For Date Range: $start - $end Completed Successfully"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -209,6 +317,24 @@ $message3<br>
 	}
 	Send-MailMessage @params
 }
+Function Execute-ShrinkLogFile {
+	$message = "Shrinking database log file..."
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	$sqlShrinkParams = @{
+		query = "EXECUTE [dbo].[usp_Shrink_Log]";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	Invoke-Sqlcmd @sqlShrinkParams
+	$message = "Database log file shrunk successfully."
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+}
 # Init
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
@@ -237,14 +363,27 @@ If ($(Confirm-Run) -eq 'y') {
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
 		# Update local store and product tables
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
 		Execute-LocalStoreAndProduct
 		Start-Sleep -Seconds 2
-		# Run agg1
-		Execute-AggregateOne
+		# Run agg1-1
+		Execute-AggregateOneOne
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+		# Run agg1-2
+		Execute-AggregateOneTwo
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+		# Run agg1-3
+		Execute-AggregateOneThree
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg2
 		Execute-AggregateTwo
-		Start-Sleep -Seconds 2
 		# Report
 		$totalEndTime = Get-Date
 		$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
@@ -266,7 +405,9 @@ Ben (or Anna), please start the Alteryx process to create the store reports and 
 $message0<br>
 $message1<br>
 $message2<br>
-$aggOneResult<br>
+$aggOneOneResult<br>
+$aggOneTwoResult<br>
+$aggOneThreeResult<br>
 $aggTwoResult<br>
 </font>
 "@
@@ -281,7 +422,9 @@ $aggTwoResult<br>
 		$message = "BIT Store Report Data For Date Range: $start - $end FAILED!!!"
 		Write-Output $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $aggOneResult" -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
 		Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
 		$params = @{
 			SmtpServer = $smtpServer;
@@ -295,6 +438,8 @@ $aggTwoResult<br>
 <font face='courier'>
 Something bad happened!!!<br>
 $aggOneResult<br>
+$aggOneTwoResult<br>
+$aggOneThreeResult<br>
 $aggTwoResult<br>
 </font>
 "@
