@@ -40,10 +40,11 @@
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SQL\agg1_test.sql" />
-    <Content Include="SQL\agg2_test.sql" />
+    <Content Include="SQL\agg1.sql" />
+    <Content Include="SQL\agg2.sql" />
     <Content Include="SQL\Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Count_Store_By_Day_SP.sql" />
+    <Content Include="SQL\Create_Prod_Headers.sql" />
     <Content Include="SQL\Create_stg_CouponSalesDetails_410.sql" />
     <Content Include="SQL\Create_stg_CouponSales_409.sql" />
     <Content Include="SQL\Create_stg_PromoSalesDetails_137.sql" />
