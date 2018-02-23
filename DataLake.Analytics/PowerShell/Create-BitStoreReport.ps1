@@ -1,11 +1,11 @@
-# Init  --  v1.1.0.0
+# Init  --  v1.1.0.1
 ##########################################
 ##########################################
 $global:end = '2018-02-18'
 ##########################################
 ##########################################
 $global:opsLog = "H:\Ops_Log\BITC_$($end)_Store_Report.log"
-$global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com'
+$global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $global:finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
 $global:smtpServer = '10.128.1.125'
