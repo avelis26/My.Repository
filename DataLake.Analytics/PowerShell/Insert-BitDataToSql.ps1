@@ -1,13 +1,13 @@
-# Init  --  v1.3.1.6
+# Init  --  v1.4.0.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '02-19-2018'
+[string]$global:startDate = '01-13-2018'
 [string]$global:endDate   = '02-19-2018'
 ##   Enter the transactions you would like to filter for:
-[string]$global:transTypes = 'D1121,D1122,D1124'
+[string]$global:transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 [string]$global:destinationRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
@@ -279,7 +279,7 @@ Function Confirm-Run {
 		$global:opsLogRootPath = 'H:\Ops_Log\'
 	}
 	ElseIf ($report -eq 'c') {
-		$global:moveSp = 'usp_Move_STG_To_PROD'
+		$global:moveSp = 'usp_Move_STG_To_PROD_CEO'
 		$global:opsLogRootPath = 'H:\Ops_Log_CEO\'
 	}
 	Else {
@@ -495,7 +495,7 @@ If ($continue -eq 'y') {
 				ErrorAction = 'Stop';
 			}
 			$122CountResults = Invoke-Sqlcmd @sql122Params
-			$sql124Params = @{
+			<#$sql124Params = @{
 				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_124_Media]";
 				ServerInstance = $sqlServer;
 				Database = $database;
@@ -504,12 +504,12 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			$124countResults = Invoke-Sqlcmd @sql124Params
+			$124countResults = Invoke-Sqlcmd @sql124Params#>
 			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
 			Get-Job | Wait-Job
-			$totalFileRowCount = $(Receive-Job $job121122124) - 15
+			$totalFileRowCount = $(Receive-Job $job121122124) - $($transTypes.Split(',').Count * 5)
 			Get-Job | Remove-Job
-			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count) + $($124countResults.Count)
+			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count)# + $($124countResults.Count)
 			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
