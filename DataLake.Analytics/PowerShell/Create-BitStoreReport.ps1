@@ -144,8 +144,13 @@ $message3<br>
 	Send-MailMessage @params
 }
 Function Execute-AggregateOneThree {
+	[CmdletBinding()]
+	Param(
+		[string]$dateStart,
+		[string]$dateEnd
+	)
 	$startTime = Get-Date
-	$message = "Starting Aggregate 1-3 For Date Range: $start - $end"
+	$message = "Starting Aggregate 1-3 For Date Range: $dateStart - $dateEnd"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$params = @{
@@ -160,7 +165,7 @@ Function Execute-AggregateOneThree {
 	}
 	Send-MailMessage @params
 	$sqlAggOneThreeParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_1_3]";
+		query = "EXECUTE [dbo].[usp_Aggregate_1_3] @StartDate = '$dateStart', @EndDate = '$dateEnd'";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -169,7 +174,7 @@ Function Execute-AggregateOneThree {
 		ErrorAction = 'Stop';
 	}
 	$global:aggOneThreeResult = Invoke-Sqlcmd @sqlAggOneThreeParams
-	$message = "Aggregate 1-3 For Date Range: $start - $end Completed Successfully"
+	$message = "Aggregate 1-3 For Date Range: $dateStart - $dateEnd Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
@@ -339,6 +344,33 @@ Function Execute-ShrinkLogFile {
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+
+
+
+[DateTime]$weekOneStartDate = $startDate.AddDays(0)
+[DateTime]$weekOneEndDate = $startDate.AddDays(7)
+[string]$weekOneStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+[string]$weekOneEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+
+[DateTime]$weekTwoStartDate = $startDate.AddDays(8)
+[DateTime]$weekTwoEndDate = $startDate.AddDays(16)
+[string]$weekTwoStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+[string]$weekTwoEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+
+[DateTime]$weekThreeStartDate = $startDate.AddDays(0)
+[DateTime]$weekThreeEndDate = $startDate.AddDays(7)
+[string]$weekThreeStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+[string]$weekThreeEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+
+[DateTime]$weekFourStartDate = $startDate.AddDays(0)
+[DateTime]$weekFourEndDate = $startDate.AddDays(7)
+[string]$weekFourStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+[string]$weekFourEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
+
+
+
+
+
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($(Confirm-Run) -eq 'y') {
 	Try {
@@ -378,10 +410,22 @@ If ($(Confirm-Run) -eq 'y') {
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3
-		Execute-AggregateOneThree
+		# need logic for running week by week
+
+
+
+
+
+		Execute-AggregateOneThree -dateStart $foo -dateEnd $bar
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
+
+
+
+
+
+
 		# Run agg2
 		Execute-AggregateTwo
 		# Report
