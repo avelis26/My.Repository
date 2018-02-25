@@ -1,4 +1,4 @@
-# Init  --  v1.1.0.1
+# Init  --  v1.2.0.0
 ##########################################
 ##########################################
 $global:end = '2018-02-18'
@@ -344,33 +344,26 @@ Function Execute-ShrinkLogFile {
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-
-
-
 [DateTime]$weekOneStartDate = $startDate.AddDays(0)
-[DateTime]$weekOneEndDate = $startDate.AddDays(7)
-[string]$weekOneStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-[string]$weekOneEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-
-[DateTime]$weekTwoStartDate = $startDate.AddDays(8)
-[DateTime]$weekTwoEndDate = $startDate.AddDays(16)
-[string]$weekTwoStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-[string]$weekTwoEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-
-[DateTime]$weekThreeStartDate = $startDate.AddDays(0)
-[DateTime]$weekThreeEndDate = $startDate.AddDays(7)
-[string]$weekThreeStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-[string]$weekThreeEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-
-[DateTime]$weekFourStartDate = $startDate.AddDays(0)
-[DateTime]$weekFourEndDate = $startDate.AddDays(7)
-[string]$weekFourStart = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-[string]$weekFourEnd = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
-
-
-
-
-
+[DateTime]$weekOneEndDate = $startDate.AddDays(5)
+[string]$weekOneStart = $($weekOneStartDate.year.ToString("0000")) + '-' + $($weekOneStartDate.month.ToString("00")) + '-' + $($weekOneStartDate.day.ToString("00"))
+[string]$weekOneEnd = $($weekOneEndDate.year.ToString("0000")) + '-' + $($weekOneEndDate.month.ToString("00")) + '-' + $($weekOneEndDate.day.ToString("00"))
+[DateTime]$weekTwoStartDate = $startDate.AddDays(6)
+[DateTime]$weekTwoEndDate = $startDate.AddDays(11)
+[string]$weekTwoStart = $($weekTwoStartDate.year.ToString("0000")) + '-' + $($weekTwoStartDate.month.ToString("00")) + '-' + $($weekTwoStartDate.day.ToString("00"))
+[string]$weekTwoEnd = $($weekTwoEndDate.year.ToString("0000")) + '-' + $($weekTwoEndDate.month.ToString("00")) + '-' + $($weekTwoEndDate.day.ToString("00"))
+[DateTime]$weekThreeStartDate = $startDate.AddDays(12)
+[DateTime]$weekThreeEndDate = $startDate.AddDays(17)
+[string]$weekThreeStart = $($weekThreeStartDate.year.ToString("0000")) + '-' + $($weekThreeStartDate.month.ToString("00")) + '-' + $($weekThreeStartDate.day.ToString("00"))
+[string]$weekThreeEnd = $($weekThreeEndDate.year.ToString("0000")) + '-' + $($weekThreeEndDate.month.ToString("00")) + '-' + $($weekThreeEndDate.day.ToString("00"))
+[DateTime]$weekFourStartDate = $startDate.AddDays(18)
+[DateTime]$weekFourEndDate = $startDate.AddDays(23)
+[string]$weekFourStart = $($weekFourStartDate.year.ToString("0000")) + '-' + $($weekFourStartDate.month.ToString("00")) + '-' + $($weekFourStartDate.day.ToString("00"))
+[string]$weekFourEnd = $($weekFourEndDate.year.ToString("0000")) + '-' + $($weekFourEndDate.month.ToString("00")) + '-' + $($weekFourEndDate.day.ToString("00"))
+[DateTime]$weekFiveStartDate = $startDate.AddDays(24)
+[DateTime]$weekFiveEndDate = $startDate.AddDays(29)
+[string]$weekFiveStart = $($weekFiveStartDate.year.ToString("0000")) + '-' + $($weekFiveStartDate.month.ToString("00")) + '-' + $($weekFiveStartDate.day.ToString("00"))
+[string]$weekFiveEnd = $($weekFiveEndDate.year.ToString("0000")) + '-' + $($weekFiveEndDate.month.ToString("00")) + '-' + $($weekFiveEndDate.day.ToString("00"))
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($(Confirm-Run) -eq 'y') {
 	Try {
@@ -409,23 +402,31 @@ If ($(Confirm-Run) -eq 'y') {
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3
-		# need logic for running week by week
-
-
-
-
-
-		Execute-AggregateOneThree -dateStart $foo -dateEnd $bar
+		# Run agg1-3-1
+		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-
-
-
-
-
-
+		# Run agg1-3-2
+		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+		# Run agg1-3-3
+		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+		# Run agg1-3-4
+		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+		# Run agg1-3-5
+		Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
 		# Run agg2
 		Execute-AggregateTwo
 		# Report
@@ -449,10 +450,6 @@ Ben (or Anna), please start the Alteryx process to create the store reports and 
 $message0<br>
 $message1<br>
 $message2<br>
-$aggOneOneResult<br>
-$aggOneTwoResult<br>
-$aggOneThreeResult<br>
-$aggTwoResult<br>
 </font>
 "@
 		}
