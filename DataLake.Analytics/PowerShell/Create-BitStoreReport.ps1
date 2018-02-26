@@ -1,4 +1,4 @@
-# Init  --  v1.2.0.2
+# Init  --  v1.2.0.3
 ##########################################
 ##########################################
 $global:end = '2018-02-25'
@@ -404,22 +404,22 @@ If ($(Confirm-Run) -eq 'y') {
 		Start-Sleep -Seconds 2
 		# Run agg1-3-1
 		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd
-		Start-Sleep -Seconds 2
+		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-2
 		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd
-		Start-Sleep -Seconds 2
+		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-3
 		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd
-		Start-Sleep -Seconds 2
+		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-4
 		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd
-		Start-Sleep -Seconds 2
+		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-5
