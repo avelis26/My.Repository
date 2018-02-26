@@ -404,27 +404,27 @@ If ($(Confirm-Run) -eq 'y') {
 		Start-Sleep -Seconds 2
 		# Run agg1-3-1
 		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd
-		Start-Sleep -Seconds 420
+		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-2
 		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd
-		Start-Sleep -Seconds 420
+		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-3
 		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd
-		Start-Sleep -Seconds 420
+		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-4
 		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd
-		Start-Sleep -Seconds 420
+		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg1-3-5
 		Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd
-		Start-Sleep -Seconds 420
+		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		# Run agg2
