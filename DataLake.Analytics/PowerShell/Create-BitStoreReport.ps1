@@ -4,7 +4,6 @@
 $global:end = '2018-02-25'
 ##########################################
 ##########################################
-$global:opsLog = "H:\Ops_Log\BITC_$($end)_Store_Report.log"
 $global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $global:finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
@@ -17,6 +16,10 @@ $global:sqlPass = 'Password20!7!'
 $global:sqlServer = 'mstestsqldw.database.windows.net'
 ##########################################
 Function Create-TimeStamp {
+	[CmdletBinding()]
+	Param(
+		[switch]$forFileName
+	)
 	$now = Get-Date
 	$day = $now.day.ToString("00")
 	$month = $now.month.ToString("00")
@@ -24,7 +27,12 @@ Function Create-TimeStamp {
 	$hour = $now.hour.ToString("00")
 	$minute = $now.minute.ToString("00")
 	$second = $now.second.ToString("00")
-	$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	If ($forFileName -eq $true) {
+		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
+	}
+	Else {
+		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	}
 	Return $timeStamp
 }
 Function Confirm-Run {
@@ -373,6 +381,7 @@ Function Execute-ShrinkLogFile {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 }
 # Init
+$global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
