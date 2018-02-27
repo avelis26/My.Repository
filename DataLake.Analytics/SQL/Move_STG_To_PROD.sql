@@ -8,6 +8,8 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Move_STG_To_PROD]
 AS
 SET NOCOUNT ON
+TRUNCATE TABLE					[dbo].[stg_122_Details]
+TRUNCATE TABLE					[dbo].[stg_121_Headers]
 INSERT INTO						[dbo].[prod_121_Headers]
 (
 								[RecordId],
@@ -125,5 +127,3 @@ SELECT
 								[DataLakeFolder],
 								[Pk]
 FROM							[dbo].[stg_122_Details]
---TRUNCATE TABLE					[dbo].[stg_122_Details]
---TRUNCATE TABLE					[dbo].[stg_121_Headers]

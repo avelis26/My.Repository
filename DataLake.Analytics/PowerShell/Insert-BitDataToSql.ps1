@@ -508,8 +508,9 @@ If ($continue -eq 'y') {
 			$milestone_5 = Get-Date
 
 
-			$sqlPkParams = @{
-				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_121_Headers]";
+
+			$sqlParams = @{
+				query = "UPDATE $table121 SET [CsvFile] = '$file', [DataLakeFolder] = '$adls', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -517,7 +518,18 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			Invoke-Sqlcmd @sqlPkParams
+			Invoke-Sqlcmd @sqlParams
+
+			$sqlParams = @{
+				query = "UPDATE $table122 SET [CsvFile] = '$file', [DataLakeFolder] = '$adls', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+				ErrorAction = 'Stop';
+			}
+			Invoke-Sqlcmd @sqlParams
 
 
 
