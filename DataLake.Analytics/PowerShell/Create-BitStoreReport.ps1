@@ -1,4 +1,4 @@
-# Init  --  v1.2.0.5
+# Init  --  v1.2.1.0
 ##########################################
 ##########################################
 $global:end = '2018-02-25'
@@ -59,7 +59,7 @@ $query<br>
 	}
 	Send-MailMessage @params
 	$sqlAggOneOneParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_1_1] @StartDate = '$start', @EndDate = '$end'";
+		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -71,7 +71,6 @@ $query<br>
 	$message = "Store Report: 1 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -98,9 +97,11 @@ $message3<br>
 }
 Function Execute-AggregateOneTwo {
 	$startTime = Get-Date
-	$message = "Starting Aggregate 1-2 For Date Range: $start - $end"
+	$message = "Store Report: 2 of 8 For Date Range: $start - $end"
+	$query = "EXECUTE [dbo].[usp_Aggregate_1_2]"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -109,11 +110,16 @@ Function Execute-AggregateOneTwo {
 		To = $opsAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
+		Body = @"
+<font face='courier'>
+Start Time: $(Get-Date)<br>
+$query<br>
+</font>
+"@
 	}
 	Send-MailMessage @params
 	$sqlAggOneTwoParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_1_2]";
+		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -122,10 +128,9 @@ Function Execute-AggregateOneTwo {
 		ErrorAction = 'Stop';
 	}
 	$global:aggOneTwoResult = Invoke-Sqlcmd @sqlAggOneTwoParams
-	$message = "Aggregate 1-2 For Date Range: $start - $end Completed Successfully"
+	$message = "Store Report: 2 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -154,12 +159,15 @@ Function Execute-AggregateOneThree {
 	[CmdletBinding()]
 	Param(
 		[string]$dateStart,
-		[string]$dateEnd
+		[string]$dateEnd,
+		[string]$step
 	)
 	$startTime = Get-Date
-	$message = "Starting Aggregate 1-3 For Date Range: $dateStart - $dateEnd"
+	$message = "Store Report: $step of 8 For Date Range: $dateStart - $dateEnd"
+	$query = "EXECUTE [dbo].[usp_Aggregate_1_3] @StartDate = '$dateStart', @EndDate = '$dateEnd'"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -168,11 +176,16 @@ Function Execute-AggregateOneThree {
 		To = $opsAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
+		Body = @"
+<font face='courier'>
+Start Time: $(Get-Date)<br>
+$query<br>
+</font>
+"@
 	}
 	Send-MailMessage @params
 	$sqlAggOneThreeParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_1_3] @StartDate = '$dateStart', @EndDate = '$dateEnd'";
+		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -181,10 +194,9 @@ Function Execute-AggregateOneThree {
 		ErrorAction = 'Stop';
 	}
 	$global:aggOneThreeResult = Invoke-Sqlcmd @sqlAggOneThreeParams
-	$message = "Aggregate 1-3 For Date Range: $dateStart - $dateEnd Completed Successfully"
+	$message = "Store Report: $step of 8 For Date Range: $dateStart - $dateEnd Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -216,9 +228,11 @@ $message3<br>
 }
 Function Execute-AggregateTwo {
 	$startTime = Get-Date
-	$message = "Starting Aggregate Two For Date Range: $start - $end"
+	$message = "Store Report: 8 of 8 For Date Range: $dateStart - $dateEnd"
+	$query = "EXECUTE [dbo].[usp_Aggregate_Two]"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -227,11 +241,16 @@ Function Execute-AggregateTwo {
 		To = $opsAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
+		Body = @"
+<font face='courier'>
+Start Time: $(Get-Date)<br>
+$query<br>
+</font>
+"@
 	}
 	Send-MailMessage @params
 	$sqlAggTwoParams = @{
-		query = "EXECUTE [dbo].[usp_Aggregate_Two]";
+		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -240,10 +259,9 @@ Function Execute-AggregateTwo {
 		ErrorAction = 'Stop';
 	}
 	$aggTwoResult = Invoke-Sqlcmd @sqlAggTwoParams
-	$message = "Aggregate Two For Date Range: $start - $end Completed Successfully"
+	$message = $message = "Store Report: 8 of 8 For Date Range: $dateStart - $dateEnd Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -275,9 +293,11 @@ $message3<br>
 }
 Function Execute-LocalStoreAndProduct {
 	$startTime = Get-Date
-	$message = "Updating Local Store And Product Tables"
+	$message = "Store Report: 0 of 8 For Date Range: $dateStart - $dateEnd"
+	$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -286,11 +306,16 @@ Function Execute-LocalStoreAndProduct {
 		To = $opsAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
+		Body = @"
+<font face='courier'>
+Start Time: $(Get-Date)<br>
+$query<br>
+</font>
+"@
 	}
 	Send-MailMessage @params
 	$sqlSandPParams = @{
-		query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]";
+		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
