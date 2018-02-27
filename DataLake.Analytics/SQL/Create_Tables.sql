@@ -1,16 +1,10 @@
---CONCAT([StoreNumber],[DayNumber],[ShiftNumber],[TransactionUID]) AS [PK]
-
-/****** Object:  Table [dbo].[prod_121_Headers]    Script Date: 2/26/2018 7:17:30 PM ******/
-DROP TABLE [dbo].[prod_121_Headers]
-GO
-
-/****** Object:  Table [dbo].[prod_121_Headers]    Script Date: 2/26/2018 7:17:30 PM ******/
 SET ANSI_NULLS ON
-GO
-
 SET QUOTED_IDENTIFIER ON
 GO
-
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'prod_121_Headers')
+BEGIN
+DROP TABLE [dbo].[prod_121_Headers]
+END
 CREATE TABLE [dbo].[prod_121_Headers](
 	[RecordId] [varchar](2) NULL,
 	[StoreNumber] [int] NULL,
@@ -36,22 +30,15 @@ CREATE TABLE [dbo].[prod_121_Headers](
 	[StageInsertStamp] [DATETIME] NOT NULL,
 	[CsvFile] [varchar](128) NOT NULL,
 	[DataLakeFolder] [varchar](64) NOT NULL,
+	[RawFileName] [varchar](256) NOT NULL,
+	[LineNo] [varchar](32) NOT NULL,
 	[Pk] [varchar](30) PRIMARY KEY
 )
 GO
-
-
-/****** Object:  Table [dbo].[prod_122_Details]    Script Date: 2/26/2018 7:17:38 PM ******/
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'prod_122_Details')
+BEGIN
 DROP TABLE [dbo].[prod_122_Details]
-GO
-
-/****** Object:  Table [dbo].[prod_122_Details]    Script Date: 2/26/2018 7:17:38 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
+END
 CREATE TABLE [dbo].[prod_122_Details](
 	[RecordID] [varchar](2) NULL,
 	[StoreNumber] [int] NOT NULL,
@@ -84,21 +71,15 @@ CREATE TABLE [dbo].[prod_122_Details](
 	[StageInsertStamp] [DATETIME] NOT NULL,
 	[CsvFile] [varchar](128) NOT NULL,
 	[DataLakeFolder] [varchar](64) NOT NULL,
+	[RawFileName] [varchar](256) NOT NULL,
+	[LineNo] [varchar](32) NOT NULL,
 	[Pk] [varchar](30) PRIMARY KEY
 ) ON [PRIMARY]
 GO
-
-/****** Object:  Table [dbo].[stg_121_Headers]    Script Date: 2/26/2018 7:20:07 PM ******/
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'stg_121_Headers')
+BEGIN
 DROP TABLE [dbo].[stg_121_Headers]
-GO
-
-/****** Object:  Table [dbo].[stg_121_Headers]    Script Date: 2/26/2018 7:20:07 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
+END
 CREATE TABLE [dbo].[stg_121_Headers](
 	[RecordId] [varchar](2) NULL,
 	[StoreNumber] [int] NULL,
@@ -119,24 +100,18 @@ CREATE TABLE [dbo].[stg_121_Headers](
 	[TransactionCode] [int] NULL,
 	[TransactionSequence] [int] NULL,
 	[RewardMemberID] [varchar](20) NULL,
+	[RawFileName] [varchar](256) NULL,
+	[LineNo] [varchar](32) NULL,
 	[StageInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
 	[CsvFile] [varchar](128) NULL,
 	[DataLakeFolder] [varchar](64) NULL,
 	[Pk] [varchar](30) NULL
 ) ON [PRIMARY]
 GO
-
-/****** Object:  Table [dbo].[stg_122_Details]    Script Date: 2/26/2018 7:20:24 PM ******/
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'stg_122_Details')
+BEGIN
 DROP TABLE [dbo].[stg_122_Details]
-GO
-
-/****** Object:  Table [dbo].[stg_122_Details]    Script Date: 2/26/2018 7:20:24 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
+END
 CREATE TABLE [dbo].[stg_122_Details](
 	[RecordID] [varchar](2) NULL,
 	[StoreNumber] [int] NOT NULL,
@@ -164,10 +139,11 @@ CREATE TABLE [dbo].[stg_122_Details](
 	[MUBasePrice] [money] NULL,
 	[HostItemId] [varchar](20) NULL,
 	[CouponCount] [int] NULL,
+	[RawFileName] [varchar](256) NULL,
+	[LineNo] [varchar](32) NULL,
 	[StageInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
 	[CsvFile] [varchar](128) NULL,
 	[DataLakeFolder] [varchar](64) NULL,
 	[Pk] [varchar](30) NULL
 ) ON [PRIMARY]
 GO
-

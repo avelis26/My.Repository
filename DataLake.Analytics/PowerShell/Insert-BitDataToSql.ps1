@@ -1,15 +1,16 @@
-# Init  --  v1.5.0.1
+# Init  --  v1.5.1.1
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-27-2018'
-[string]$global:endDate   = '02-25-2018'
+[string]$global:startDate = '01-29-2018'
+[string]$global:endDate   = '01-29-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$global:destinationRootPath = 'H:\BIT_CRM\'
+[string]$global:destinationRootPath = 'C:\BIT_CRM\'
+[string]$global:archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
@@ -229,7 +230,7 @@ Function Add-CsvsToSql {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -F 2 -t ',' -q -e '$errLogFile'"
+		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 1000000 -F 2 -t ',' -q -e '$errLogFile'"
 		Add-Content -Value "$(Create-TimeStamp)  $command" -Path $opsLog
 		$result = Invoke-Expression -Command $command
 		Add-Content -Value "$(Create-TimeStamp)  $($result[$($result.Length - 3)])" -Path $opsLog
@@ -326,7 +327,7 @@ $global:sqlServer = 'mstestsqldw.database.windows.net'
 $global:user = $userName + '@7-11.com'
 $global:dataLakeSearchPathRoot = '/BIT_CRM/'
 $global:dataLakeStoreName = '711dlprodcons01'
-$global:extractorExe = 'C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe'
+$global:extractorExe = 'C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe'
 $global:table = $null
 $global:file = $null
 $global:fileCount = $null
@@ -345,6 +346,10 @@ If ($continue -eq 'y') {
 	If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $destinationRootPath..."
 		New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $archiveRootPath..."
+		New-Item -ItemType Directory -Path $archiveRootPath -Force | Out-Null
 	}
 	If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $opsLogRootPath..."
@@ -415,7 +420,7 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Truncating staging tables successful"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
-			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File
+			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*"
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
 				errLogRoot = $errLogRootPath;
@@ -426,7 +431,7 @@ If ($continue -eq 'y') {
 # Count stores by day in stg header table and compare rows in database to rows in files
 			$milestone_4 = Get-Date
 			$block = {
-				$files = Get-ChildItem -Recurse -File -Path $($args[0])
+				$files = Get-ChildItem -Recurse -File -Path $($args[0]) -Include "*Structured*"
 				$total = 0
 				ForEach ($file in $files) {
 					$count = 0
@@ -513,6 +518,9 @@ If ($continue -eq 'y') {
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
 			Add-PkToStgData -dataLakeFolder $($dataLakeSearchPathRoot + $processDate)
+			$message = "$(Create-TimeStamp)  Finished creating PK's on data in staging tables!"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
@@ -626,6 +634,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Start-Sleep -Seconds 1
 			Write-Output "1..."
 			Start-Sleep -Seconds 1
+			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force
 			$i++
 		}
 	}

@@ -32,6 +32,8 @@ INSERT INTO						[dbo].[prod_121_Headers]
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
+								[RawFileName],
+								[LineNo],
 								[Pk]
 )
 SELECT
@@ -57,6 +59,8 @@ SELECT
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
+								[RawFileName],
+								[LineNo],
 								[Pk]
 FROM							[dbo].[stg_121_Headers];
 INSERT INTO						[dbo].[prod_122_Details]
@@ -90,6 +94,8 @@ INSERT INTO						[dbo].[prod_122_Details]
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
+								[RawFileName],
+								[LineNo],
 								[Pk]
 )
 SELECT
@@ -122,7 +128,8 @@ SELECT
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
+								[RawFileName],
+								[LineNo],
 								[Pk]
 FROM							[dbo].[stg_122_Details];
-TRUNCATE TABLE					[dbo].[stg_122_Details];
-TRUNCATE TABLE					[dbo].[stg_121_Headers];
+
