@@ -717,7 +717,12 @@ Error:  $($Error[0].Exception.Message)<br>
 		Send-MailMessage @params
 	}
 	Catch {
-		Write-Error -Message 'Something bad happened!!!' -Exception $Error[0].Exception
+		$errorParams = @{
+			Exception = $Error[0].Exception;
+			Message = $Error[0].Exception.Message;
+			CategoryActivity = $Error[0].CategoryInfo.Activity;
+		}
+		Write-Error @errorParams
 		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog
 		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog
 		$params = @{
