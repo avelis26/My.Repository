@@ -28,7 +28,11 @@ INSERT INTO						[dbo].[prod_121_Headers]
 								[TotalAmount],
 								[TransactionCode],
 								[TransactionSequence],
-								[RewardMemberID]
+								[RewardMemberID],
+								[StageInsertStamp],
+								[CsvFile],
+								[DataLakeFolder],
+								[Pk]
 )
 SELECT
 								[RecordId],
@@ -49,9 +53,13 @@ SELECT
 								[TotalAmount],
 								[TransactionCode],
 								[TransactionSequence],
-								[RewardMemberID]
+								[RewardMemberID],
+								[StageInsertStamp],
+								[CsvFile],
+								[DataLakeFolder],
+								[Pk]
 FROM							[dbo].[stg_121_Headers]
-TRUNCATE TABLE					[dbo].[stg_121_Headers]
+
 INSERT INTO						[dbo].[prod_122_Details]
 (
 								[RecordID],
@@ -79,7 +87,11 @@ INSERT INTO						[dbo].[prod_122_Details]
 								[SalesPrice],
 								[MUBasePrice],
 								[HostItemId],
-								[CouponCount]
+								[CouponCount],
+								[StageInsertStamp],
+								[CsvFile],
+								[DataLakeFolder],
+								[Pk]
 )
 SELECT
 								[RecordID],
@@ -107,46 +119,11 @@ SELECT
 								[SalesPrice],
 								[MUBasePrice],
 								[HostItemId],
-								[CouponCount]						
+								[CouponCount],
+								[StageInsertStamp],
+								[CsvFile],
+								[DataLakeFolder],
+								[Pk]
 FROM							[dbo].[stg_122_Details]
-TRUNCATE TABLE					[dbo].[stg_122_Details]
-INSERT INTO						[dbo].[prod_124_Media]
-(
-								[RecordId],
-								[StoreNumber],
-								[TransactionType],
-								[DayNumber],
-								[ShiftNumber],
-								[TransactionUID],
-								[SequenceNumber],
-								[MediaNumber],
-								[NetworkMediaSequenceNumber],
-								[MediaType],
-								[RecordCount],
-								[RecordAmount],
-								[RecordType],
-								[ErrorCorrectionFlag],
-								[VoidFlag],
-								[ExchangeRate],
-								[ForeignAmount]
-)
-SELECT
-								[RecordId],
-								[StoreNumber],
-								[TransactionType],
-								[DayNumber],
-								[ShiftNumber],
-								[TransactionUID],
-								[SequenceNumber],
-								[MediaNumber],
-								[NetworkMediaSequenceNumber],
-								[MediaType],
-								[RecordCount],
-								[RecordAmount],
-								[RecordType],
-								[ErrorCorrectionFlag],
-								[VoidFlag],
-								[ExchangeRate],
-								[ForeignAmount]
-FROM							[dbo].[stg_124_Media]
-TRUNCATE TABLE					[dbo].[stg_124_Media]
+--TRUNCATE TABLE					[dbo].[stg_122_Details]
+--TRUNCATE TABLE					[dbo].[stg_121_Headers]

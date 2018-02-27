@@ -37,9 +37,11 @@ Function Confirm-Run {
 }
 Function Execute-AggregateOneOne {
 	$startTime = Get-Date
-	$message = "Starting Aggregate 1-1 For Date Range: $start - $end"
+	$message = "Store Report: 1 of 8 For Date Range: $start - $end"
+	$query = "EXECUTE [dbo].[usp_Aggregate_1_1] @StartDate = '$start', @EndDate = '$end'"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -48,7 +50,12 @@ Function Execute-AggregateOneOne {
 		To = $opsAddr;
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
-		Body = "Start Time: $(Get-Date)"
+		Body = @"
+<font face='courier'>
+Start Time: $(Get-Date)<br>
+$query<br>
+</font>
+"@
 	}
 	Send-MailMessage @params
 	$sqlAggOneOneParams = @{
@@ -61,7 +68,7 @@ Function Execute-AggregateOneOne {
 		ErrorAction = 'Stop';
 	}
 	$global:aggOneOneResult = Invoke-Sqlcmd @sqlAggOneOneParams
-	$message = "Aggregate 1-1 For Date Range: $start - $end Completed Successfully"
+	$message = "Store Report: 1 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog

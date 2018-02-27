@@ -22,7 +22,6 @@
 ## Name of staging tables to insert data to
 [string]$global:table121 = 'stg_121_Headers'
 [string]$global:table122 = 'stg_122_Details'
-[string]$global:table124 = 'stg_124_Media'
 #######################################################################################################
 #######################################################################################################
 Function Create-TimeStamp {
@@ -292,7 +291,6 @@ Function Confirm-Run {
 	Write-Host "Verbose       ::  $verbose"
 	Write-Host "Table121      ::  $table121"
 	Write-Host "Table122      ::  $table122"
-	Write-Host "Table124      ::  $table124"
 	Write-Host "Move SP       ::  $moveSp"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
@@ -402,7 +400,7 @@ If ($continue -eq 'y') {
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
 			$sqlTruncateParams = @{
-				query = "TRUNCATE TABLE [dbo].[stg_121_Headers]; TRUNCATE TABLE [dbo].[stg_122_Details]; TRUNCATE TABLE [dbo].[stg_124_Media];";
+				query = "TRUNCATE TABLE [dbo].[stg_121_Headers]; TRUNCATE TABLE [dbo].[stg_122_Details];";
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -495,8 +493,23 @@ If ($continue -eq 'y') {
 				ErrorAction = 'Stop';
 			}
 			$122CountResults = Invoke-Sqlcmd @sql122Params
-			<#$sql124Params = @{
-				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_124_Media]";
+			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
+			Get-Job | Wait-Job
+			$totalFileRowCount = $(Receive-Job $job121122124) - $($transTypes.Split(',').Count * 5)
+			Get-Job | Remove-Job
+			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count)
+			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
+			If ($totalFileRowCount -ne $totalSqlRowCount) {
+				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
+			}
+# Create PK and move data in DB from stg to prod
+			$milestone_5 = Get-Date
+
+
+			$sqlPkParams = @{
+				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_121_Headers]";
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -504,20 +517,11 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			$124countResults = Invoke-Sqlcmd @sql124Params#>
-			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
-			Get-Job | Wait-Job
-			$totalFileRowCount = $(Receive-Job $job121122124) - $($transTypes.Split(',').Count * 5)
-			Get-Job | Remove-Job
-			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count)# + $($124countResults.Count)
-			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
-			If ($totalFileRowCount -ne $totalSqlRowCount) {
-				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
-			}
-# Move data in DB from stg to prod
-			$milestone_5 = Get-Date
+			Invoke-Sqlcmd @sqlPkParams
+
+
+
+
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
