@@ -419,47 +419,47 @@ If ($(Confirm-Run) -eq 'y') {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
-		# Update local store and product tables
+		# Step 0: Update local store and product tables
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 		Execute-LocalStoreAndProduct
 		Start-Sleep -Seconds 2
-		# Run agg1-1
+		# Step 1: Run agg1-1
 		Execute-AggregateOneOne
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-2
+		# Step 2: Run agg1-2
 		Execute-AggregateOneTwo
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3-1
-		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd
+		# Step 3: Run agg1-3-1
+		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd -step '3'
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3-2
-		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd
+		# Step 4: Run agg1-3-2
+		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd -step '4'
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3-3
-		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd
+		# Step 5: Run agg1-3-3
+		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd -step '5'
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3-4
-		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd
+		# Step 6: Run agg1-3-4
+		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd -step '6'
 		Start-Sleep -Seconds 420
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg1-3-5
-		Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd
+		# Step 7: Run agg1-3-5
+		Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd -step '7'
 		Start-Sleep -Seconds 2
 		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
-		# Run agg2
+		# Step 8: Run agg2
 		Execute-AggregateTwo
 		Start-Sleep -Seconds 2
 		# Report
