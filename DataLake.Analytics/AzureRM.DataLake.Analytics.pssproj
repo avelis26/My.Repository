@@ -52,6 +52,7 @@
     <Content Include="SQL\Create_stg_CouponSales_409.sql" />
     <Content Include="SQL\Create_stg_PromoSalesDetails_137.sql" />
     <Content Include="SQL\Create_stg_PromoSales_136.sql" />
+    <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\Delete_Old_Data.sql" />
     <Content Include="SQL\Move_STG_To_PROD.sql" />
     <Content Include="SQL\Move_STG_To_PROD_CEO.sql" />
