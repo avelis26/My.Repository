@@ -429,6 +429,7 @@ If ($(Confirm-Run) -eq 'y') {
 		Start-Sleep -Seconds 2
 		# Run agg2
 		Execute-AggregateTwo
+		Start-Sleep -Seconds 2
 		# Report
 		$totalEndTime = Get-Date
 		$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
