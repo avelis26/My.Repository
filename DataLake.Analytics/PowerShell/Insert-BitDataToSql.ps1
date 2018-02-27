@@ -506,7 +506,9 @@ If ($continue -eq 'y') {
 			}
 # Create PK and move data in DB from stg to prod
 			$milestone_5 = Get-Date
-
+			$message = "$(Create-TimeStamp)  Creating PK's on data in staging tables..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog
 
 
 			$sqlParams = @{
