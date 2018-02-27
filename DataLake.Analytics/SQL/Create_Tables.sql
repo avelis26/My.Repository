@@ -34,8 +34,8 @@ CREATE TABLE [dbo].[prod_121_Headers](
 	[Header_Id] [int] IDENTITY(1,1) NOT NULL,
 	[ProdInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
 	[StageInsertStamp] [DATETIME] NOT NULL,
-	[CsvFile] [varchar](64),
-	[DataLakeFolder] [varchar](32),
+	[CsvFile] [varchar](128) NOT NULL,
+	[DataLakeFolder] [varchar](64) NOT NULL,
 	[Pk] [varchar](30) PRIMARY KEY
 )
 GO
@@ -82,8 +82,8 @@ CREATE TABLE [dbo].[prod_122_Details](
 	[Detail_Id] [int] IDENTITY(1,1) NOT NULL,
 	[ProdInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
 	[StageInsertStamp] [DATETIME] NOT NULL,
-	[CsvFile] [varchar](64) NOT NULL,
-	[DataLakeFolder] [varchar](32) NOT NULL,
+	[CsvFile] [varchar](128) NOT NULL,
+	[DataLakeFolder] [varchar](64) NOT NULL,
 	[Pk] [varchar](30) PRIMARY KEY
 ) ON [PRIMARY]
 GO
@@ -120,8 +120,8 @@ CREATE TABLE [dbo].[stg_121_Headers](
 	[TransactionSequence] [int] NULL,
 	[RewardMemberID] [varchar](20) NULL,
 	[StageInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
-	[CsvFile] [varchar](64) NULL,
-	[DataLakeFolder] [varchar](32) NULL,
+	[CsvFile] [varchar](128) NULL,
+	[DataLakeFolder] [varchar](64) NULL,
 	[Pk] [varchar](30) NULL
 ) ON [PRIMARY]
 GO
@@ -165,8 +165,8 @@ CREATE TABLE [dbo].[stg_122_Details](
 	[HostItemId] [varchar](20) NULL,
 	[CouponCount] [int] NULL,
 	[StageInsertStamp] [DATETIME] NOT NULL DEFAULT(CONVERT(datetime, SWITCHOFFSET(GETDATE(), DATEPART(TZOFFSET, GETDATE() AT TIME ZONE 'Central Standard Time')))),
-	[CsvFile] [varchar](64) NULL,
-	[DataLakeFolder] [varchar](32) NULL,
+	[CsvFile] [varchar](128) NULL,
+	[DataLakeFolder] [varchar](64) NULL,
 	[Pk] [varchar](30) NULL
 ) ON [PRIMARY]
 GO

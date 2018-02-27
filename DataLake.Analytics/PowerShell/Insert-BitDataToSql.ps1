@@ -1,4 +1,4 @@
-# Init  --  v1.4.0.0
+# Init  --  v1.5.0.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -215,6 +215,7 @@ Function Add-CsvsToSql {
 	###################################################
 	## Add logic to check bcp error file for content ##
 	###################################################
+	Write-Output "$(Create-TimeStamp)  Inserting..."
 	ForEach ($file in $structuredFiles) {
 		If ($file.Name -like "*D1_121*") {
 			$table = $table121
@@ -224,52 +225,53 @@ Function Add-CsvsToSql {
 			$table = $table122
 			$formatFile = "C:\Scripts\XML\format122.xml"
 		}
-		ElseIf ($file.Name -like "*D1_124*") {
-			$table = $table124
-			$formatFile = "C:\Scripts\XML\format124.xml"
-		}
 		Else {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
-		$block = {
-			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-			Function Create-TimeStamp {
-				$now = Get-Date
-				$day = $now.day.ToString("00")
-				$month = $now.month.ToString("00")
-				$year = $now.year.ToString("0000")
-				$hour = $now.hour.ToString("00")
-				$minute = $now.minute.ToString("00")
-				$second = $now.second.ToString("00")
-				$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
-				Return $timeStamp
-			}
-			$errLogFile = $args[0] + $args[1] + '_' + $args[10] + '_BCP_Error.log'
-			$command = "bcp $($args[2]) in $($args[3]) -S $($args[4]) -d $($args[5]) -U $($args[6]) -P $($args[7]) -f $($args[8]) -F 2 -t ',' -q -e '$errLogFile'"
-			$result = Invoke-Expression -Command $command
-			$message1 = "$(Create-TimeStamp)  $command"
-			$message2 = "$(Create-TimeStamp)  $($result[$($result.Length - 3)])"
-			Add-Content -Value $message1 -Path $($args[9])
-			Add-Content -Value $message2 -Path $($args[9])
-			Return $message
+		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
+		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -F 2 -t ',' -q -e '$errLogFile'"
+		Add-Content -Value "$(Create-TimeStamp)  $command" -Path $opsLog
+		$result = Invoke-Expression -Command $command
+		Add-Content -Value "$(Create-TimeStamp)  $($result[$($result.Length - 3)])" -Path $opsLog
+		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)' WHERE [CsvFile] IS NULL"
+		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+		$sqlParams = @{
+			query = $query;
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
 		}
-		Start-Job -ScriptBlock $block -ArgumentList `
-		"$errLogRoot", ` #0
-		"$($file.BaseName)", ` #1
-		"$table", ` #2
-		"$($file.FullName)", ` #3
-		"$sqlServer", ` #4
-		"$database", ` #5
-		"$sqlUser", ` #6
-		"$sqlPass", ` #7
-		"$formatFile", ` #8
-		"$opsLog", ` #9
-		"$($file.Directory.Name)" #10
-		Start-Sleep -Seconds 3
+		Invoke-Sqlcmd @sqlParams
 	}
-	Write-Output "$(Create-TimeStamp)  Inserting..."
-	Get-Job | Wait-Job
-	Get-Job | Remove-Job
+}
+Function Add-PkToStgData {
+	[CmdletBinding()]
+	Param(
+		[string]$dataLakeFolder
+	)
+	$sqlParams = @{
+		query = "UPDATE $table121 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	Invoke-Sqlcmd @sqlParams
+	$sqlParams = @{
+		query = "UPDATE $table122 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	Invoke-Sqlcmd @sqlParams
 }
 Function Confirm-Run {
 	$report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
@@ -297,6 +299,7 @@ Function Confirm-Run {
 	Return $answer
 }
 $continue = Confirm-Run
+[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($policy -ne 'TrustAllCertsPolicy') {
 	add-type @"
@@ -509,33 +512,7 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Creating PK's on data in staging tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
-
-
-			$sqlParams = @{
-				query = "UPDATE $table121 SET [CsvFile] = '$file', [DataLakeFolder] = '$adls', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
-				ServerInstance = $sqlServer;
-				Database = $database;
-				Username = $sqlUser;
-				Password = $sqlPass;
-				QueryTimeout = 0;
-				ErrorAction = 'Stop';
-			}
-			Invoke-Sqlcmd @sqlParams
-
-			$sqlParams = @{
-				query = "UPDATE $table122 SET [CsvFile] = '$file', [DataLakeFolder] = '$adls', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
-				ServerInstance = $sqlServer;
-				Database = $database;
-				Username = $sqlUser;
-				Password = $sqlPass;
-				QueryTimeout = 0;
-				ErrorAction = 'Stop';
-			}
-			Invoke-Sqlcmd @sqlParams
-
-
-
-
+			Add-PkToStgData -dataLakeFolder $($dataLakeSearchPathRoot + $processDate)
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
