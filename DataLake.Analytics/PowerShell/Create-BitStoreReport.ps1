@@ -1,4 +1,4 @@
-# Init  --  v1.2.0.4
+# Init  --  v1.2.0.5
 ##########################################
 ##########################################
 $global:end = '2018-02-25'
@@ -79,7 +79,7 @@ Function Execute-AggregateOneOne {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='consolas'>
+<font face='courier'>
 $message1<br>
 $message2<br>
 $message3<br>
@@ -133,7 +133,7 @@ Function Execute-AggregateOneTwo {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='consolas'>
+<font face='courier'>
 $message1<br>
 $message2<br>
 $message3<br>
@@ -192,7 +192,7 @@ Function Execute-AggregateOneThree {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='consolas'>
+<font face='courier'>
 The results have been loaded into:<br>
 <br>
 Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
@@ -251,7 +251,7 @@ Function Execute-AggregateTwo {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='consolas'>
+<font face='courier'>
 The results have been loaded into:<br>
 <br>
 Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
@@ -310,7 +310,7 @@ Function Execute-LocalStoreAndProduct {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='consolas'>
+<font face='courier'>
 The results have been loaded into:<br>
 <br>
 $message1<br>
