@@ -1,15 +1,15 @@
-# Init  --  v1.5.2.7
+# Init  --  v1.5.2.8
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-26-2018'
+[string]$global:startDate = '01-28-2018'
 [string]$global:endDate   = '02-26-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$global:destinationRootPath = 'C:\BIT_CRM\'
+[string]$global:destinationRootPath = 'D:\BIT_CRM\'
 [string]$global:archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
@@ -55,6 +55,7 @@ Function Get-DataLakeRawFiles {
 		[string]$dataLakeStoreName, # 711dlprodcons01
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	Try {
 		If ($(Test-Path -Path $destinationRootPath) -eq $true) {
 			$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
@@ -99,6 +100,7 @@ Function Split-FilesAmongFolders {
 		[string]$inFolder, # H:\BIT_CRM\20171216\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$global:fileCount = $null
 	$global:emptyFileCount = $null
 	$global:emptyFileList = @()
@@ -185,6 +187,7 @@ Function Convert-BitFilesToCsv {
 		[string]$filePrefix, # 20171216
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$folders = Get-ChildItem -Path $inFolder -Directory
 	ForEach ($folder in $folders) {
 		$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
@@ -215,6 +218,7 @@ Function Add-CsvsToSql {
 		[string]$errLogRoot, # H:\BCP_Errors\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	###################################################
 	## Add logic to check bcp error file for content ##
 	###################################################
@@ -262,6 +266,7 @@ Function Add-PkToStgData {
 	Param(
 		[string]$dataLakeFolder
 	)
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$sqlParams = @{
 		query = "UPDATE $table121 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
 		ServerInstance = $sqlServer;
@@ -640,6 +645,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 "@
 			}
 			Send-MailMessage @params
+			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force
 			Write-Output "Starting next day in 5..."
 			Start-Sleep -Seconds 1
 			Write-Output "4..."
@@ -650,7 +656,6 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Start-Sleep -Seconds 1
 			Write-Output "1..."
 			Start-Sleep -Seconds 1
-			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force
 			$i++
 		}
 	}
