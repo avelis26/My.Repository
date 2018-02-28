@@ -1,4 +1,4 @@
-# Init  --  v1.5.2.4
+# Init  --  v1.5.2.7
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -15,8 +15,8 @@
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
 #[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
-#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
-[string[]]$global:emailList = 'graham.pinkston@ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
+#[string[]]$global:emailList = 'graham.pinkston@ansira.com'
 ######################################################
 ## create failure email list and add megan and ravi ##
 ######################################################
@@ -232,14 +232,16 @@ Function Add-CsvsToSql {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 1000000 -F 2 -t ',' -q -e '$errLogFile'"
+		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 10000000 -F 2 -t ',' -q -e '$errLogFile'"
 		Add-Content -Value "$(Create-TimeStamp)  $command" -Path $opsLog
 		$global:bcpResult = Invoke-Expression -Command $command
-		Add-Content -Value "$(Create-TimeStamp)  $($result[$($result.Length - 3)])" -Path $opsLog
-		If ($bcpResult -notlike "*copied*") {
+		If ($bcpResult[$bcpResult.Count - 3] -notlike "*copied*") {
 			$global:bcpError = $Error[0]
-			Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  $bcpResult" -Path $opsLog
 			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
+		}
+		Else {
+			Add-Content -Value "$(Create-TimeStamp)  $($bcpResult[$bcpResult.Count - 3])" -Path $opsLog
 		}
 		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)' WHERE [CsvFile] IS NULL"
 		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
