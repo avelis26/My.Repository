@@ -12,8 +12,8 @@ DROP TABLE							[dbo].[prod_121_Headers]
 END
 CREATE TABLE						[dbo].[prod_121_Headers]				(
 									[RecordId]								[varchar](2)														NULL,
-									[StoreNumber]							[int]																NULL,
-									[TransactionType]						[int]																NOT NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
 									[DayNumber]								[int]																NOT NULL,
 									[ShiftNumber]							[int]																NOT NULL,
 									[TransactionUID]						[int]																NOT NULL,
@@ -24,13 +24,13 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 									[EndDate]								[date]																NOT NULL,
 									[EndTime]								[time](7)															NOT NULL,
 									[StartDate]								[date]																NOT NULL,
-									[StartTime]								[time](7)															NULL,
+									[StartTime]								[time](7)															NOT NULL,
 									[Status]								[tinyint]															NULL,
 									[TotalAmount]							[money]																NULL,
 									[TransactionCode]						[int]																NULL,
 									[TransactionSequence]					[int]																NULL,
 									[RewardMemberID]						[varchar](20)														NULL,
-									[RawFileName]							[varchar](256)														NOT NULL,
+									[RawFileName]							[varchar](512)														NOT NULL,
 									[LineNo]								[varchar](32)														NOT NULL,
 									[Header_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
@@ -47,9 +47,9 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 																					)
 																				)
 																			),
-									[CsvFile]								[varchar](128)														NOT NULL,
-									[DataLakeFolder]						[varchar](64)														NOT NULL,
-									[Pk]									[varchar](30)														PRIMARY KEY NONCLUSTERED
+									[CsvFile]								[varchar](512)														NOT NULL,
+									[DataLakeFolder]						[varchar](128)														NOT NULL,
+									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Headers]
@@ -87,7 +87,7 @@ CREATE TABLE						[dbo].[stg_121_Headers](
 									[TransactionCode]						[int]																NULL,
 									[TransactionSequence]					[int]																NULL,
 									[RewardMemberID]						[varchar](20)														NULL,
-									[RawFileName]							[varchar](256)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
 									[LineNo]								[varchar](32)														NULL,
 									[Header_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL
@@ -104,9 +104,9 @@ CREATE TABLE						[dbo].[stg_121_Headers](
 																				)
 																			),
 									[ProdInsertStamp]						[DATETIME]															NULL,
-									[CsvFile]								[varchar](128)														NULL,
-									[DataLakeFolder]						[varchar](64)														NULL,
-									[Pk]									[varchar](30)														NULL
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Stg_Headers]
@@ -150,11 +150,11 @@ CREATE TABLE						[dbo].[prod_122_Details](
 									[MUBasePrice]							[money]																NULL,
 									[HostItemId]							[varchar](20)														NULL,
 									[CouponCount]							[int]																NULL,
-									[RawFileName]							[DATETIME]															NOT NULL,
-									[LineNo]								[varchar](128)														NOT NULL,
+									[RawFileName]							[varchar](512)														NOT NULL,
+									[LineNo]								[varchar](32)														NOT NULL,
 									[Detail_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
-									[ProdInsertStamp]						[varchar](64)														NOT NULL
+									[ProdInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
 																				CONVERT(
 																					datetime,
@@ -167,9 +167,9 @@ CREATE TABLE						[dbo].[prod_122_Details](
 																					)
 																				)
 																			),
-									[CsvFile]								[varchar](256)														NOT NULL,
-									[DataLakeFolder]						[varchar](32)														NOT NULL,
-									[Pk]									[varchar](30)														PRIMARY KEY NONCLUSTERED
+									[CsvFile]								[varchar](512)														NOT NULL,
+									[DataLakeFolder]						[varchar](128)														NOT NULL,
+									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Details]
@@ -213,8 +213,8 @@ CREATE TABLE						[dbo].[stg_122_Details](
 									[MUBasePrice]							[money]																NULL,
 									[HostItemId]							[varchar](20)														NULL,
 									[CouponCount]							[int]																NULL,
-									[RawFileName]							[DATETIME]															NULL,
-									[LineNo]								[varchar](128)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
 									[Detail_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
@@ -229,10 +229,10 @@ CREATE TABLE						[dbo].[stg_122_Details](
 																					)
 																				)
 																			),
-									[ProdInsertStamp]						[varchar](64)														NULL,
-									[CsvFile]								[varchar](256)														NULL,
-									[DataLakeFolder]						[varchar](32)														NULL,
-									[Pk]									[varchar](30)														NULL
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Stg_Details]
