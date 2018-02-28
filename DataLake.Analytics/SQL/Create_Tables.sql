@@ -109,11 +109,6 @@ CREATE TABLE						[dbo].[stg_121_Headers](
 									[Pk]									[varchar](64)														NULL
 )
 GO
-CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Stg_Headers]
-ON									[dbo].[stg_121_Headers]
-WITH								(DROP_EXISTING = OFF,
-									COMPRESSION_DELAY = 0)
-ON									[PRIMARY]
 -------------------------------------------------------------------------- PROD DETAILS
 IF EXISTS							(
 SELECT								*
@@ -235,8 +230,3 @@ CREATE TABLE						[dbo].[stg_122_Details](
 									[Pk]									[varchar](64)														NULL
 )
 GO
-CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Stg_Details]
-ON									[dbo].[stg_122_Details]
-WITH								(DROP_EXISTING = OFF,
-									COMPRESSION_DELAY = 0)
-ON									[PRIMARY]
