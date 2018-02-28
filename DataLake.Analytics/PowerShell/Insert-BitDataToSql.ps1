@@ -426,7 +426,7 @@ If ($continue -eq 'y') {
 				ErrorAction = 'Stop';
 			}
 			Invoke-Sqlcmd @sqlTruncateParams
-			$message = "$(Create-TimeStamp)  Truncating staging tables successful"
+			$message = "$(Create-TimeStamp)  Truncating staging tables successful."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*"
@@ -526,6 +526,7 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Creating PK's on data in staging tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
+			Write-Output "$(Create-TimeStamp)  Adding PK's..."
 			Add-PkToStgData -dataLakeFolder $($dataLakeSearchPathRoot + $processDate)
 			$message = "$(Create-TimeStamp)  Finished creating PK's on data in staging tables!"
 			Write-Verbose -Message $message
