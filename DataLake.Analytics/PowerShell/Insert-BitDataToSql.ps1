@@ -1,11 +1,11 @@
-# Init  --  v1.5.1.1
+# Init  --  v1.5.2.4
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-29-2018'
-[string]$global:endDate   = '01-29-2018'
+[string]$global:startDate = '01-26-2018'
+[string]$global:endDate   = '02-26-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -14,7 +14,9 @@
 ##   Enter the path where you want the error logs to be stored:
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com'
 ######################################################
 ## create failure email list and add megan and ravi ##
 ######################################################
@@ -232,8 +234,13 @@ Function Add-CsvsToSql {
 		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
 		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 1000000 -F 2 -t ',' -q -e '$errLogFile'"
 		Add-Content -Value "$(Create-TimeStamp)  $command" -Path $opsLog
-		$result = Invoke-Expression -Command $command
+		$global:bcpResult = Invoke-Expression -Command $command
 		Add-Content -Value "$(Create-TimeStamp)  $($result[$($result.Length - 3)])" -Path $opsLog
+		If ($bcpResult -notlike "*copied*") {
+			$global:bcpError = $Error[0]
+			Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
+		}
 		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)' WHERE [CsvFile] IS NULL"
 		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 		$sqlParams = @{
@@ -521,6 +528,7 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Finished creating PK's on data in staging tables!"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
+			$milestone_6 = Get-Date
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
@@ -550,7 +558,8 @@ If ($continue -eq 'y') {
 			$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
 			$insTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 			$couTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
-			$movTime = New-TimeSpan -Start $milestone_5 -End $endTime
+			$pkcTime = New-TimeSpan -Start $milestone_5 -End $milestone_6
+			$movTime = New-TimeSpan -Start $milestone_6 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
 			$message0 = "Start Time--------:  $startTimeText"
 			$message1 = "End Time----------:  $endTimeText"
@@ -559,11 +568,12 @@ If ($continue -eq 'y') {
 			$message4 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
 			$message5 = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
 			$message6 = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
-			$message7 = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
-			$message8 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-			$message9 = "Total File Count--:  $fileCount"
-			$messageX = "Empty File Count--:  $emptyFileCount"
-			$messageY = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
+			$message7 = "Create PK in STG--:  $($pkcTime.Hours.ToString("00")) h $($pkcTime.Minutes.ToString("00")) m $($pkcTime.Seconds.ToString("00")) s"
+			$message8 = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
+			$message9 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+			$messageX = "Total File Count--:  $fileCount"
+			$messageY = "Empty File Count--:  $emptyFileCount"
+			$messageZ = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
 			Write-Output $message0
 			Write-Output $message1
 			Write-Output $message2
@@ -576,6 +586,7 @@ If ($continue -eq 'y') {
 			Write-Output $message9
 			Write-Output $messageX
 			Write-Output $messageY
+			Write-Output $messageZ
 			Write-Output $emptyFileList
 			Add-Content -Value $message0 -Path $opsLog
 			Add-Content -Value $message1 -Path $opsLog
@@ -589,6 +600,7 @@ If ($continue -eq 'y') {
 			Add-Content -Value $message9 -Path $opsLog
 			Add-Content -Value $messageX -Path $opsLog
 			Add-Content -Value $messageY -Path $opsLog
+			Add-Content -Value $messageZ -Path $opsLog
 			Add-Content -Value $emptyFileList -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
@@ -614,6 +626,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 				$message9<br>
 				$messageX<br>
 				$messageY<br>
+				$messageZ<br>
 				</font>
 				<br>
 				Store Count By Day In Folder $processDate :<br>
@@ -698,6 +711,28 @@ Something bad happened!!!<br><br>
 Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
 <br>
 Error:  $($Error[0].Exception.Message)<br>
+</font>
+"@
+		}
+		Send-MailMessage @params
+	}
+	Catch [System.Activities.WorkflowApplicationException] {
+		Write-Error -Exception $Error[0].Exception
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $emailList;
+			BodyAsHtml = $true;
+			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+			Body = @"
+<font face='consolas'>
+Something bad happened!!!<br><br>
+Failed Command:  BCP<br>
+<br>
+$($bcpError.Exception.Message)<br>
 </font>
 "@
 		}

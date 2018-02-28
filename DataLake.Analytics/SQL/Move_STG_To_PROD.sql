@@ -29,11 +29,11 @@ INSERT INTO						[dbo].[prod_121_Headers]
 								[TransactionCode],
 								[TransactionSequence],
 								[RewardMemberID],
+								[RawFileName],
+								[LineNo],
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
-								[RawFileName],
-								[LineNo],
 								[Pk]
 )
 SELECT
@@ -56,11 +56,11 @@ SELECT
 								[TransactionCode],
 								[TransactionSequence],
 								[RewardMemberID],
+								[RawFileName],
+								[LineNo],
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
-								[RawFileName],
-								[LineNo],
 								[Pk]
 FROM							[dbo].[stg_121_Headers];
 INSERT INTO						[dbo].[prod_122_Details]
@@ -91,11 +91,11 @@ INSERT INTO						[dbo].[prod_122_Details]
 								[MUBasePrice],
 								[HostItemId],
 								[CouponCount],
+								[RawFileName],
+								[LineNo],
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
-								[RawFileName],
-								[LineNo],
 								[Pk]
 )
 SELECT
@@ -125,11 +125,10 @@ SELECT
 								[MUBasePrice],
 								[HostItemId],
 								[CouponCount],
+								[RawFileName],
+								[LineNo],
 								[StageInsertStamp],
 								[CsvFile],
 								[DataLakeFolder],
-								[RawFileName],
-								[LineNo],
 								[Pk]
 FROM							[dbo].[stg_122_Details];
-
