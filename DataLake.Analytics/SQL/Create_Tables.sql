@@ -50,6 +50,7 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
 									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
+WITH								(IGNORE_DUP_KEY = ON)
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Headers]
@@ -165,6 +166,7 @@ CREATE TABLE						[dbo].[prod_122_Details](
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
 									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
+WITH								(IGNORE_DUP_KEY = ON)
 )
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Details]
