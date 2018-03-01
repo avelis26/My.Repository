@@ -1,4 +1,4 @@
-# Init  --  v1.5.2.9
+# Init  --  v1.5.3.0
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -337,7 +337,7 @@ $global:port = 25
 $global:fromAddr = 'noreply@7-11.com'
 $global:database = '7ELE'
 $global:sqlUser = 'sqladmin'
-$global:sqlPass = 'Password20!7!'
+$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 $global:sqlServer = 'mstestsqldw.database.windows.net'
 $global:user = $userName + '@7-11.com'
 $global:dataLakeSearchPathRoot = '/BIT_CRM/'
