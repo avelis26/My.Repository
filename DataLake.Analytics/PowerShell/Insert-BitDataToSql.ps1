@@ -4,8 +4,8 @@
 ##   Enter your 7-11 user name without domain:
 [string]$global:userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-28-2018'
-[string]$global:endDate   = '02-26-2018'
+[string]$global:startDate = '01-26-2018'
+[string]$global:endDate   = '01-28-2018'
 ##   Enter the transactions you would like to filter for:
 [string]$global:transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -15,8 +15,8 @@
 [string]$global:errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
 #[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
-[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
-#[string[]]$global:emailList = 'graham.pinkston@ansira.com'
+#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
+[string[]]$global:emailList = 'graham.pinkston@ansira.com'
 ######################################################
 ## create failure email list and add megan and ravi ##
 ######################################################
