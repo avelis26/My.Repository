@@ -58,6 +58,7 @@ ON									[dbo].[prod_121_Headers]
 WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
+GO
 -------------------------------------------------------------------------- STG HEADERS
 IF EXISTS							(
 SELECT								*
@@ -67,8 +68,7 @@ WHERE								[name] = 'stg_121_Headers'
 BEGIN
 DROP TABLE							[dbo].[stg_121_Headers]
 END
-
-CREATE TABLE						[dbo].[stg_121_Headers](
+CREATE TABLE						[dbo].[stg_121_Headers]					(
 									[RecordId]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
 									[TransactionType]						[int]																NULL,
@@ -119,7 +119,7 @@ WHERE								[name] = 'prod_122_Details'
 BEGIN
 DROP TABLE							[dbo].[prod_122_Details]
 END
-CREATE TABLE						[dbo].[prod_122_Details](
+CREATE TABLE						[dbo].[prod_122_Details]				(
 									[RecordID]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
 									[TransactionType]						[int]																NULL,
@@ -174,6 +174,7 @@ ON									[dbo].[prod_122_Details]
 WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
+GO
 -------------------------------------------------------------------------- STG DETAILS
 IF EXISTS							(
 SELECT								*
@@ -183,7 +184,7 @@ WHERE								[name] = 'stg_122_Details'
 BEGIN
 DROP TABLE							[dbo].[stg_122_Details]
 END
-CREATE TABLE						[dbo].[stg_122_Details](
+CREATE TABLE						[dbo].[stg_122_Details]					(
 									[RecordID]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
 									[TransactionType]						[int]																NULL,
