@@ -15,6 +15,13 @@ $global:sqlUser = 'sqladmin'
 $global:sqlPass = 'Password20!7!'
 $global:sqlServer = 'mstestsqldw.database.windows.net'
 ##########################################
+# add function to check last found log file and look for ::ETL SUCCESSFUL::
+# $path = 'H:\Ops_Log'
+# $lastLogFile = Get-ChildItem -Path $path -File -Filter "*BITC.log" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
+# $logContent = Get-Content -Path $lastLogFile
+# If ($logContent[$logContent.Count - 1] -eq '::ETL SUCCESSFUL::' {do the things})
+# Else {wait to do the things}
+##########################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
 	Param(
