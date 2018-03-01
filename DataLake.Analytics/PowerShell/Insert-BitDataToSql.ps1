@@ -646,7 +646,8 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 "@
 			}
 			Send-MailMessage @params
-			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force
+			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
+			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog
 			Write-Output "Starting next day in 5..."
 			Start-Sleep -Seconds 1
 			Write-Output "4..."
