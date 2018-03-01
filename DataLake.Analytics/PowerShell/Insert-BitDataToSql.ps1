@@ -1,4 +1,4 @@
-# Init  --  v1.5.2.8
+# Init  --  v1.5.2.9
 #######################################################################################################
 #######################################################################################################
 ##   Enter your 7-11 user name without domain:
@@ -249,6 +249,7 @@ Function Add-CsvsToSql {
 		}
 		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)' WHERE [CsvFile] IS NULL"
 		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+		Add-Content -Value "_" -Path $opsLog
 		$sqlParams = @{
 			query = $query;
 			ServerInstance = $sqlServer;
