@@ -356,22 +356,23 @@ If ($continue -eq 'y') {
 	Import-Module 7Zip -ErrorAction Stop
 	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-	Write-Verbose -Message "$(Create-TimeStamp)  Logging into Azure..."
+	Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog
 	Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog
 	If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $destinationRootPath..."
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog
 		New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
 	}
 	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $archiveRootPath..."
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog
 		New-Item -ItemType Directory -Path $archiveRootPath -Force | Out-Null
 	}
 	If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $opsLogRootPath..."
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog
 		New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
 	}
 	If ($(Test-Path -Path $errLogRootPath) -eq $false) {
-		Write-Verbose -Message "$(Create-TimeStamp)  Creating folder:  $errLogRootPath..."
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog
 		New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
 	}
 	Try {

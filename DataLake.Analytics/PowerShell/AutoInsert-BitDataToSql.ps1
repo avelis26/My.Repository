@@ -80,23 +80,20 @@ Function Get-DataLakeRawFiles {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	Try {
 		If ($(Test-Path -Path $destinationRootPath) -eq $true) {
-			$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  Removing folder $destinationRootPath ..." -Path $opsLog
 			Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop | Out-Null
 		}
-		$message = "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..."
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..." -Path $opsLog
 		$getParams = @{
 			Account = $dataLakeStoreName;
 			Path = $dataLakeSearchPath;
-			ErrorAction = 'SilentlyContinue';
+			ErrorAction = 'Stop';
 		}
 		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
 		If ($dataLakeFolder -eq $null) {
 			throw [System.IO.DirectoryNotFoundException] "$dataLakeSearchPath NOT FOUND!!!"
 		}
-		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..." -Path $opsLog
 		$exportParams = @{
 			Account = $dataLakeStoreName;
 			Path = $($dataLakeFolder.Path);
@@ -314,24 +311,6 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
-Import-Module SqlServer -ErrorAction Stop
-Import-Module AzureRM -ErrorAction Stop
-Import-Module 7Zip -ErrorAction Stop
-$password = ConvertTo-SecureString -String $(Get-Content -Path $credPath)
-$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
-Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
-If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
-}
-If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $archiveRootPath -Force | Out-Null
-}
-If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
-}
-If ($(Test-Path -Path $errLogRootPath) -eq $false) {
-	New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
-}
 Try {
 # Init
 	If ($runDate -eq $null) {
@@ -347,8 +326,35 @@ Try {
 	$year = $runDateObj.year.ToString("0000")
 	$processDate = $year + $month + $day
 	$opsLog = $opsLogRootPath + $processDate + '_' + $(Create-TimeStamp -forFileName) + '_BITC.log'
-	$message = "Run Date: $runDate"
-	Set-Content -Value $message -Path $opsLog
+	Set-Content -Value "$(Create-TimeStamp)  Run Date: $processDate" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  Loading SqlServer module..." -Path $opsLog
+	Import-Module SqlServer -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Loading AzureRM module..." -Path $opsLog
+	Import-Module AzureRM -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Loading 7Zip module..." -Path $opsLog
+	Import-Module 7Zip -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Building credential object..." -Path $opsLog
+	$password = ConvertTo-SecureString -String $(Get-Content -Path $credPath)
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog
+	Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog
+	If ($(Test-Path -Path $destinationRootPath) -eq $false) {
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog
+		New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog
+		New-Item -ItemType Directory -Path $archiveRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog
+		New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
+	}
+	If ($(Test-Path -Path $errLogRootPath) -eq $false) {
+		Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog
+		New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
+	}
 # Get raw files
 	$getDataLakeRawFilesParams = @{
 		dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
@@ -581,6 +587,12 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 "@
 	}
 	Send-MailMessage @params
+	If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
+		Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog
+		Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
+		Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog
+	}
+	Add-Content -Value "$(Create-TimeStamp)  Moving folder to arcive: $($destinationRootPath + $processDate)..." -Path $opsLog
 	Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 	Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog
 }
