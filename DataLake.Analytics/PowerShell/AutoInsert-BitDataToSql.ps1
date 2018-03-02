@@ -123,7 +123,7 @@ Function Split-FilesAmongFolders {
 	$global:emptyFileCount = $null
 	$global:emptyFileList = @()
 	$files = Get-ChildItem -Path $inFolder -File -ErrorAction Stop
-	$emptyFiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 1500}
+	$emptyFiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 92}
 	$global:fileCount = $files.Count.ToString()
 	$global:emptyFileCount = $emptyFiles.Count.ToString()
 	$message = "$(Create-TimeStamp)  Found $fileCount total files..."
