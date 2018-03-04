@@ -1,4 +1,4 @@
-# Init  --  v1.5.3.1
+# Init  --  v1.5.3.2
 [CmdletBinding()]
 Param(
 	[string]$report,
@@ -592,7 +592,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 		Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
 		Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog
 	}
-	Add-Content -Value "$(Create-TimeStamp)  Moving folder to arcive: $($destinationRootPath + $processDate)..." -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog
 	Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 	Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog
 }
