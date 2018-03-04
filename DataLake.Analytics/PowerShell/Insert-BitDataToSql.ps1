@@ -19,6 +19,7 @@
 [string[]]$global:emailList = 'graham.pinkston@ansira.com'
 ######################################################
 ## create failure email list and add megan and ravi ##
+## check why powershell spins up only 4 jobs at a time
 ######################################################
 ##   Enter $true for verbose information output, $false faster speed:
 [bool]$global:verbose = $false
