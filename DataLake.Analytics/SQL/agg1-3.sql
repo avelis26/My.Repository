@@ -1,9 +1,6 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_1_3')
-BEGIN
-DROP PROCEDURE						[dbo].[usp_Aggregate_1_3]
-END
+DROP PROCEDURE IF EXISTS			[dbo].[usp_Aggregate_1_3]
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON

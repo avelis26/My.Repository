@@ -1,9 +1,6 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_1_1')
-BEGIN
-DROP PROCEDURE						[dbo].[usp_Aggregate_1_1]
-END
+DROP PROCEDURE IF EXISTS			[dbo].[usp_Aggregate_1_1]
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
@@ -13,12 +10,7 @@ CREATE PROCEDURE					[dbo].[usp_Aggregate_1_1]
 									@EndDate								date
 AS
 SET NOCOUNT ON
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
-BEGIN
-DROP TABLE							[dbo].[Agg1_DaypartAggregate]
-END
-IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
-BEGIN
+DROP TABLE IF EXISTS				[dbo].[Agg1_DaypartAggregate]
 CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NULL,
@@ -49,13 +41,7 @@ CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
 									[Ttl_Itm_Amt_DayP6]						[int]						NOT NULL,
 									[Ttl_Itm_Amt_DayP7]						[int]						NOT NULL)
 ON									[PRIMARY]
-END
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_joined')
-BEGIN
-DROP TABLE							[dbo].[tmp_query_data_joined]
-END
-IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_joined')
-BEGIN
+DROP TABLE IF EXISTS				[dbo].[tmp_query_data_joined]
 CREATE TABLE						[dbo].[tmp_query_data_joined]			(
 									[RecordId]								[varchar](2)				NULL,
 									[StoreNumber]							[int]						NULL,
@@ -97,13 +83,7 @@ CREATE TABLE						[dbo].[tmp_query_data_joined]			(
 									[HostItemId]							[varchar](20)				NULL,
 									[CouponCount]							[int]						NULL)
 ON									[PRIMARY]
-END
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_FINAL')
-BEGIN
-DROP TABLE							[dbo].[tmp_query_data_FINAL]
-END
-IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_FINAL')
-BEGIN
+DROP TABLE IF EXISTS				[dbo].[tmp_query_data_FINAL]
 CREATE TABLE						[dbo].[tmp_query_data_FINAL]			(
 									[RecordId]								[varchar](2)				NULL,
 									[StoreNumber]							[int]						NULL,
@@ -150,7 +130,6 @@ CREATE TABLE						[dbo].[tmp_query_data_FINAL]			(
 									[Category_Ds]							[varchar](50)				NULL,
 									[SubCategory_Cd]						[varchar](4)				NULL)
 ON									[PRIMARY]
-END
 INSERT INTO							[dbo].[tmp_query_data_joined]
 SELECT								[tht].[RecordId],
 									[tht].[StoreNumber],
