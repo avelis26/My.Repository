@@ -49,6 +49,7 @@
     <Content Include="SQL\usp_Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\Delete_Old_Data.sql" />
+    <Content Include="SQL\usp_Database_Maintenance.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Headers.sql" />
     <Content Include="SQL\shrink-log.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Details.sql" />
