@@ -45,6 +45,7 @@
     <Content Include="SQL\usp_Aggregate_1_2.sql" />
     <Content Include="SQL\usp_Aggregate_1_3.sql" />
     <Content Include="SQL\usp_Aggregate_2_1.sql" />
+    <Content Include="SQL\usp_CEO_Report.sql" />
     <Content Include="SQL\usp_Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\Delete_Old_Data.sql" />
