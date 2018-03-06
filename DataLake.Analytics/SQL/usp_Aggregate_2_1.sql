@@ -1,9 +1,6 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Aggregate_Two')
-BEGIN
-DROP PROCEDURE						[dbo].[usp_Aggregate_Two]
-END
+DROP PROCEDURE IF EXISTS			[dbo].[usp_Aggregate_Two]
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
@@ -11,9 +8,7 @@ GO
 CREATE PROCEDURE					[dbo].[usp_Aggregate_Two]
 AS
 SET NOCOUNT ON
-IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg2_StoreTxnItems')
-BEGIN
-DROP TABLE							[dbo].[Agg2_StoreTxnItems]
+DROP TABLE IF EXISTS				[dbo].[Agg2_StoreTxnItems]
 CREATE TABLE						[dbo].[Agg2_StoreTxnItems]		(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NOT NULL,
@@ -23,7 +18,6 @@ CREATE TABLE						[dbo].[Agg2_StoreTxnItems]		(
 									[TotalAmount]							[money]						NULL,
 									[Unique_member_count]					[int]						NULL)
 ON									[PRIMARY]
-END
 INSERT INTO							[dbo].[Agg2_StoreTxnItems]		(
 									[EndDate],
 									[StoreNumber],
@@ -51,4 +45,3 @@ FROM								[dbo].[tmp_query_data_FINAL]
 GROUP BY							CASE WHEN [RewardMemberID] IS NULL THEN 'Non-Member' ELSE 'Member' END,
 									[StoreNumber],
 									[EndDate]
-GO

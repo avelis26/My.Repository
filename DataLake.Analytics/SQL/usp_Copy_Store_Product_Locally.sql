@@ -1,9 +1,6 @@
 USE								[7ELE]
 GO
-IF EXISTS						(SELECT * FROM sys.procedures WHERE [name] = 'usp_Copy_Store_Product_Locally')
-BEGIN
-DROP PROCEDURE					[dbo].[usp_Copy_Store_Product_Locally]
-END
+DROP PROCEDURE IF EXISTS		[dbo].[usp_Copy_Store_Product_Locally]
 GO
 CREATE PROCEDURE				[dbo].[usp_Copy_Store_Product_Locally]
 AS

@@ -41,17 +41,14 @@
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SQL\agg1-1.sql" />
-    <Content Include="SQL\agg1-2.sql" />
-    <Content Include="SQL\agg1-3.sql" />
-    <Content Include="SQL\agg2.sql" />
-    <Content Include="SQL\Copy_Store_Product_Locally.sql" />
-    <Content Include="SQL\Count_Store_By_Day_SP.sql" />
-    <Content Include="SQL\Create_Prod_Headers.sql" />
+    <Content Include="SQL\usp_Aggregate_1_1.sql" />
+    <Content Include="SQL\usp_Aggregate_1_2.sql" />
+    <Content Include="SQL\usp_Aggregate_1_3.sql" />
+    <Content Include="SQL\usp_Aggregate_2_1.sql" />
+    <Content Include="SQL\usp_Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\Delete_Old_Data.sql" />
-    <Content Include="SQL\Move_STG_To_PROD.sql" />
-    <Content Include="SQL\Move_STG_To_PROD_CEO.sql" />
+    <Content Include="SQL\usp_Staging_To_Prod_Headers.sql" />
     <Content Include="SQL\shrink-log.sql" />
     <Content Include="SQL\Truncate_Staging.sql" />
     <Content Include="XML\format121.xml" />

@@ -1,11 +1,9 @@
 USE								[7ELE]
 GO
-IF EXISTS						(SELECT * FROM sys.procedures WHERE [name] = 'usp_Move_STG_To_PROD')
-BEGIN
-DROP PROCEDURE					[dbo].[usp_Move_STG_To_PROD]
-END
-GO
+DROP PROCEDURE IF EXISTS		[dbo].[usp_Move_STG_To_PROD]
 CREATE PROCEDURE				[dbo].[usp_Move_STG_To_PROD]
+									@HeadersTable								varchar(32),
+									@DetailsTable								varchar(32)
 AS
 SET NOCOUNT ON
 INSERT INTO						[dbo].[prod_121_Headers]
@@ -62,7 +60,7 @@ SELECT
 								[CsvFile],
 								[DataLakeFolder],
 								[Pk]
-FROM							[dbo].[stg_121_Headers];
+FROM							[dbo].[stg_121_Headers]
 INSERT INTO						[dbo].[prod_122_Details]
 (
 								[RecordID],
@@ -131,4 +129,5 @@ SELECT
 								[CsvFile],
 								[DataLakeFolder],
 								[Pk]
-FROM							[dbo].[stg_122_Details];
+FROM							[dbo].[stg_122_Details]
+GO
