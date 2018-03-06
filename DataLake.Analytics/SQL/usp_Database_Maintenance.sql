@@ -33,9 +33,6 @@ SELECT							table_schema,
 FROM							information_schema.tables
 WHERE							TABLE_TYPE								=							'BASE TABLE'
 OPEN							updatestats
-DECLARE							@tableSchema							NVARCHAR(128)
-DECLARE							@tableName								NVARCHAR(128)
-DECLARE							@Statement								NVARCHAR(300) 
 FETCH NEXT FROM					updatestats
 INTO							@tableSchema,
 								@tableName
