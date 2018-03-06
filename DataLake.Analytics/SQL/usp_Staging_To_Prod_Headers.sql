@@ -1,12 +1,13 @@
 USE								[7ELE]
 GO
-DROP PROCEDURE IF EXISTS		[dbo].[usp_Move_STG_To_PROD]
-CREATE PROCEDURE				[dbo].[usp_Move_STG_To_PROD]
-									@HeadersTable								varchar(32),
-									@DetailsTable								varchar(32)
+DROP PROCEDURE IF EXISTS		[dbo].[usp_Staging_To_Prod_Headers]
+GO
+CREATE PROCEDURE				[dbo].[usp_Staging_To_Prod_Headers]
+									@HeadersTable								varchar(32)
 AS
 SET NOCOUNT ON
-INSERT INTO						[dbo].[prod_121_Headers]
+--INSERT INTO						[dbo].[prod_121_Headers]
+INSERT INTO						@HeadersTable
 (
 								[RecordId],
 								[StoreNumber],
@@ -61,73 +62,4 @@ SELECT
 								[DataLakeFolder],
 								[Pk]
 FROM							[dbo].[stg_121_Headers]
-INSERT INTO						[dbo].[prod_122_Details]
-(
-								[RecordID],
-								[StoreNumber],
-								[TransactionType],
-								[DayNumber],
-								[ShiftNumber],
-								[TransactionUID],
-								[SequenceNumber],
-								[ProductNumber],
-								[PLUNumber],
-								[RecordAmount],
-								[RecordCount],
-								[RecordType],
-								[SizeIndx],
-								[ErrorCorrectionFlag],
-								[PriceOverideFlag],
-								[TaxableFlag],
-								[VoidFlag],
-								[RecommendedFlag],
-								[PriceMultiple],
-								[CarryStatus],
-								[TaxOverideFlag],
-								[PromotionCount],
-								[SalesPrice],
-								[MUBasePrice],
-								[HostItemId],
-								[CouponCount],
-								[RawFileName],
-								[LineNo],
-								[StageInsertStamp],
-								[CsvFile],
-								[DataLakeFolder],
-								[Pk]
-)
-SELECT
-								[RecordID],
-								[StoreNumber],
-								[TransactionType],
-								[DayNumber],
-								[ShiftNumber],
-								[TransactionUID],
-								[SequenceNumber],
-								[ProductNumber],
-								[PLUNumber],
-								[RecordAmount],
-								[RecordCount],
-								[RecordType],
-								[SizeIndx],
-								[ErrorCorrectionFlag],
-								[PriceOverideFlag],
-								[TaxableFlag],
-								[VoidFlag],
-								[RecommendedFlag],
-								[PriceMultiple],
-								[CarryStatus],
-								[TaxOverideFlag],
-								[PromotionCount],
-								[SalesPrice],
-								[MUBasePrice],
-								[HostItemId],
-								[CouponCount],
-								[RawFileName],
-								[LineNo],
-								[StageInsertStamp],
-								[CsvFile],
-								[DataLakeFolder],
-								[Pk]
-FROM							[dbo].[stg_122_Details]
 GO

@@ -27,7 +27,6 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 									[RewardMemberID]						[varchar](20)														NULL,
 									[RawFileName]							[varchar](512)														NOT NULL,
 									[LineNo]								[varchar](32)														NOT NULL,
-									[Header_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
 									[ProdInsertStamp]						[DATETIME]															NOT NULL 
 																			DEFAULT(
@@ -78,7 +77,6 @@ CREATE TABLE						[dbo].[prod_121_Headers_CEO]			(
 									[RewardMemberID]						[varchar](20)														NULL,
 									[RawFileName]							[varchar](512)														NOT NULL,
 									[LineNo]								[varchar](32)														NOT NULL,
-									[Header_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
 									[ProdInsertStamp]						[DATETIME]															NOT NULL 
 																			DEFAULT(
@@ -106,14 +104,7 @@ WITH								(DROP_EXISTING = OFF,
 ON									[PRIMARY]
 GO
 -------------------------------------------------------------------------- STG HEADERS
-IF EXISTS							(
-SELECT								*
-FROM								sys.tables
-WHERE								[name] = 'stg_121_Headers'
-)
-BEGIN
-DROP TABLE							[dbo].[stg_121_Headers]
-END
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers]
 CREATE TABLE						[dbo].[stg_121_Headers]					(
 									[RecordId]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
@@ -136,7 +127,6 @@ CREATE TABLE						[dbo].[stg_121_Headers]					(
 									[RewardMemberID]						[varchar](20)														NULL,
 									[RawFileName]							[varchar](512)														NULL,
 									[LineNo]								[varchar](32)														NULL,
-									[Header_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
 																				CONVERT(
@@ -187,7 +177,6 @@ CREATE TABLE						[dbo].[prod_122_Details]				(
 									[CouponCount]							[int]																NULL,
 									[RawFileName]							[varchar](512)														NOT NULL,
 									[LineNo]								[varchar](32)														NOT NULL,
-									[Detail_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
 									[ProdInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
@@ -245,7 +234,6 @@ CREATE TABLE						[dbo].[prod_122_Details_CEO]			(
 									[CouponCount]							[int]																NULL,
 									[RawFileName]							[varchar](512)														NOT NULL,
 									[LineNo]								[varchar](32)														NOT NULL,
-									[Detail_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL,
 									[ProdInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
@@ -273,14 +261,7 @@ WITH								(DROP_EXISTING = OFF,
 ON									[PRIMARY]
 GO
 -------------------------------------------------------------------------- STG DETAILS
-IF EXISTS							(
-SELECT								*
-FROM								sys.tables
-WHERE								[name] = 'stg_122_Details'
-)
-BEGIN
-DROP TABLE							[dbo].[stg_122_Details]
-END
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details]
 CREATE TABLE						[dbo].[stg_122_Details]					(
 									[RecordID]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
@@ -310,7 +291,6 @@ CREATE TABLE						[dbo].[stg_122_Details]					(
 									[CouponCount]							[int]																NULL,
 									[RawFileName]							[varchar](512)														NULL,
 									[LineNo]								[varchar](32)														NULL,
-									[Detail_Id]								[int] IDENTITY(1,1)													NOT NULL,
 									[StageInsertStamp]						[DATETIME]															NOT NULL
 																			DEFAULT(
 																				CONVERT(
@@ -331,76 +311,81 @@ CREATE TABLE						[dbo].[stg_122_Details]					(
 )
 GO
 -------------------------------------------------------------------------- EXT PRODUCTS
-CREATE TABLE [dbo].[ext_productTable](
-	[ProductMaster_Id] [varchar](50) NOT NULL,
-	[UPC] [varchar](50) NOT NULL,
-	[Category_Cd] [varchar](5) NULL,
-	[Category_Ds] [varchar](50) NULL,
-	[Depart_Cd] [varchar](30) NULL,
-	[Manufacturer_Cd] [varchar](20) NULL,
-	[Manufacturer_Nm] [varchar](50) NULL,
-	[PSA_Cd] [varchar](4) NULL,
-	[PSA_Ds] [varchar](50) NULL,
-	[Item_Ds] [varchar](50) NULL,
-	[SubCategory_Cd] [varchar](4) NULL,
-	[SubCategory_Ds] [varchar](50) NULL,
-	[VerticalClass_Cd] [varchar](3) NULL,
-	[VerticalClass_Ds] [varchar](50) NULL,
-	[CorpBrand] [varchar](10) NULL,
-	[UPCType_Cd] [varchar](2) NULL,
-	[AgeRestricted_Fg] [varchar](2) NOT NULL,
-	[CurrentImport_Id] [varchar](10) NOT NULL,
-	[OriginalImport_Id] [varchar](10) NOT NULL,
-	[Modified_Dttm] [varchar](30) NOT NULL,
-	[Created_Dttm] [varchar](30) NOT NULL,
-	[SLIN] [int] NULL,
- CONSTRAINT [pk_ProductMaster_Id] PRIMARY KEY CLUSTERED 
-(
-	[ProductMaster_Id] ASC
-)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF)
+DROP TABLE IF EXISTS				[dbo].[ext_productTable]
+CREATE TABLE						[dbo].[ext_productTable]				(
+									[ProductMaster_Id]						[varchar](50)														NOT NULL,
+									[UPC]									[varchar](50)														NOT NULL,
+									[Category_Cd]							[varchar](5)														NULL,
+									[Category_Ds]							[varchar](50)														NULL,
+									[Depart_Cd]								[varchar](30)														NULL,
+									[Manufacturer_Cd]						[varchar](20)														NULL,
+									[Manufacturer_Nm]						[varchar](50)														NULL,
+									[PSA_Cd]								[varchar](4)														NULL,
+									[PSA_Ds]								[varchar](50)														NULL,
+									[Item_Ds]								[varchar](50)														NULL,
+									[SubCategory_Cd]						[varchar](4)														NULL,
+									[SubCategory_Ds]						[varchar](50)														NULL,
+									[VerticalClass_Cd]						[varchar](3)														NULL,
+									[VerticalClass_Ds]						[varchar](50)														NULL,
+									[CorpBrand]								[varchar](10)														NULL,
+									[UPCType_Cd]							[varchar](2)														NULL,
+									[AgeRestricted_Fg]						[varchar](2)														NOT NULL,
+									[CurrentImport_Id]						[varchar](10)														NOT NULL,
+									[OriginalImport_Id]						[varchar](10)														NOT NULL,
+									[Modified_Dttm]							[varchar](30)														NOT NULL,
+									[Created_Dttm]							[varchar](30)														NOT NULL,
+									[SLIN]									[int]																NULL,
+CONSTRAINT							[pk_ProductMaster_Id]					PRIMARY KEY CLUSTERED												(
+									[ProductMaster_Id] ASC)
+WITH								(STATISTICS_NORECOMPUTE = OFF,
+									IGNORE_DUP_KEY = ON)
 )
 -------------------------------------------------------------------------- EXT STORES
-CREATE TABLE [dbo].[ext_storeTable](
-	[Store_Id] [int] NOT NULL,
-	[Location_Nm] [varchar](50) NULL,
-	[PhysicalAddress_Id] [int] NULL,
-	[MailingAddress_Id] [int] NULL,
-	[Phone_Id] [int] NULL,
-	[Fax_Id] [int] NULL,
-	[OriginalImport_Id] [int] NOT NULL,
-	[CurrentImport_Id] [int] NOT NULL,
-	[Modified_Dttm] [datetime2](0) NOT NULL,
-	[Created_Dttm] [datetime2](0) NOT NULL,
-	[EffectiveStart_Dt] [date] NULL,
-	[Open_Dt] [date] NULL,
-	[Closed_Dt] [date] NULL,
-	[Alcohol_Fg] [bit] NOT NULL,
-	[Liquor_Fg] [bit] NOT NULL,
-	[Gas_Fg] [bit] NOT NULL,
-	[CDC_Cd] [varchar](3) NULL,
-	[CDC_Nm] [varchar](30) NULL,
-	[DMA_Cd] [smallint] NULL,
-	[DMA_Nm] [varchar](30) NULL,
-	[FieldConsultant_Nm] [varchar](33) NULL,
-	[Franchise_Cd] [char](1) NULL,
-	[Market_Cd] [int] NULL,
-	[Market_Ds] [varchar](30) NULL,
-	[Latitude] [decimal](9, 6) NULL,
-	[Longitude] [decimal](9, 6) NULL,
-	[MarketManager_Nm] [varchar](30) NULL,
-	[Owner_Cd] [char](1) NULL,
-	[StoreType_Cd] [char](1) NULL,
-	[Vicinity] [varchar](50) NULL,
-	[Wholesale_Center] [varchar](2) NULL,
-	[Zone_Cd] [int] NULL,
-	[Zone_Nm] [varchar](30) NULL,
-	[Region_Cd] [char](1) NULL,
-	[Active_Fg] [bit] NOT NULL,
-	[SysStartTime] [datetime2](0) NOT NULL,
-	[SysEndTime] [datetime2](0) NOT NULL,
-	[AgreementEdition_Dt] [date] NULL,
-	[AgreementSigned_Dt] [date] NULL,
-	[Dark_Fg] [bit] NOT NULL,
-	[Country_Cd] [char](2) NULL
-PRIMARY KEY CLUSTERED		([Store_Id] ASC)	WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF)
+DROP TABLE IF EXISTS				[dbo].[ext_storeTable]
+CREATE TABLE						[dbo].[ext_storeTable]					(
+									[Store_Id]								[int]																NOT NULL,
+									[Location_Nm]							[varchar](50)														NULL,
+									[PhysicalAddress_Id]					[int]																NULL,
+									[MailingAddress_Id]						[int]																NULL,
+									[Phone_Id]								[int]																NULL,
+									[Fax_Id]								[int]																NULL,
+									[OriginalImport_Id]						[int]																NOT NULL,
+									[CurrentImport_Id]						[int]																NOT NULL,
+									[Modified_Dttm]							[datetime2](0)														NOT NULL,
+									[Created_Dttm]							[datetime2](0)														NOT NULL,
+									[EffectiveStart_Dt]						[date]																NULL,
+									[Open_Dt]								[date]																NULL,
+									[Closed_Dt]								[date]																NULL,
+									[Alcohol_Fg]							[bit]																NOT NULL,
+									[Liquor_Fg]								[bit]																NOT NULL,
+									[Gas_Fg]								[bit]																NOT NULL,
+									[CDC_Cd]								[varchar](3)														NULL,
+									[CDC_Nm]								[varchar](30)														NULL,
+									[DMA_Cd]								[smallint]															NULL,
+									[DMA_Nm]								[varchar](30)														NULL,
+									[FieldConsultant_Nm]					[varchar](33)														NULL,
+									[Franchise_Cd]							[char](1)															NULL,
+									[Market_Cd]								[int]																NULL,
+									[Market_Ds]								[varchar](30)														NULL,
+									[Latitude]								[decimal](9, 6)														NULL,
+									[Longitude]								[decimal](9, 6)														NULL,
+									[MarketManager_Nm]						[varchar](30)														NULL,
+									[Owner_Cd]								[char](1)															NULL,
+									[StoreType_Cd]							[char](1)															NULL,
+									[Vicinity]								[varchar](50)														NULL,
+									[Wholesale_Center]						[varchar](2)														NULL,
+									[Zone_Cd]								[int]																NULL,
+									[Zone_Nm]								[varchar](30)														NULL,
+									[Region_Cd]								[char](1)															NULL,
+									[Active_Fg]								[bit]																NOT NULL,
+									[SysStartTime]							[datetime2](0)														NOT NULL,
+									[SysEndTime]							[datetime2](0)														NOT NULL,
+									[AgreementEdition_Dt]					[date]																NULL,
+									[AgreementSigned_Dt]					[date]																NULL,
+									[Dark_Fg]								[bit]																NOT NULL,
+									[Country_Cd]							[char](2)															NULL
+CONSTRAINT							[pk_Store_Id]							PRIMARY KEY CLUSTERED												(
+									[Store_Id] ASC)
+WITH								(STATISTICS_NORECOMPUTE = OFF,
+									IGNORE_DUP_KEY = ON)
 )

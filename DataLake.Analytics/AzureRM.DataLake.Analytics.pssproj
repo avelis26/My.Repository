@@ -50,11 +50,11 @@
     <Content Include="SQL\Delete_Old_Data.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Headers.sql" />
     <Content Include="SQL\shrink-log.sql" />
-    <Content Include="SQL\Truncate_Staging.sql" />
+    <Content Include="SQL\usp_Staging_To_Prod_Details.sql" />
     <Content Include="XML\format121.xml" />
     <Content Include="XML\format122.xml" />
     <Content Include="XML\format124.xml" />
-    <Content Include="SQL\ParseDictionary.sql" />
+    <Content Include="SQL\Transaction_Schemas.sql" />
     <Content Include="SQL\Tmp_Header_SP.sql" />
   </ItemGroup>
   <ItemGroup>
