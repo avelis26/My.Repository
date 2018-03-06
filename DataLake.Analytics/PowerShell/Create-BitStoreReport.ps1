@@ -1,10 +1,10 @@
-# Init  --  v1.2.1.0
+# Init  --  v1.2.1.1
 ##########################################
 ##########################################
-$global:end = '2018-02-25'
+$global:end = '2018-03-04'
 ##########################################
 ##########################################
-$global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
+$global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Ben.Smith@Ansira.com'
 $global:finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
 $global:smtpServer = '10.128.1.125'

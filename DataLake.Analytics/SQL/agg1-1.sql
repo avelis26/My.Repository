@@ -16,6 +16,9 @@ SET NOCOUNT ON
 IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
 BEGIN
 DROP TABLE							[dbo].[Agg1_DaypartAggregate]
+END
+IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'Agg1_DaypartAggregate')
+BEGIN
 CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NULL,
@@ -47,9 +50,12 @@ CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
 									[Ttl_Itm_Amt_DayP7]						[int]						NOT NULL)
 ON									[PRIMARY]
 END
-IF EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_joined')
+IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_joined')
 BEGIN
 DROP TABLE							[dbo].[tmp_query_data_joined]
+END
+IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_joined')
+BEGIN
 CREATE TABLE						[dbo].[tmp_query_data_joined]			(
 									[RecordId]								[varchar](2)				NULL,
 									[StoreNumber]							[int]						NULL,
@@ -70,7 +76,6 @@ CREATE TABLE						[dbo].[tmp_query_data_joined]			(
 									[TransactionCode]						[int]						NULL,
 									[TransactionSequence]					[int]						NULL,
 									[RewardMemberID]						[varchar](20)				NULL,
-									[Header_Id]								[int]						NOT NULL,
 									[SequenceNumber]						[int]						NULL,
 									[ProductNumber]							[int]						NULL,
 									[PLUNumber]								[varchar](14)				NULL,
@@ -90,13 +95,15 @@ CREATE TABLE						[dbo].[tmp_query_data_joined]			(
 									[SalesPrice]							[money]						NULL,
 									[MUBasePrice]							[money]						NULL,
 									[HostItemId]							[varchar](20)				NULL,
-									[CouponCount]							[int]						NULL,
-									[Detail_Id]								[int]						NOT NULL)
+									[CouponCount]							[int]						NULL)
 ON									[PRIMARY]
 END
 IF EXISTS							(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_FINAL')
 BEGIN
 DROP TABLE							[dbo].[tmp_query_data_FINAL]
+END
+IF NOT EXISTS						(SELECT * FROM sys.tables WHERE [name] = 'tmp_query_data_FINAL')
+BEGIN
 CREATE TABLE						[dbo].[tmp_query_data_FINAL]			(
 									[RecordId]								[varchar](2)				NULL,
 									[StoreNumber]							[int]						NULL,
@@ -117,7 +124,6 @@ CREATE TABLE						[dbo].[tmp_query_data_FINAL]			(
 									[TransactionCode]						[int]						NULL,
 									[TransactionSequence]					[int]						NULL,
 									[RewardMemberID]						[varchar](20)				NULL,
-									[Header_Id]								[int]						NOT NULL,
 									[SequenceNumber]						[int]						NULL,
 									[ProductNumber]							[int]						NULL,
 									[PLUNumber]								[varchar](14)				NULL,
@@ -138,7 +144,6 @@ CREATE TABLE						[dbo].[tmp_query_data_FINAL]			(
 									[MUBasePrice]							[money]						NULL,
 									[HostItemId]							[varchar](20)				NULL,
 									[CouponCount]							[int]						NULL,
-									[Detail_Id]								[int]						NOT NULL,
 									[PSA_Cd]								[varchar](4)				NULL,
 									[PSA_Ds]								[varchar](50)				NULL,
 									[Category_Cd]							[varchar](5)				NULL,
@@ -166,7 +171,6 @@ SELECT								[tht].[RecordId],
 									[tht].[TransactionCode],
 									[tht].[TransactionSequence],
 									[tht].[RewardMemberID],
-									[tht].[Header_Id],
 									[pdt].[SequenceNumber],
 									[pdt].[ProductNumber],
 									[pdt].[PLUNumber],
@@ -186,8 +190,7 @@ SELECT								[tht].[RecordId],
 									[pdt].[SalesPrice],
 									[pdt].[MUBasePrice],
 									[pdt].[HostItemId],
-									[pdt].[CouponCount],
-									[pdt].[Detail_Id]
+									[pdt].[CouponCount]
 FROM								[dbo].[prod_122_Details]				AS							[pdt]
 INNER JOIN							[dbo].[prod_121_Headers]				AS							[tht]
 ON									[pdt].[StoreNumber]						=							[tht].[StoreNumber]
