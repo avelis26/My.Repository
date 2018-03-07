@@ -164,7 +164,7 @@ ON									[td].[StoreNumber]							=							[th].[StoreNumber]
 AND									[td].[DayNumber]							=							[th].[DayNumber]
 AND									[td].[ShiftNumber]							=							[th].[ShiftNumber]
 AND									[td].[TransactionUID]						=							[th].[TransactionUID]
-WHERE								[th].[EndDate]								=							@curr_yr_date
+WHERE								[th].[EndDate]								BETWEEN						DATEADD(day, -6, @curr_yr_date) AND @curr_yr_date
 INSERT INTO							[dbo].[tmp_query_data_joined_CEO]
 SELECT								[th].[RecordId],
 									[th].[StoreNumber],

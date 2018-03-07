@@ -1,32 +1,81 @@
-# Init  --  v1.5.3.2
-#######################################################################################################
-#######################################################################################################
+# Version  --  v1.6.0.0
+######################################################
+## need to imporve multithreading
+## Add logic to check bcp error file for content
+######################################################
+[CmdletBinding()]
+Param(
+	[string]$report,
+	[switch]$autoDate,
+	[switch]$test
+)
 ##   Enter your 7-11 user name without domain:
-[string]$global:userName = 'gpink003'
+[string]$userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$global:startDate = '01-26-2018'
-[string]$global:endDate   = '01-28-2018'
+[string]$startDate = '01-26-2018'
+[string]$endDate   = '01-28-2018'
 ##   Enter the transactions you would like to filter for:
-[string]$global:transTypes = 'D1121,D1122'
+[string]$transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$global:destinationRootPath = 'D:\BIT_CRM\'
-[string]$global:archiveRootPath = 'H:\BIT_CRM\'
+[string]$destinationRootPath = 'D:\BIT_CRM\'
+[string]$archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
-[string]$global:errLogRootPath = 'H:\Err_Log\'
+[string]$errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address desired for notifications:
-#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
-#[string[]]$global:emailList = 'graham.pinkston@ansira.com', 'Bryan.Ingram@ansira.com', 'Cheong.Sin@Ansira.com'
-[string[]]$global:emailList = 'graham.pinkston@ansira.com'
-######################################################
-## create failure email list and add megan and ravi ##
-## check why powershell spins up only 4 jobs at a time
-######################################################
-##   Enter $true for verbose information output, $false faster speed:
-[bool]$global:verbose = $false
-## Name of staging tables to insert data to
-[string]$global:table121 = 'stg_121_Headers'
-[string]$global:table122 = 'stg_122_Details'
+If ($test -eq $true) {
+	[string]$emailList = 'graham.pinkston@ansira.com'
+	[string]$failEmailList = 'graham.pinkston@ansira.com'
+}
+Else {
+	[string[]]$emailList = `
+	'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'tyler.bailey@ansira.com', `
+	'DIST-SEI_CRM_STATUS@7-11.com', `
+	'catherine.wells@ansira.com', `
+	'britten.morse@ansira.com', `
+	'Geri.Shaeffer@Ansira.com', `
+	'megan.morace@ansira.com'
+	[string]$failEmailList = `
+	'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'tyler.bailey@ansira.com'
+}
+## Base name of staging tables to insert data to
+[string]$stgTable121 = 'stg_121_Headers_'
+[string]$stgTable122 = 'stg_122_Details_'
+## Path where opsLog will be saved
+If ($report -eq 's') {
+	$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+}
+ElseIf ($report -eq 'c') {
+	$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+}
+Else {
+	[System.ArgumentOutOfRangeException] "Report: Only 's' or 'c' accepted!!!"
+}
 #######################################################################################################
+$dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
+$smtpServer = '10.128.1.125'
+$port = 25
+$fromAddr = 'noreply@7-11.com'
+$database = '7ELE'
+$sqlUser = 'sqladmin'
+$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
+$azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
+$sqlServer = 'mstestsqldw.database.windows.net'
+$user = $userName + '@7-11.com'
+$dataLakeSearchPathRoot = '/BIT_CRM/'
+$dataLakeStoreName = '711dlprodcons01'
+$extractorExe = 'C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe'
+$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+$table = $null
+$file = $null
+$fileCount = $null
+$emptyFileList = $null
+$storeCountResults = $null
+$i = 0
 #######################################################################################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
@@ -56,7 +105,6 @@ Function Get-DataLakeRawFiles {
 		[string]$dataLakeStoreName, # 711dlprodcons01
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	Try {
 		If ($(Test-Path -Path $destinationRootPath) -eq $true) {
 			$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
@@ -101,7 +149,6 @@ Function Split-FilesAmongFolders {
 		[string]$inFolder, # H:\BIT_CRM\20171216\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$global:fileCount = $null
 	$global:emptyFileCount = $null
 	$global:emptyFileList = @()
@@ -188,7 +235,6 @@ Function Convert-BitFilesToCsv {
 		[string]$filePrefix, # 20171216
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$folders = Get-ChildItem -Path $inFolder -Directory
 	ForEach ($folder in $folders) {
 		$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
@@ -219,18 +265,14 @@ Function Add-CsvsToSql {
 		[string]$errLogRoot, # H:\BCP_Errors\
 		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
 	)
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-	###################################################
-	## Add logic to check bcp error file for content ##
-	###################################################
 	Write-Output "$(Create-TimeStamp)  Inserting..."
 	ForEach ($file in $structuredFiles) {
 		If ($file.Name -like "*D1_121*") {
-			$table = $table121
+			$table = $stgTable121
 			$formatFile = "C:\Scripts\XML\format121.xml"
 		}
 		ElseIf ($file.Name -like "*D1_122*") {
-			$table = $table122
+			$table = $stgTable122
 			$formatFile = "C:\Scripts\XML\format122.xml"
 		}
 		Else {
@@ -268,9 +310,8 @@ Function Add-PkToStgData {
 	Param(
 		[string]$dataLakeFolder
 	)
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$sqlParams = @{
-		query = "UPDATE $table121 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
+		query = "UPDATE $stgTable121 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -280,7 +321,7 @@ Function Add-PkToStgData {
 	}
 	Invoke-Sqlcmd @sqlParams
 	$sqlParams = @{
-		query = "UPDATE $table122 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+		query = "UPDATE $stgTable122 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
 		ServerInstance = $sqlServer;
 		Database = $database;
 		Username = $sqlUser;
@@ -291,76 +332,54 @@ Function Add-PkToStgData {
 	Invoke-Sqlcmd @sqlParams
 }
 Function Confirm-Run {
-	$report = Read-Host -Prompt "Store report or CEO dashboard? (s/c)"
-	If ($report -eq 's') {
-		$global:moveSp = 'usp_Move_STG_To_PROD'
-		$global:opsLogRootPath = 'H:\Ops_Log\'
-	}
-	ElseIf ($report -eq 'c') {
-		$global:moveSp = 'usp_Move_STG_To_PROD_CEO'
-		$global:opsLogRootPath = 'H:\Ops_Log_CEO\'
-	}
-	Else {
-		[System.ArgumentOutOfRangeException] "Only 's' or 'c' accepted!!!"
-	}
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	Write-Host "Start Date    ::  $startDate"
 	Write-Host "End Date      ::  $endDate"
 	Write-Host "Transactions  ::  $transTypes"
 	Write-Host "Verbose       ::  $verbose"
-	Write-Host "Table121      ::  $table121"
-	Write-Host "Table122      ::  $table122"
+	Write-Host "stgTable121   ::  $stgTable121"
+	Write-Host "stgTable122   ::  $stgTable122"
 	Write-Host "Move SP       ::  $moveSp"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
-$continue = Confirm-Run
+# Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($policy -ne 'TrustAllCertsPolicy') {
 	add-type @"
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-public class TrustAllCertsPolicy : ICertificatePolicy {
-	public bool CheckValidationResult(
-		ServicePoint srvPoint, X509Certificate certificate,
-		WebRequest request, int certificateProblem
-	) {
-		return true;
+	using System.Net;
+	using System.Security.Cryptography.X509Certificates;
+	public class TrustAllCertsPolicy : ICertificatePolicy {
+		public bool CheckValidationResult(
+			ServicePoint srvPoint, X509Certificate certificate,
+			WebRequest request, int certificateProblem
+		) {
+			return true;
+		}
 	}
-}
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
-$global:smtpServer = '10.128.1.125'
-$global:port = 25
-$global:fromAddr = 'noreply@7-11.com'
-$global:database = '7ELE'
-$global:sqlUser = 'sqladmin'
-$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
-$global:sqlServer = 'mstestsqldw.database.windows.net'
-$global:user = $userName + '@7-11.com'
-$global:dataLakeSearchPathRoot = '/BIT_CRM/'
-$global:dataLakeStoreName = '711dlprodcons01'
-$global:extractorExe = 'C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe'
-$global:table = $null
-$global:file = $null
-$global:fileCount = $null
-$global:emptyFileList = $null
-$global:storeCountResults = $null
-$i = 0
+If ($autoDate -eq $null) {
+	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+	$continue = Confirm-Run
+}
+Else {
+	$startDateObj = Get-Date -ErrorAction Stop
+	$endDateObj = $startDateObj
+	$continue = 'y'
+}
 If ($continue -eq 'y') {
 	Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip -ErrorAction Stop
-	$password = ConvertTo-SecureString -String $(Get-Content -Path "C:\Users\$userName\Documents\Secrets\$userName.cred")
+	$password = ConvertTo-SecureString -String $azuPass
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 	Try {
-# Get raw files
-		$startDateObj = Get-Date -Date $startDate
-		$endDateObj = Get-Date -Date $endDate
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 		While ($i -lt $range) {
 			$startTime = Get-Date
@@ -368,11 +387,11 @@ If ($continue -eq 'y') {
 			$day = $($startDateObj.AddDays($i)).day.ToString("00")
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
-			$global:processDate = $year + $month + $day
-			$global:opsLog = $opsLogRootPath + $processDate + '_' + $(Create-TimeStamp -forFileName) + '_BITC.log'
-			$message = "Range: $startDate - $endDate"
+			$processDate = $year + $month + $day
+			$opsLog = $opsLogRootPath + $processDate + '_' + $(Create-TimeStamp -forFileName) + '_BITC.log'
+			Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog
 			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog
-			Login-AzureRmAccount -Credential $credential -Subscription 'ee691273-18af-4600-bc24-eb6768bf9cfa' -ErrorAction Stop
+			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog
@@ -390,8 +409,7 @@ If ($continue -eq 'y') {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog
 				New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
 			}
-			Write-Verbose -Message $message
-			Set-Content -Value $message -Path $opsLog
+# Get raw files
 			$getDataLakeRawFilesParams = @{
 				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
@@ -424,8 +442,20 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Truncating staging tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
+			$query = @"
+				TRUNCATE TABLE [dbo].[$($stgTable121)_1];
+				TRUNCATE TABLE [dbo].[$($stgTable121)_2];
+				TRUNCATE TABLE [dbo].[$($stgTable121)_3];
+				TRUNCATE TABLE [dbo].[$($stgTable121)_4];
+				TRUNCATE TABLE [dbo].[$($stgTable121)_5];
+				TRUNCATE TABLE [dbo].[$($stgTable122)_1];
+				TRUNCATE TABLE [dbo].[$($stgTable122)_2];
+				TRUNCATE TABLE [dbo].[$($stgTable122)_3];
+				TRUNCATE TABLE [dbo].[$($stgTable122)_4];
+				TRUNCATE TABLE [dbo].[$($stgTable122)_5];
+"@
 			$sqlTruncateParams = @{
-				query = "TRUNCATE TABLE [dbo].[stg_121_Headers]; TRUNCATE TABLE [dbo].[stg_122_Details];";
+				query = $query;
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -656,17 +686,31 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog
 			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog
-			Write-Output "Starting next day in 5..."
-			Start-Sleep -Seconds 1
-			Write-Output "4..."
-			Start-Sleep -Seconds 1
-			Write-Output "3..."
-			Start-Sleep -Seconds 1
-			Write-Output "2..."
-			Start-Sleep -Seconds 1
-			Write-Output "1..."
-			Start-Sleep -Seconds 1
 			$i++
+			If ($i -lt $range) {
+				Write-Output "Starting next day in 10..."
+				Start-Sleep -Seconds 1
+				Write-Output "9..."
+				Start-Sleep -Seconds 1
+				Write-Output "8..."
+				Start-Sleep -Seconds 1
+				Write-Output "7..."
+				Start-Sleep -Seconds 1
+				Write-Output "6..."
+				Start-Sleep -Seconds 1
+				Write-Output "5..."
+				Start-Sleep -Seconds 1
+				Write-Output "4..."
+				Start-Sleep -Seconds 1
+				Write-Output "3..."
+				Start-Sleep -Seconds 1
+				Write-Output "2..."
+				Start-Sleep -Seconds 1
+				Write-Output "1..."
+				Start-Sleep -Milliseconds 400
+				Write-Output "Too late :P"
+				Start-Sleep -Milliseconds 256
+			}
 		}
 	}
 	Catch [System.InvalidOperationException] {
@@ -677,7 +721,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
@@ -698,7 +742,7 @@ Error:  $($Error[0].Exception.Message)<br>
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
@@ -720,7 +764,7 @@ Error:  $($Error[0].Exception.Message)<br>
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
@@ -742,7 +786,7 @@ Error:  $($Error[0].Exception.Message)<br>
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
@@ -764,7 +808,7 @@ $($bcpError.Exception.Message)<br>
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
@@ -792,7 +836,7 @@ Error:  $($Error[0].Exception.Message)<br>
 			Port = $port;
 			UseSsl = 0;
 			From = $fromAddr;
-			To = $emailList;
+			To = $failEmailList;
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
