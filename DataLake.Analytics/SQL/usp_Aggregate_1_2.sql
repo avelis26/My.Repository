@@ -26,5 +26,6 @@ AND									[tqj].[Aborted]							=							0
 AND									[tqj].[VoidFlag]						=							0
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Tmp_Final]
 ON									[dbo].[tmp_query_data_FINAL]
-WITH								(DROP_EXISTING = OFF, COMPRESSION_DELAY = 0)
+WITH								(DROP_EXISTING = OFF,
+									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]

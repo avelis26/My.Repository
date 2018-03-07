@@ -3,11 +3,11 @@ GO
 DROP PROCEDURE IF EXISTS		[dbo].[usp_Staging_To_Prod_Details]
 GO
 CREATE PROCEDURE				[dbo].[usp_Staging_To_Prod_Details]
-									@DetailsTable								varchar(32)
+									@StagingTable								varchar(32),
+									@ProdTable									varchar(32)
 AS
 SET NOCOUNT ON
---INSERT INTO						[dbo].[prod_122_Details]
-INSERT INTO						@DetailsTable
+INSERT INTO						@ProdTable
 (
 								[RecordID],
 								[StoreNumber],
@@ -75,5 +75,5 @@ SELECT
 								[CsvFile],
 								[DataLakeFolder],
 								[Pk]
-FROM							[dbo].[stg_122_Details]
+FROM							@StagingTable
 GO

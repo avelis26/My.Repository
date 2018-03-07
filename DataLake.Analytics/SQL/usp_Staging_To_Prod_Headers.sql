@@ -3,11 +3,11 @@ GO
 DROP PROCEDURE IF EXISTS		[dbo].[usp_Staging_To_Prod_Headers]
 GO
 CREATE PROCEDURE				[dbo].[usp_Staging_To_Prod_Headers]
-									@HeadersTable								varchar(32)
+									@StagingTable								varchar(32),
+									@ProdTable									varchar(32)
 AS
 SET NOCOUNT ON
---INSERT INTO						[dbo].[prod_121_Headers]
-INSERT INTO						@HeadersTable
+INSERT INTO						@ProdTable
 (
 								[RecordId],
 								[StoreNumber],
@@ -61,5 +61,5 @@ SELECT
 								[CsvFile],
 								[DataLakeFolder],
 								[Pk]
-FROM							[dbo].[stg_121_Headers]
+FROM							@StagingTable
 GO

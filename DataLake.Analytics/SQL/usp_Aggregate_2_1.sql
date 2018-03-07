@@ -9,7 +9,7 @@ CREATE PROCEDURE					[dbo].[usp_Aggregate_Two]
 AS
 SET NOCOUNT ON
 DROP TABLE IF EXISTS				[dbo].[Agg2_StoreTxnItems]
-CREATE TABLE						[dbo].[Agg2_StoreTxnItems]		(
+CREATE TABLE						[dbo].[Agg2_StoreTxnItems]				(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NOT NULL,
 									[Member_Status]							[varchar](10)				NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE						[dbo].[Agg2_StoreTxnItems]		(
 									[TotalAmount]							[money]						NULL,
 									[Unique_member_count]					[int]						NULL)
 ON									[PRIMARY]
-INSERT INTO							[dbo].[Agg2_StoreTxnItems]		(
+INSERT INTO							[dbo].[Agg2_StoreTxnItems]				(
 									[EndDate],
 									[StoreNumber],
 									[Member_Status],

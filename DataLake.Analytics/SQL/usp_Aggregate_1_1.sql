@@ -11,7 +11,7 @@ CREATE PROCEDURE					[dbo].[usp_Aggregate_1_1]
 AS
 SET NOCOUNT ON
 DROP TABLE IF EXISTS				[dbo].[Agg1_DaypartAggregate]
-CREATE TABLE						[dbo].[Agg1_DaypartAggregate]	(
+CREATE TABLE						[dbo].[Agg1_DaypartAggregate]			(
 									[EndDate]								[date]						NULL,
 									[StoreNumber]							[int]						NULL,
 									[PSA_Cd]								[varchar](4)				NULL,
@@ -179,5 +179,6 @@ AND									[pdt].[TransactionUID]					=							[tht].[TransactionUID]
 WHERE								[tht].[EndDate]							BETWEEN						@StartDate AND @EndDate
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Tmp_Joined]
 ON									[dbo].[tmp_query_data_joined]
-WITH								(DROP_EXISTING = OFF, COMPRESSION_DELAY = 0)
+WITH								(DROP_EXISTING = OFF,
+									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]

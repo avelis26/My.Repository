@@ -60,7 +60,16 @@ INSERT INTO						[dbo].[ext_productTable]		(
 )
 SELECT							[ProductMaster_Id],
 								[SLIN],
-								SUBSTRING([UPC], PATINDEX('%[^0]%', [UPC] + ' '), LEN([UPC])),
+								SUBSTRING(
+									[UPC],
+									PATINDEX(
+										'%[^0]%',
+										[UPC] + ' '
+									),
+									LEN(
+										[UPC]
+									)
+								),
 								[Category_Cd],
 								[Category_Ds],
 								[Depart_Cd],
