@@ -103,9 +103,181 @@ WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
 GO
--------------------------------------------------------------------------- STG HEADERS
-DROP TABLE IF EXISTS				[dbo].[stg_121_Headers]
-CREATE TABLE						[dbo].[stg_121_Headers]					(
+-------------------------------------------------------------------------- STG HEADERS 1
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_1]
+CREATE TABLE						[dbo].[stg_121_Headers_1]				(
+									[RecordId]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[Aborted]								[bit]																NULL,
+									[DeviceNumber]							[int]																NULL,
+									[DeviceType]							[int]																NULL,
+									[EmployeeNumber]						[int]																NULL,
+									[EndDate]								[date]																NULL,
+									[EndTime]								[time](7)															NULL,
+									[StartDate]								[date]																NULL,
+									[StartTime]								[time](7)															NULL,
+									[Status]								[tinyint]															NULL,
+									[TotalAmount]							[money]																NULL,
+									[TransactionCode]						[int]																NULL,
+									[TransactionSequence]					[int]																NULL,
+									[RewardMemberID]						[varchar](20)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG HEADERS 2
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_2]
+CREATE TABLE						[dbo].[stg_121_Headers_2]				(
+									[RecordId]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[Aborted]								[bit]																NULL,
+									[DeviceNumber]							[int]																NULL,
+									[DeviceType]							[int]																NULL,
+									[EmployeeNumber]						[int]																NULL,
+									[EndDate]								[date]																NULL,
+									[EndTime]								[time](7)															NULL,
+									[StartDate]								[date]																NULL,
+									[StartTime]								[time](7)															NULL,
+									[Status]								[tinyint]															NULL,
+									[TotalAmount]							[money]																NULL,
+									[TransactionCode]						[int]																NULL,
+									[TransactionSequence]					[int]																NULL,
+									[RewardMemberID]						[varchar](20)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG HEADERS 3
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_3]
+CREATE TABLE						[dbo].[stg_121_Headers_3]				(
+									[RecordId]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[Aborted]								[bit]																NULL,
+									[DeviceNumber]							[int]																NULL,
+									[DeviceType]							[int]																NULL,
+									[EmployeeNumber]						[int]																NULL,
+									[EndDate]								[date]																NULL,
+									[EndTime]								[time](7)															NULL,
+									[StartDate]								[date]																NULL,
+									[StartTime]								[time](7)															NULL,
+									[Status]								[tinyint]															NULL,
+									[TotalAmount]							[money]																NULL,
+									[TransactionCode]						[int]																NULL,
+									[TransactionSequence]					[int]																NULL,
+									[RewardMemberID]						[varchar](20)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG HEADERS 4
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_4]
+CREATE TABLE						[dbo].[stg_121_Headers_4]				(
+									[RecordId]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[Aborted]								[bit]																NULL,
+									[DeviceNumber]							[int]																NULL,
+									[DeviceType]							[int]																NULL,
+									[EmployeeNumber]						[int]																NULL,
+									[EndDate]								[date]																NULL,
+									[EndTime]								[time](7)															NULL,
+									[StartDate]								[date]																NULL,
+									[StartTime]								[time](7)															NULL,
+									[Status]								[tinyint]															NULL,
+									[TotalAmount]							[money]																NULL,
+									[TransactionCode]						[int]																NULL,
+									[TransactionSequence]					[int]																NULL,
+									[RewardMemberID]						[varchar](20)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG HEADERS 5
+DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_5]
+CREATE TABLE						[dbo].[stg_121_Headers_5]				(
 									[RecordId]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
 									[TransactionType]						[int]																NULL,
@@ -260,9 +432,209 @@ WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
 GO
--------------------------------------------------------------------------- STG DETAILS
-DROP TABLE IF EXISTS				[dbo].[stg_122_Details]
-CREATE TABLE						[dbo].[stg_122_Details]					(
+-------------------------------------------------------------------------- STG DETAILS 1
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details_1]
+CREATE TABLE						[dbo].[stg_122_Details_1]				(
+									[RecordID]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[SequenceNumber]						[int]																NOT NULL,
+									[ProductNumber]							[int]																NULL,
+									[PLUNumber]								[varchar](14)														NULL,
+									[RecordAmount]							[money]																NULL,
+									[RecordCount]							[int]																NULL,
+									[RecordType]							[int]																NULL,
+									[SizeIndx]								[int]																NULL,
+									[ErrorCorrectionFlag]					[bit]																NULL,
+									[PriceOverideFlag]						[bit]																NULL,
+									[TaxableFlag]							[bit]																NULL,
+									[VoidFlag]								[bit]																NULL,
+									[RecommendedFlag]						[bit]																NULL,
+									[PriceMultiple]							[int]																NULL,
+									[CarryStatus]							[int]																NULL,
+									[TaxOverideFlag]						[bit]																NULL,
+									[PromotionCount]						[int]																NULL,
+									[SalesPrice]							[money]																NULL,	
+									[MUBasePrice]							[money]																NULL,
+									[HostItemId]							[varchar](20)														NULL,
+									[CouponCount]							[int]																NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG DETAILS 2
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details_2]
+CREATE TABLE						[dbo].[stg_122_Details_2]				(
+									[RecordID]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[SequenceNumber]						[int]																NOT NULL,
+									[ProductNumber]							[int]																NULL,
+									[PLUNumber]								[varchar](14)														NULL,
+									[RecordAmount]							[money]																NULL,
+									[RecordCount]							[int]																NULL,
+									[RecordType]							[int]																NULL,
+									[SizeIndx]								[int]																NULL,
+									[ErrorCorrectionFlag]					[bit]																NULL,
+									[PriceOverideFlag]						[bit]																NULL,
+									[TaxableFlag]							[bit]																NULL,
+									[VoidFlag]								[bit]																NULL,
+									[RecommendedFlag]						[bit]																NULL,
+									[PriceMultiple]							[int]																NULL,
+									[CarryStatus]							[int]																NULL,
+									[TaxOverideFlag]						[bit]																NULL,
+									[PromotionCount]						[int]																NULL,
+									[SalesPrice]							[money]																NULL,	
+									[MUBasePrice]							[money]																NULL,
+									[HostItemId]							[varchar](20)														NULL,
+									[CouponCount]							[int]																NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG DETAILS 3
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details_3]
+CREATE TABLE						[dbo].[stg_122_Details_3]				(
+									[RecordID]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[SequenceNumber]						[int]																NOT NULL,
+									[ProductNumber]							[int]																NULL,
+									[PLUNumber]								[varchar](14)														NULL,
+									[RecordAmount]							[money]																NULL,
+									[RecordCount]							[int]																NULL,
+									[RecordType]							[int]																NULL,
+									[SizeIndx]								[int]																NULL,
+									[ErrorCorrectionFlag]					[bit]																NULL,
+									[PriceOverideFlag]						[bit]																NULL,
+									[TaxableFlag]							[bit]																NULL,
+									[VoidFlag]								[bit]																NULL,
+									[RecommendedFlag]						[bit]																NULL,
+									[PriceMultiple]							[int]																NULL,
+									[CarryStatus]							[int]																NULL,
+									[TaxOverideFlag]						[bit]																NULL,
+									[PromotionCount]						[int]																NULL,
+									[SalesPrice]							[money]																NULL,	
+									[MUBasePrice]							[money]																NULL,
+									[HostItemId]							[varchar](20)														NULL,
+									[CouponCount]							[int]																NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG DETAILS 4
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details_4]
+CREATE TABLE						[dbo].[stg_122_Details_4]				(
+									[RecordID]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[SequenceNumber]						[int]																NOT NULL,
+									[ProductNumber]							[int]																NULL,
+									[PLUNumber]								[varchar](14)														NULL,
+									[RecordAmount]							[money]																NULL,
+									[RecordCount]							[int]																NULL,
+									[RecordType]							[int]																NULL,
+									[SizeIndx]								[int]																NULL,
+									[ErrorCorrectionFlag]					[bit]																NULL,
+									[PriceOverideFlag]						[bit]																NULL,
+									[TaxableFlag]							[bit]																NULL,
+									[VoidFlag]								[bit]																NULL,
+									[RecommendedFlag]						[bit]																NULL,
+									[PriceMultiple]							[int]																NULL,
+									[CarryStatus]							[int]																NULL,
+									[TaxOverideFlag]						[bit]																NULL,
+									[PromotionCount]						[int]																NULL,
+									[SalesPrice]							[money]																NULL,	
+									[MUBasePrice]							[money]																NULL,
+									[HostItemId]							[varchar](20)														NULL,
+									[CouponCount]							[int]																NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL
+																			DEFAULT(
+																				CONVERT(
+																					datetime,
+																					SWITCHOFFSET(
+																						GETDATE(),
+																						DATEPART(
+																							TZOFFSET,
+																							GETDATE() AT TIME ZONE 'Central Standard Time'
+																						)
+																					)
+																				)
+																			),
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
+GO
+-------------------------------------------------------------------------- STG DETAILS 5
+DROP TABLE IF EXISTS				[dbo].[stg_122_Details_5]
+CREATE TABLE						[dbo].[stg_122_Details_5]				(
 									[RecordID]								[varchar](2)														NULL,
 									[StoreNumber]							[int]																NOT NULL,
 									[TransactionType]						[int]																NULL,

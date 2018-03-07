@@ -5,11 +5,17 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Database_Maintenance]
 AS
 SET NOCOUNT ON
-DECLARE							rebuildindexes							CURSOR FOR
+DECLARE							rebuildindexes							CURSOR
+FOR
 SELECT							table_schema,
-								table_name  
+								table_name
 FROM							information_schema.tables
-WHERE							TABLE_TYPE								=							'BASE TABLE'
+WHERE							[TABLE_NAME] LIKE 'tmp%'
+OR								[TABLE_NAME] LIKE 'Agg%'
+OR								[TABLE_NAME] LIKE 'ext%'
+OR								[TABLE_NAME] LIKE 'prod%'
+OR								[TABLE_NAME] LIKE 'stg%'
+OR								[TABLE_NAME] LIKE 'CEO%'
 OPEN							rebuildindexes
 DECLARE							@tableSchema							NVARCHAR(128)
 DECLARE							@tableName								NVARCHAR(128)
@@ -19,7 +25,7 @@ INTO							@tableSchema,
 								@tableName
 WHILE							(@@FETCH_STATUS = 0)
 BEGIN
-SET								@Statement								=							'ALTER INDEX ALL ON '  + '[' + @tableSchema + ']' + '.' + '[' + @tableName + ']' + ' REBUILD'
+SET								@Statement =							'ALTER INDEX ALL ON '  + '[' + @tableSchema + ']' + '.' + '[' + @tableName + ']' + ' REBUILD'
 EXEC							sp_executesql @Statement
 FETCH NEXT FROM					rebuildindexes
 INTO							@tableSchema,
@@ -27,18 +33,24 @@ INTO							@tableSchema,
 END 
 CLOSE							rebuildindexes
 DEALLOCATE						rebuildindexes 
-DECLARE							updatestats								CURSOR FOR
+DECLARE							updatestats								CURSOR
+FOR
 SELECT							table_schema,
 								table_name  
 FROM							information_schema.tables
-WHERE							TABLE_TYPE								=							'BASE TABLE'
+WHERE							[TABLE_NAME] LIKE 'tmp%'
+OR								[TABLE_NAME] LIKE 'Agg%'
+OR								[TABLE_NAME] LIKE 'ext%'
+OR								[TABLE_NAME] LIKE 'prod%'
+OR								[TABLE_NAME] LIKE 'stg%'
+OR								[TABLE_NAME] LIKE 'CEO%'
 OPEN							updatestats
 FETCH NEXT FROM					updatestats
 INTO							@tableSchema,
 								@tableName
 WHILE							(@@FETCH_STATUS = 0)
 BEGIN
-SET								@Statement								=							'UPDATE STATISTICS '  + '[' + @tableSchema + ']' + '.' + '[' + @tableName + ']' + ' WITH FULLSCAN'
+SET								@Statement =							'UPDATE STATISTICS '  + '[' + @tableSchema + ']' + '.' + '[' + @tableName + ']' + ' WITH FULLSCAN'
 EXEC							sp_executesql @Statement
 FETCH NEXT FROM					updatestats
 INTO							@tableSchema,
@@ -46,4 +58,4 @@ INTO							@tableSchema,
 END
 CLOSE							updatestats
 DEALLOCATE						updatestats
-ALTER DATABASE SCOPED CONFIGURATION CLEAR	PROCEDURE_CACHE
+ALTER DATABASE SCOPED CONFIGURATION CLEAR PROCEDURE_CACHE
