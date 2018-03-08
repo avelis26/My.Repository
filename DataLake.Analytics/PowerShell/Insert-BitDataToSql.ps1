@@ -5,26 +5,32 @@
 ######################################################
 [CmdletBinding()]
 Param(
-	[string]$report,
-	[switch]$autoDate,
-	[switch]$test
+	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
+	[parameter(Mandatory = $false)][switch]$autoDate,
+	[parameter(Mandatory = $false)][switch]$test = $true
 )
 ##   Enter your 7-11 user name without domain:
-[string]$userName = 'gpink003'
+$userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-[string]$startDate = '01-26-2018'
-[string]$endDate   = '01-28-2018'
+$startDate = '01-26-2018'
+$endDate   = '01-28-2018'
 ##   Enter the transactions you would like to filter for:
-[string]$transTypes = 'D1121,D1122'
+$transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
-[string]$destinationRootPath = 'D:\BIT_CRM\'
-[string]$archiveRootPath = 'H:\BIT_CRM\'
+$destinationRootPath = 'D:\BIT_CRM\'
+$archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
-[string]$errLogRootPath = 'H:\Err_Log\'
-##   Enter the email address desired for notifications:
+$errLogRootPath = 'H:\Err_Log\'
+##   Enter the email address's desired for notifications and path for log:
 If ($test -eq $true) {
-	[string]$emailList = 'graham.pinkston@ansira.com'
-	[string]$failEmailList = 'graham.pinkston@ansira.com'
+	$emailList = 'graham.pinkston@ansira.com'
+	$failEmailList = 'graham.pinkston@ansira.com'
+	If ($report -eq 's') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
+	}
+	ElseIf ($report -eq 'c') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
+	}
 }
 Else {
 	[string[]]$emailList = `
@@ -36,25 +42,22 @@ Else {
 	'britten.morse@ansira.com', `
 	'Geri.Shaeffer@Ansira.com', `
 	'megan.morace@ansira.com'
-	[string]$failEmailList = `
+	[string[]]$failEmailList = `
 	'graham.pinkston@ansira.com', `
 	'mayank.minawat@ansira.com', `
 	'tyler.bailey@ansira.com'
+	If ($report -eq 's') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+	}
+	ElseIf ($report -eq 'c') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+	}
 }
 ## Base name of staging tables to insert data to
 [string]$stgTable121 = 'stg_121_Headers_'
 [string]$stgTable122 = 'stg_122_Details_'
-## Path where opsLog will be saved
-If ($report -eq 's') {
-	$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
-}
-ElseIf ($report -eq 'c') {
-	$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
-}
-Else {
-	[System.ArgumentOutOfRangeException] "Report: Only 's' or 'c' accepted!!!"
-}
 #######################################################################################################
+## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -70,6 +73,7 @@ $dataLakeStoreName = '711dlprodcons01'
 $extractorExe = 'C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe'
 $headersMoveSp = 'usp_Staging_To_Prod_Headers'
 $detailsMoveSp = 'usp_Staging_To_Prod_Details'
+## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
 $fileCount = $null
@@ -100,17 +104,17 @@ Function Create-TimeStamp {
 Function Get-DataLakeRawFiles {
 	[CmdletBinding()]
 	Param(
-		[string]$dataLakeSearchPath, # /BIT_CRM/20171216
-		[string]$destinationRootPath, # H:\BIT_CRM\20171216\
-		[string]$dataLakeStoreName, # 711dlprodcons01
-		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
+		[string]$dataLakeSearchPath,
+		[string]$destinationPath,
+		[string]$dataLakeStoreName,
+		[string]$opsLog
 	)
 	Try {
-		If ($(Test-Path -Path $destinationRootPath) -eq $true) {
-			$message = "$(Create-TimeStamp)  Removing folder $destinationRootPath ..."
+		If ($(Test-Path -Path $destinationPath) -eq $true) {
+			$message = "$(Create-TimeStamp)  Removing folder $destinationPath ..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
-			Remove-Item -Path $destinationRootPath -Force -Recurse -ErrorAction Stop | Out-Null
+			Remove-Item -Path $destinationPath -Force -Recurse -ErrorAction Stop | Out-Null
 		}
 		$message = "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..."
 		Write-Verbose -Message $message
@@ -130,7 +134,7 @@ Function Get-DataLakeRawFiles {
 		$exportParams = @{
 			Account = $dataLakeStoreName;
 			Path = $($dataLakeFolder.Path);
-			Destination = $destinationRootPath;
+			Destination = $destinationPath;
 			Force = $true;
 			ErrorAction = 'SilentlyContinue';
 		}
@@ -146,8 +150,8 @@ Function Get-DataLakeRawFiles {
 Function Split-FilesAmongFolders {
 	[CmdletBinding()]
 	Param(
-		[string]$inFolder, # H:\BIT_CRM\20171216\
-		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
+		[string]$inFolder,
+		[string]$opsLog
 	)
 	$global:fileCount = $null
 	$global:emptyFileCount = $null
@@ -174,10 +178,10 @@ Function Split-FilesAmongFolders {
 		If ($(Test-Path -Path $dirPath) -eq $false) {
 			$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
 			Write-Verbose -Message $message
-			New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
+			New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
 		}
 		Else {
-			Get-ChildItem -Path $dirPath -Recurse | Remove-Item -Force
+			Get-ChildItem -Path $dirPath -Recurse | Remove-Item -Force -ErrorAction Stop
 		}
 		$i++
 	}
@@ -219,23 +223,23 @@ Function Split-FilesAmongFolders {
 		$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
-		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName)
-		Start-Sleep -Seconds 1
+		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -ErrorAction Stop
+		Start-Sleep -Milliseconds 128
 	}
 	Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
 	Get-Job | Wait-Job
-	Get-Job | Remove-Job
+	Get-Job | Remove-Job -ErrorAction Stop
 }
 Function Convert-BitFilesToCsv {
 	[CmdletBinding()]
 	Param(
-		[string]$inFolder, # H:\BIT_CRM\20171216\
-		[string]$transTypes, # D1121,D1122,D1124
-		[string]$extractorExe, # C:\Scripts\C#\Debug\Ansira.Sel.fileExtractor.exe
-		[string]$filePrefix, # 20171216
-		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
+		[string]$inFolder,
+		[string]$transTypes,
+		[string]$extractorExe,
+		[string]$filePrefix,
+		[string]$opsLog
 	)
-	$folders = Get-ChildItem -Path $inFolder -Directory
+	$folders = Get-ChildItem -Path $inFolder -Directory -ErrorAction Stop
 	ForEach ($folder in $folders) {
 		$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
 		If ($(Test-Path -Path $outputPath) -eq $false) {
@@ -246,63 +250,95 @@ Function Convert-BitFilesToCsv {
 		$block = {
 			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 			& $args[0] $args[1..4];
-			Remove-Item -Path $($args[1]) -Recurse -Force;
+			Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
 		}
 		$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog
-		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix"
-		Start-Sleep -Seconds 1
+		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix" -ErrorAction Stop
+		Start-Sleep -Milliseconds 128
 	}
 	Write-Output "$(Create-TimeStamp)  Converting..."
 	Get-Job | Wait-Job
-	Get-Job | Remove-Job
+	Get-Job | Remove-Job -ErrorAction Stop
 }
 Function Add-CsvsToSql {
 	[CmdletBinding()]
 	Param(
 		[System.IO.FileInfo[]]$structuredFiles,
-		[string]$errLogRoot, # H:\BCP_Errors\
-		[string]$opsLog # H:\Ops_Log\20171216_BITC.log
+		[string]$errLogRoot,
+		[string]$opsLog
 	)
-	Write-Output "$(Create-TimeStamp)  Inserting..."
+	$hext = 1
+	$dext = 1
+	$jobN = 1
+	$jobBase = 'bcp_job_'
+	Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog
 	ForEach ($file in $structuredFiles) {
+		Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
 		If ($file.Name -like "*D1_121*") {
-			$table = $stgTable121
+			$table = "[dbo].[$stgTable121$hext]"
 			$formatFile = "C:\Scripts\XML\format121.xml"
+			$hext++
 		}
 		ElseIf ($file.Name -like "*D1_122*") {
-			$table = $stgTable122
+			$table = "[dbo].[$stgTable122$dext]"
 			$formatFile = "C:\Scripts\XML\format122.xml"
+			$dext++
 		}
 		Else {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 10000000 -F 2 -t ',' -q -e '$errLogFile'"
-		Add-Content -Value "$(Create-TimeStamp)  $command" -Path $opsLog
-		$global:bcpResult = Invoke-Expression -Command $command
-		If ($bcpResult[$bcpResult.Count - 3] -notlike "*copied*") {
-			$global:bcpError = $Error[0]
-			Add-Content -Value "$(Create-TimeStamp)  $bcpResult" -Path $opsLog
+		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 100000 -F 2 -t ',' -q -e '$errLogFile'"
+		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)'"
+		$block = {
+			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+			Import-Module SqlServer -ErrorAction Stop
+			[string[]]$jobResult = $($args[0]), $($args[1])
+			[string[]]$bcpResult = Invoke-Expression -Command $($args[0])
+			If ($bcpResult[$bcpResult.Count - 3] -notlike "*copied*") {
+				Return $bcpResult
+			}
+			Else {
+				$sqlParams = @{
+					query = $($args[1]);
+					ServerInstance = $($args[2]);
+					Database = $($args[3]);
+					Username = $($args[4]);
+					Password = $($args[5]);
+					QueryTimeout = 0;
+					ErrorAction = 'Stop';
+				}
+				Invoke-Sqlcmd @sqlParams
+			}
+			$jobResult += $bcpResult
+			Return $jobResult
+		}
+		[string]$jobName = $jobBase + $jobN
+		Start-Job -ScriptBlock $block -Name $jobName -ArgumentList `
+			"$command", ` #0
+			"$query", ` #1
+			"$sqlServer", ` #2
+			"$database", ` #3
+			"$sqlUser", ` #4
+			"$sqlPass" #5
+		$jobN++
+	}
+	Get-Job | Wait-Job
+	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog
+	$jobN = 1
+	While ($jobN -lt 11) {
+		[string]$jobName = $jobBase + $jobN
+		$jobResults = Receive-Job -Name $jobName
+		If ($jobResults[$jobResults.Count - 3] -notlike "*copied*") {
 			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
 		}
 		Else {
-			Add-Content -Value "$(Create-TimeStamp)  $($bcpResult[$bcpResult.Count - 3])" -Path $opsLog
+			Add-Content -Value $jobResults -Path $opsLog
+			Remove-Job -Name $jobName
 		}
-		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)' WHERE [CsvFile] IS NULL"
-		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
-		Add-Content -Value "_" -Path $opsLog
-		$sqlParams = @{
-			query = $query;
-			ServerInstance = $sqlServer;
-			Database = $database;
-			Username = $sqlUser;
-			Password = $sqlPass;
-			QueryTimeout = 0;
-			ErrorAction = 'Stop';
-		}
-		Invoke-Sqlcmd @sqlParams
+		$jobN++
 	}
 }
 Function Add-PkToStgData {
@@ -377,8 +413,7 @@ If ($continue -eq 'y') {
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip -ErrorAction Stop
-	$password = ConvertTo-SecureString -String $azuPass
-	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
+	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass)
 	Try {
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
 		While ($i -lt $range) {
@@ -388,26 +423,26 @@ If ($continue -eq 'y') {
 			$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$processDate = $year + $month + $day
-			$opsLog = $opsLogRootPath + $processDate + '_' + $(Create-TimeStamp -forFileName) + '_BITC.log'
-			Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog
+			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
+			Set-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog
 			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog
 			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog
-				New-Item -ItemType Directory -Path $destinationRootPath -Force | Out-Null
+				New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $archiveRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog
-				New-Item -ItemType Directory -Path $archiveRootPath -Force | Out-Null
+				New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog
-				New-Item -ItemType Directory -Path $opsLogRootPath -Force | Out-Null
+				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog
-				New-Item -ItemType Directory -Path $errLogRootPath -Force | Out-Null
+				New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 # Get raw files
 			$getDataLakeRawFilesParams = @{
@@ -415,7 +450,6 @@ If ($continue -eq 'y') {
 				destinationRootPath = $($destinationRootPath + $processDate + '\');
 				dataLakeStoreName = $dataLakeStoreName;
 				opsLog = $opsLog;
-				Verbose = $verbose;
 			}
 			Get-DataLakeRawFiles @getDataLakeRawFilesParams
 # Seperate files into 5 seperate folders for paralell processing
@@ -423,7 +457,6 @@ If ($continue -eq 'y') {
 			$splitFilesAmongFoldersParams = @{
 				inFolder = $($destinationRootPath + $processDate + '\');
 				opsLog = $opsLog;
-				Verbose = $verbose;
 			}
 			Split-FilesAmongFolders @splitFilesAmongFoldersParams
 # Execute C# app as job on raw files to create CSV's
@@ -434,7 +467,6 @@ If ($continue -eq 'y') {
 				extractorExe = $extractorExe;
 				filePrefix = $processDate;
 				opsLog = $opsLog;
-				Verbose = $verbose;
 			}
 			Convert-BitFilesToCsv @convertBitFilesToCsvParams
 # Insert CSV's to DB (stg tables)
@@ -467,12 +499,11 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Truncating staging tables successful."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
-			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*"
+			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*" -ErrorAction Stop
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
 				errLogRoot = $errLogRootPath;
 				opsLog = $opsLog;
-				Verbose = $verbose;
 			}
 			Add-CsvsToSql @addCsvsToSqlParams
 # Count stores by day in stg header table and compare rows in database to rows in files
