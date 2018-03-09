@@ -1,9 +1,6 @@
 USE									[7ELE]
 GO
-IF EXISTS							(SELECT * FROM sys.procedures WHERE [name] = 'usp_Shrink_Log')
-BEGIN
-DROP PROCEDURE						[dbo].[usp_Shrink_Log]
-END
+DROP PROCEDURE IF EXISTS			[dbo].[usp_Shrink_Log]
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
