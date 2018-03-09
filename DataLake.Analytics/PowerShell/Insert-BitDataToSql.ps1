@@ -1,4 +1,4 @@
-# Version  --  v2.0.1.0
+# Version  --  v2.0.1.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -15,7 +15,7 @@ Param(
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 $startDate = '02-08-2018'
-$endDate   = '02-08-2018'
+$endDate   = '03-10-2018'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
