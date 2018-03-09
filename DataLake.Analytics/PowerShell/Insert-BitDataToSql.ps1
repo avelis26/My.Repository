@@ -2,6 +2,8 @@
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
+## add logic to compare row count from output.json
+## finish error handling for optimus failure
 ######################################################
 [CmdletBinding()]
 Param(
@@ -72,7 +74,7 @@ $sqlServer = 'mstestsqldw.database.windows.net'
 $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
-$extractorExe = 'C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe'
+$extractorExe = "C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe"
 $headersMoveSp = 'usp_Staging_To_Prod_Headers'
 $detailsMoveSp = 'usp_Staging_To_Prod_Details'
 ## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
@@ -263,6 +265,22 @@ Function Convert-BitFilesToCsv {
 	Write-Output "$(Create-TimeStamp)  Converting..."
 	Get-Job | Wait-Job
 	Get-Job | Remove-Job -ErrorAction Stop
+	Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
+	$folders = Get-ChildItem -Path $inFolder -Directory -ErrorAction Stop
+	ForEach ($folder in $folders) {
+		$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
+		$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json
+		If ($jsonObj.ResponseCode -ne 0) {
+			[string]$global:optimusError = $jsonObj.ResponseMsg
+			throw [OptimusException] "Optimus Failed!!!"
+		}
+		Else {
+			Add-Content -Value "$($folder.FullName)" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "-------------------------------------------------" -Path $opsLog -ErrorAction Stop
+		}
+	}
 }
 Function Add-CsvsToSql {
 	[CmdletBinding()]
@@ -279,12 +297,12 @@ Function Add-CsvsToSql {
 	ForEach ($file in $structuredFiles) {
 		Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
 		If ($file.Name -like "*D1_121*") {
-			$table = "[dbo].[$($stgTable121)_$hext]"
+			$table = "$($stgTable121)_$hext"
 			$formatFile = "C:\Scripts\XML\format121.xml"
 			$hext++
 		}
 		ElseIf ($file.Name -like "*D1_122*") {
-			$table = "[dbo].[$($stgTable122)_$dext]"
+			$table = "$($stgTable122)_$dext"
 			$formatFile = "C:\Scripts\XML\format122.xml"
 			$dext++
 		}
@@ -292,7 +310,7 @@ Function Add-CsvsToSql {
 			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
 		}
 		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 100000 -F 2 -t ',' -q -e '$errLogFile'"
+		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 640000 -F 2 -t ',' -q -e '$errLogFile'"
 		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)'"
 		$block = {
 			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
@@ -327,17 +345,22 @@ Function Add-CsvsToSql {
 			"$sqlPass" #5
 		$jobN++
 	}
-	Get-Job | Wait-Job
+	Write-Output "$(Create-TimeStamp)  Inserting..."
 	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog -ErrorAction Stop
 	$jobN = 1
 	While ($jobN -lt $($structuredFiles.Count + 1)) {
 		[string]$jobName = $jobBase + $jobN
-		$jobResults = Receive-Job -Name $jobName
-		If ($jobResults[$jobResults.Count - 3] -notlike "*copied*") {
+		Write-Output "$(Create-TimeStamp)  Waiting on $jobName..."
+		Get-Job -Name $jobName | Wait-Job -Name $jobName
+		$global:bcpJobResults = Receive-Job -Name $jobName
+		If ($bcpJobResults[$bcpJobResults.Count - 3] -notlike "*copied*") {
+			Add-Content -Value "$(Create-TimeStamp)  BCP FAILED!!!" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
 			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
 		}
 		Else {
-			Add-Content -Value $jobResults -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
 			Remove-Job -Name $jobName
 		}
 		$jobN++
@@ -508,7 +531,7 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Truncating staging tables successful."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*" -ErrorAction Stop
+			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Filter "*Structured*" -ErrorAction Stop
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
 				errLogRoot = $errLogRootPath;
@@ -518,7 +541,7 @@ If ($continue -eq 'y') {
 # Count stores by day in stg header table and compare rows in database to rows in files
 			$milestone_4 = Get-Date
 			$block = {
-				$files = Get-ChildItem -Recurse -File -Path $($args[0]) -Include "*Structured*"
+				$files = Get-ChildItem -Recurse -File -Path $($args[0]) -Filter "*Structured*"
 				$total = 0
 				ForEach ($file in $files) {
 					$count = 0
@@ -530,31 +553,31 @@ If ($continue -eq 'y') {
 			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
 			$rowsInFilesJobResults = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')"
 			$query = @"
-			SELECT		CAST([EndDate] AS char(10))		AS [EndDate],
-						COUNT(DISTINCT([StoreNumber]))	AS [StoreCount]
-			FROM		(
-			SELECT		[EndDate],
-						[StoreNumber]
-			FROM		[dbo].[$($stgTable121)_1]
-			UNION		ALL
-			SELECT		[EndDate],
-						[StoreNumber]
-			FROM		[dbo].[$($stgTable121)_2]
-			UNION		ALL
-			SELECT		[EndDate],
-						[StoreNumber]
-			FROM		[dbo].[$($stgTable121)_3]
-			UNION		ALL
-			SELECT		[EndDate],
-						[StoreNumber]
-			FROM		[dbo].[$($stgTable121)_4]
-			UNION		ALL
-			SELECT		[EndDate],
-						[StoreNumber]
-			FROM		[dbo].[$($stgTable121)_5]
-						)								AS					[x]
-			GROUP BY	[EndDate]
-			ORDER BY	[EndDate]						DESC
+				SELECT		CAST([EndDate] AS char(10))		AS [EndDate],
+							COUNT(DISTINCT([StoreNumber]))	AS [StoreCount]
+				FROM		(
+				SELECT		[EndDate],
+							[StoreNumber]
+				FROM		[dbo].[$($stgTable121)_1]
+				UNION		ALL
+				SELECT		[EndDate],
+							[StoreNumber]
+				FROM		[dbo].[$($stgTable121)_2]
+				UNION		ALL
+				SELECT		[EndDate],
+							[StoreNumber]
+				FROM		[dbo].[$($stgTable121)_3]
+				UNION		ALL
+				SELECT		[EndDate],
+							[StoreNumber]
+				FROM		[dbo].[$($stgTable121)_4]
+				UNION		ALL
+				SELECT		[EndDate],
+							[StoreNumber]
+				FROM		[dbo].[$($stgTable121)_5]
+							)								AS					[x]
+				GROUP BY	[EndDate]
+				ORDER BY	[EndDate]						DESC
 "@
 			$sqlStoreCountParams = @{
 				query = $query;
@@ -597,23 +620,23 @@ If ($continue -eq 'y') {
 				$t++
 			}
 			$query = @"
-			SELECT		COUNT([RecordID])			AS		[Count]
-			FROM		(
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable121)_1]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable121)_2]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable121)_3]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable121)_4]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable121)_5]
-						)							AS		[x]
+				SELECT		COUNT([RecordID])			AS		[Count]
+				FROM		(
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable121)_1]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable121)_2]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable121)_3]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable121)_4]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable121)_5]
+							)							AS		[x]
 "@
 			$sqlHeadersCountParams = @{
 				query = $query;
@@ -626,23 +649,23 @@ If ($continue -eq 'y') {
 			}
 			$sqlHeadersCountResults = Invoke-Sqlcmd @sqlHeadersCountParams
 			$query = @"
-			SELECT		COUNT([RecordID])			AS		[Count]
-			FROM		(
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable122)_1]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable122)_2]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable122)_3]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable122)_4]
-			UNION		ALL
-			SELECT		[RecordID]
-			FROM		[dbo].[$($stgTable122)_5]
-						)							AS		[x]
+				SELECT		COUNT([RecordID])			AS		[Count]
+				FROM		(
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable122)_1]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable122)_2]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable122)_3]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable122)_4]
+				UNION		ALL
+				SELECT		[RecordID]
+				FROM		[dbo].[$($stgTable122)_5]
+							)							AS		[x]
 "@
 			$sqlDetailsCountParams = @{
 				query = $query;
@@ -680,24 +703,33 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Write-Output "$(Create-TimeStamp)  Moving..."
 			$i = 1
-			While ($i -lt 6) {
-				$query = @"
-				EXECUTE [dbo].[$headersMoveSp] @StagingTable = '$($stgTable121)_$i', @ProdTable = '$prodTable121'
-				EXECUTE [dbo].[$detailsMoveSp] @StagingTable = '$($stgTable122)_$i', @ProdTable = '$prodTable122'
-"@
-				$sqlStgToProdParams = @{
-					query = $query;
-					ServerInstance = $sqlServer;
-					Database = $database;
-					Username = $sqlUser;
-					Password = $sqlPass;
-					QueryTimeout = 0;
-					ErrorAction = 'Stop';
-				}
-				Invoke-Sqlcmd @sqlStgToProdParams
+			$sqlStgToProdParams = @{
+				query = "EXECUTE [dbo].[$headersMoveSp]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+				ErrorAction = 'Stop';
 			}
+			$message = "$(Create-TimeStamp)  Moving headers to prod..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Invoke-Sqlcmd @sqlStgToProdParams
+			$sqlStgToProdParams = @{
+				query = "EXECUTE [dbo].[$detailsMoveSp]";
+				ServerInstance = $sqlServer;
+				Database = $database;
+				Username = $sqlUser;
+				Password = $sqlPass;
+				QueryTimeout = 0;
+				ErrorAction = 'Stop';
+			}
+			$message = "$(Create-TimeStamp)  Moving details to prod..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Invoke-Sqlcmd @sqlStgToProdParams
 			$message = "$(Create-TimeStamp)  Move complete!"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -716,6 +748,7 @@ If ($continue -eq 'y') {
 			$pkcTime = New-TimeSpan -Start $milestone_5 -End $milestone_6
 			$movTime = New-TimeSpan -Start $milestone_6 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
+			$message0 = "Data Lake Folder--:  $($dataLakeSearchPathRoot + $processDate)"
 			$messageA = "Start Time--------:  $startTimeText"
 			$messageB = "End Time----------:  $endTimeText"
 			$messageC = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
@@ -731,6 +764,7 @@ If ($continue -eq 'y') {
 			$messageM = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
 			$messageN = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
 			$messageO = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
+			Write-Output $message0
 			Write-Output $messageA
 			Write-Output $messageB
 			Write-Output $messageC
@@ -747,6 +781,7 @@ If ($continue -eq 'y') {
 			Write-Output $messageN
 			Write-Output $messageO
 			Write-Output $emptyFileList
+			Add-Content -Value $message0 -Path $opsLog -ErrorAction Stop
 			Add-Content -Value $messageA -Path $opsLog -ErrorAction Stop
 			Add-Content -Value $messageB -Path $opsLog -ErrorAction Stop
 			Add-Content -Value $messageC -Path $opsLog -ErrorAction Stop
@@ -772,31 +807,32 @@ If ($continue -eq 'y') {
 				BodyAsHtml = $true;
 				Subject = "BITC: $($processDate): ETL Process Finished";
 				Body = @"
-Raw files from the 7-11 data lake have been processed and inserted into the database.<br>
-<br>
-<font face='courier'>
-				$messageA<br>
-				$messageB<br>
-				$messageC<br>
-				$messageD<br>
-				$messageE<br>
-				$messageF<br>
-				$messageG<br>
-				$messageH<br>
-				$messageI<br>
-				$messageJ<br>
-				$messageK<br>
-				$messageL<br>
-				$messageM<br>
-				$messageN<br>
-				$messageO<br>
-				</font>
-				<br>
-				Store Count By Day In Folder $processDate :<br>
-				$storeCountHtml
-				<br>
-				Empty File List:<br>
-				$htmlEmptyFileList<br>
+					Raw files from the 7-11 data lake have been processed and inserted into the database.<br>
+					<br>
+					<font face='courier'>
+					$message0<br>
+					$messageA<br>
+					$messageB<br>
+					$messageC<br>
+					$messageD<br>
+					$messageE<br>
+					$messageF<br>
+					$messageG<br>
+					$messageH<br>
+					$messageI<br>
+					$messageJ<br>
+					$messageK<br>
+					$messageL<br>
+					$messageM<br>
+					$messageN<br>
+					$messageO<br>
+					</font>
+					<br>
+					Store Count By Day In Folder $processDate :<br>
+					$storeCountHtml
+					<br>
+					Empty File List:<br>
+					$htmlEmptyFileList<br>
 "@
 			}
 			Send-MailMessage @params
@@ -847,11 +883,11 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-File row count doesn't match database row count!!! Please check the ops log!!!<br><br>
-<br>
-Error:  $($Error[0].Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				File row count doesn't match database row count!!! Please check the ops log!!!<br><br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
@@ -868,12 +904,12 @@ Error:  $($Error[0].Exception.Message)<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-Something bad happened!!!<br><br>
-Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-<br>
-Error:  $($Error[0].Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
@@ -890,12 +926,12 @@ Error:  $($Error[0].Exception.Message)<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-Something bad happened!!!<br><br>
-Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-<br>
-Error:  $($Error[0].Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
@@ -912,12 +948,12 @@ Error:  $($Error[0].Exception.Message)<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-Something bad happened!!!<br><br>
-Failed Command:  BCP<br>
-<br>
-$($bcpError.Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				Failed Command:  BCP<br>
+				<br>
+				$bcpJobResults<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
@@ -934,12 +970,12 @@ $($bcpError.Exception.Message)<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-Something bad happened!!!<br><br>
-Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-<br>
-Error:  $($Error[0].Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
@@ -962,12 +998,12 @@ Error:  $($Error[0].Exception.Message)<br>
 			BodyAsHtml = $true;
 			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
 			Body = @"
-<font face='consolas'>
-Something bad happened!!!<br><br>
-Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-<br>
-Error:  $($Error[0].Exception.Message)<br>
-</font>
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
+				</font>
 "@
 		}
 		Send-MailMessage @params
