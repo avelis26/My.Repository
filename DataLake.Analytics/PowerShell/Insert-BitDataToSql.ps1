@@ -1,4 +1,4 @@
-# Version  --  v2.0.0.0
+# Version  --  v2.0.1.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -66,11 +66,11 @@ $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
+$sqlServer = 'mstestsqldw.database.windows.net'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
-$sqlServer = 'mstestsqldw.database.windows.net'
 $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
@@ -351,7 +351,7 @@ Function Add-CsvsToSql {
 	While ($jobN -lt $($structuredFiles.Count + 1)) {
 		[string]$jobName = $jobBase + $jobN
 		Write-Output "$(Create-TimeStamp)  Waiting on $jobName..."
-		Get-Job -Name $jobName | Wait-Job -Name $jobName
+		Get-Job -Name $jobName | Wait-Job
 		$global:bcpJobResults = Receive-Job -Name $jobName
 		If ($bcpJobResults[$bcpJobResults.Count - 3] -notlike "*copied*") {
 			Add-Content -Value "$(Create-TimeStamp)  BCP FAILED!!!" -Path $opsLog -ErrorAction Stop
@@ -371,28 +371,55 @@ Function Add-PkToStgData {
 	Param(
 		[string]$dataLakeFolder
 	)
+	$block = {
+		Import-Module SqlServer -ErrorAction Stop
+		$sqlParams = @{
+			query = "UPDATE $($args[0]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
+			ServerInstance = $($args[3]);
+			Database = $($args[4]);
+			Username = $($args[5]);
+			Password = $($args[6]);
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlParams
+		$sqlParams = @{
+			query = "UPDATE $($args[1]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+			ServerInstance = $($args[3]);
+			Database = $($args[4]);
+			Username = $($args[5]);
+			Password = $($args[6]);
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlParams
+		Return 'Successful'
+	}
+	$jobBase = 'Pk_Job_'
 	$i = 1
 	While ($i -lt 6) {
-		$sqlParams = @{
-			query = "UPDATE $($stgTable121)_$i SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
-			ServerInstance = $sqlServer;
-			Database = $database;
-			Username = $sqlUser;
-			Password = $sqlPass;
-			QueryTimeout = 0;
-			ErrorAction = 'Stop';
+		[string]$jobName = $jobBase + $i
+		Start-Job -ScriptBlock $block -Name $jobName -ArgumentList `
+			"$($stgTable121)_$i", ` #0
+			"$($stgTable122)_$i", ` #1
+			"$dataLakeFolder", ` #2
+			"$sqlServer", ` #3
+			"$database", ` #4
+			"$sqlUser", ` #5
+			"$sqlPass" #6
+		$i++
+	}
+	$i = 1
+	While ($i -lt 6) {
+		[string]$jobName = $jobBase + $i
+		Get-Job -Name $jobName | Wait-Job
+		$pkResult = Receive-Job -Name $jobName
+		If ($pkResult -ne 'Successful') {
+			throw [PkError] 'Failed to create PKs in Staging!!!'
 		}
-		Invoke-Sqlcmd @sqlParams
-		$sqlParams = @{
-			query = "UPDATE $($stgTable122)_$i SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
-			ServerInstance = $sqlServer;
-			Database = $database;
-			Username = $sqlUser;
-			Password = $sqlPass;
-			QueryTimeout = 0;
-			ErrorAction = 'Stop';
+		Else {
+			Remove-Job -Name $jobName
 		}
-		Invoke-Sqlcmd @sqlParams
 		$i++
 	}
 }
@@ -683,9 +710,8 @@ If ($continue -eq 'y') {
 			$totalSqlRowCount = $($sqlHeadersCountResults.Count) + $($sqlDetailsCountResults.Count)
 			Add-Content -Value "$(Create-TimeStamp)  Total Headers Rows: $($sqlHeadersCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Total Details Rows: $($sqlDetailsCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
-			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Total DB Rows: $($totalSqlRowCount.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			If ($totalFileRowCount -ne $totalSqlRowCount) {
 				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
 			}
@@ -733,6 +759,14 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Move complete!"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+# Move data from temp drive to archive
+			If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
+				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+				Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
+				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
+			}
+			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 			$endTime = Get-Date
 			$endTimeText = $(Create-TimeStamp -forFileName)
@@ -836,13 +870,6 @@ If ($continue -eq 'y') {
 "@
 			}
 			Send-MailMessage @params
-			If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
-				Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
-				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
-			}
-			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
-			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 			$i++
 			If ($i -lt $range) {
@@ -1007,5 +1034,8 @@ If ($continue -eq 'y') {
 "@
 		}
 		Send-MailMessage @params
+	}
+	Finally {
+		Get-Job | Remove-Job
 	}
 }
