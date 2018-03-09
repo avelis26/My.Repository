@@ -115,12 +115,12 @@ Function Get-DataLakeRawFiles {
 		If ($(Test-Path -Path $destinationPath) -eq $true) {
 			$message = "$(Create-TimeStamp)  Removing folder $destinationPath ..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $destinationPath -Force -Recurse -ErrorAction Stop | Out-Null
 		}
 		$message = "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$getParams = @{
 			Account = $dataLakeStoreName;
 			Path = $dataLakeSearchPath;
@@ -132,7 +132,7 @@ Function Get-DataLakeRawFiles {
 		}
 		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$exportParams = @{
 			Account = $dataLakeStoreName;
 			Path = $($dataLakeFolder.Path);
@@ -143,7 +143,7 @@ Function Get-DataLakeRawFiles {
 		Export-AzureRmDataLakeStoreItem @exportParams
 		$message = "$(Create-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
 	Catch {
 		throw $_
@@ -164,10 +164,10 @@ Function Split-FilesAmongFolders {
 	$global:emptyFileCount = $emptyFiles.Count.ToString()
 	$message = "$(Create-TimeStamp)  Found $fileCount total files..."
 	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
 	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	ForEach ($emptyFile in $emptyFiles) {
 		$global:emptyFileList += $emptyFile.Name
 	}
@@ -191,7 +191,7 @@ Function Split-FilesAmongFolders {
 	$i = 0
 	$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
 	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	While ($i -lt $($files.Count)) {
 		If ($i -lt $divider) {
 			$movePath = $inFolder + $folderPreFix + '1'
@@ -224,7 +224,7 @@ Function Split-FilesAmongFolders {
 		}
 		$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -ErrorAction Stop
 		Start-Sleep -Milliseconds 128
 	}
@@ -256,7 +256,7 @@ Function Convert-BitFilesToCsv {
 		}
 		$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix" -ErrorAction Stop
 		Start-Sleep -Milliseconds 128
 	}
@@ -275,7 +275,7 @@ Function Add-CsvsToSql {
 	$dext = 1
 	$jobN = 1
 	$jobBase = 'bcp_job_'
-	Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog -ErrorAction Stop
 	ForEach ($file in $structuredFiles) {
 		Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
 		If ($file.Name -like "*D1_121*") {
@@ -328,7 +328,7 @@ Function Add-CsvsToSql {
 		$jobN++
 	}
 	Get-Job | Wait-Job
-	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog -ErrorAction Stop
 	$jobN = 1
 	While ($jobN -lt $($structuredFiles.Count + 1)) {
 		[string]$jobName = $jobBase + $jobN
@@ -337,7 +337,7 @@ Function Add-CsvsToSql {
 			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
 		}
 		Else {
-			Add-Content -Value $jobResults -Path $opsLog
+			Add-Content -Value $jobResults -Path $opsLog -ErrorAction Stop
 			Remove-Job -Name $jobName
 		}
 		$jobN++
@@ -430,24 +430,24 @@ If ($continue -eq 'y') {
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$processDate = $year + $month + $day
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
-			Set-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog
-			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog
+			Set-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog -ErrorAction Stop
 			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog -ErrorAction Stop
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $errLogRootPath) -eq $false) {
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 # Get raw files
@@ -479,7 +479,7 @@ If ($continue -eq 'y') {
 			$milestone_3 = Get-Date
 			$message = "$(Create-TimeStamp)  Truncating staging tables..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$query = @"
 				TRUNCATE TABLE [dbo].[$($stgTable121)_1];
 				TRUNCATE TABLE [dbo].[$($stgTable121)_2];
@@ -504,7 +504,7 @@ If ($continue -eq 'y') {
 			Invoke-Sqlcmd @sqlTruncateParams
 			$message = "$(Create-TimeStamp)  Truncating staging tables successful."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Include "*Structured*" -ErrorAction Stop
 			$addCsvsToSqlParams = @{
 				structuredFiles = $structuredFiles;
@@ -587,10 +587,10 @@ If ($continue -eq 'y') {
 			$storeCountHtml += "</table>"
 			$message = "Store Count By Day:"
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$t = 0
 			While ($t -lt $($storeCountResults.EndDate.Count)) {
-				Add-Content -Value "$($storeCountResults.EndDate.Get($t))  |  $($storeCountResults.StoreCount.Get($t))" -Path $opsLog
+				Add-Content -Value "$($storeCountResults.EndDate.Get($t))  |  $($storeCountResults.StoreCount.Get($t))" -Path $opsLog -ErrorAction Stop
 				$t++
 			}
 			$query = @"
@@ -655,11 +655,11 @@ If ($continue -eq 'y') {
 			$totalFileRowCount = $(Receive-Job $rowsInFilesJobResults) - $($transTypes.Split(',').Count * 5)
 			Get-Job | Remove-Job
 			$totalSqlRowCount = $($sqlHeadersCountResults.Count) + $($sqlDetailsCountResults.Count)
-			Add-Content -Value "$(Create-TimeStamp)  Total Headers Rows: $($sqlHeadersCountResults.Count.ToString('N0'))" -Path $opsLog
-			Add-Content -Value "$(Create-TimeStamp)  Total Details Rows: $($sqlDetailsCountResults.Count.ToString('N0'))" -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  Total Headers Rows: $($sqlHeadersCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Total Details Rows: $($sqlDetailsCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			If ($totalFileRowCount -ne $totalSqlRowCount) {
 				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
 			}
@@ -667,16 +667,16 @@ If ($continue -eq 'y') {
 			$milestone_5 = Get-Date
 			$message = "$(Create-TimeStamp)  Creating PK's on data in staging tables..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Write-Output "$(Create-TimeStamp)  Adding PK's..."
 			Add-PkToStgData -dataLakeFolder $($dataLakeSearchPathRoot + $processDate)
 			$message = "$(Create-TimeStamp)  Finished creating PK's on data in staging tables!"
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$milestone_6 = Get-Date
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Write-Output "$(Create-TimeStamp)  Moving..."
 			$i = 1
 			While ($i -lt 6) {
@@ -697,7 +697,7 @@ If ($continue -eq 'y') {
 			}
 			$message = "$(Create-TimeStamp)  Move complete!"
 			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Send report
 			$endTime = Get-Date
 			$endTimeText = $(Create-TimeStamp -forFileName)
@@ -744,22 +744,22 @@ If ($continue -eq 'y') {
 			Write-Output $messageN
 			Write-Output $messageO
 			Write-Output $emptyFileList
-			Add-Content -Value $messageA -Path $opsLog
-			Add-Content -Value $messageB -Path $opsLog
-			Add-Content -Value $messageC -Path $opsLog
-			Add-Content -Value $messageD -Path $opsLog
-			Add-Content -Value $messageE -Path $opsLog
-			Add-Content -Value $messageF -Path $opsLog
-			Add-Content -Value $messageG -Path $opsLog
-			Add-Content -Value $messageH -Path $opsLog
-			Add-Content -Value $messageI -Path $opsLog
-			Add-Content -Value $messageJ -Path $opsLog
-			Add-Content -Value $messageK -Path $opsLog
-			Add-Content -Value $messageL -Path $opsLog
-			Add-Content -Value $messageM -Path $opsLog
-			Add-Content -Value $messageN -Path $opsLog
-			Add-Content -Value $messageO -Path $opsLog
-			Add-Content -Value $emptyFileList -Path $opsLog
+			Add-Content -Value $messageA -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageB -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageC -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageD -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageE -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageF -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageG -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageH -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageI -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageJ -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageK -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageL -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageM -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageN -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $messageO -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $emptyFileList -Path $opsLog -ErrorAction Stop
 			$params = @{
 				SmtpServer = $smtpServer;
 				Port = $port;
@@ -798,13 +798,13 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 			}
 			Send-MailMessage @params
 			If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 				Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
-				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog
+				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
 			}
-			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
-			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog
+			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 			$i++
 			If ($i -lt $range) {
 				Write-Output "Starting next day in 10..."
@@ -834,7 +834,7 @@ Raw files from the 7-11 data lake have been processed and inserted into the data
 	}
 	Catch [System.InvalidOperationException] {
 		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -855,7 +855,7 @@ Error:  $($Error[0].Exception.Message)<br>
 	}
 	Catch [System.IO.DirectoryNotFoundException] {
 		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -877,7 +877,7 @@ Error:  $($Error[0].Exception.Message)<br>
 	}
 	Catch [System.FormatException] {
 		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -899,7 +899,7 @@ Error:  $($Error[0].Exception.Message)<br>
 	}
 	Catch [System.Activities.WorkflowApplicationException] {
 		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -921,7 +921,7 @@ $($bcpError.Exception.Message)<br>
 	}
 	Catch [System.ArgumentOutOfRangeException] {
 		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -948,8 +948,8 @@ Error:  $($Error[0].Exception.Message)<br>
 			CategoryActivity = $Error[0].CategoryInfo.Activity;
 		}
 		Write-Error @errorParams
-		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog
-		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog
+		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
