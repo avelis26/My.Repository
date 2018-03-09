@@ -1,4 +1,4 @@
-# Version  --  v1.6.0.0
+# Version  --  v2.0.0.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -54,8 +54,10 @@ Else {
 	}
 }
 ## Base name of staging tables to insert data to
-[string]$stgTable121 = 'stg_121_Headers_'
-[string]$stgTable122 = 'stg_122_Details_'
+[string]$stgTable121 = 'stg_121_Headers'
+[string]$stgTable122 = 'stg_122_Details'
+[string]$prodTable121 = 'prod_121_Headers'
+[string]$prodTable122 = 'prod_122_Details'
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -277,12 +279,12 @@ Function Add-CsvsToSql {
 	ForEach ($file in $structuredFiles) {
 		Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
 		If ($file.Name -like "*D1_121*") {
-			$table = "[dbo].[$stgTable121$hext]"
+			$table = "[dbo].[$($stgTable121)_$hext]"
 			$formatFile = "C:\Scripts\XML\format121.xml"
 			$hext++
 		}
 		ElseIf ($file.Name -like "*D1_122*") {
-			$table = "[dbo].[$stgTable122$dext]"
+			$table = "[dbo].[$($stgTable122)_$dext]"
 			$formatFile = "C:\Scripts\XML\format122.xml"
 			$dext++
 		}
@@ -328,7 +330,7 @@ Function Add-CsvsToSql {
 	Get-Job | Wait-Job
 	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog
 	$jobN = 1
-	While ($jobN -lt 11) {
+	While ($jobN -lt $($structuredFiles.Count + 1)) {
 		[string]$jobName = $jobBase + $jobN
 		$jobResults = Receive-Job -Name $jobName
 		If ($jobResults[$jobResults.Count - 3] -notlike "*copied*") {
@@ -346,26 +348,30 @@ Function Add-PkToStgData {
 	Param(
 		[string]$dataLakeFolder
 	)
-	$sqlParams = @{
-		query = "UPDATE $stgTable121 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
-		ServerInstance = $sqlServer;
-		Database = $database;
-		Username = $sqlUser;
-		Password = $sqlPass;
-		QueryTimeout = 0;
-		ErrorAction = 'Stop';
+	$i = 1
+	While ($i -lt 6) {
+		$sqlParams = @{
+			query = "UPDATE $($stgTable121)_$i SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlParams
+		$sqlParams = @{
+			query = "UPDATE $($stgTable122)_$i SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlParams
+		$i++
 	}
-	Invoke-Sqlcmd @sqlParams
-	$sqlParams = @{
-		query = "UPDATE $stgTable122 SET [DataLakeFolder] = '$dataLakeFolder', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
-		ServerInstance = $sqlServer;
-		Database = $database;
-		Username = $sqlUser;
-		Password = $sqlPass;
-		QueryTimeout = 0;
-		ErrorAction = 'Stop';
-	}
-	Invoke-Sqlcmd @sqlParams
 }
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -518,9 +524,37 @@ If ($continue -eq 'y') {
 				}
 				Return $total
 			}
-			$job121122124 = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')"
-			$sqlStgToProdParams = @{
-				query = "SELECT CAST([EndDate] AS char(10)) AS [EndDate], COUNT(DISTINCT([StoreNumber])) AS [StoreCount] FROM [dbo].[stg_121_Headers] GROUP BY [EndDate] ORDER BY [EndDate] DESC";
+			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
+			$rowsInFilesJobResults = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')"
+			$query = @"
+			SELECT		CAST([EndDate] AS char(10))		AS [EndDate],
+						COUNT(DISTINCT([StoreNumber]))	AS [StoreCount]
+			FROM		(
+			SELECT		[EndDate],
+						[StoreNumber]
+			FROM		[dbo].[$($stgTable121)_1]
+			UNION		ALL
+			SELECT		[EndDate],
+						[StoreNumber]
+			FROM		[dbo].[$($stgTable121)_2]
+			UNION		ALL
+			SELECT		[EndDate],
+						[StoreNumber]
+			FROM		[dbo].[$($stgTable121)_3]
+			UNION		ALL
+			SELECT		[EndDate],
+						[StoreNumber]
+			FROM		[dbo].[$($stgTable121)_4]
+			UNION		ALL
+			SELECT		[EndDate],
+						[StoreNumber]
+			FROM		[dbo].[$($stgTable121)_5]
+						)								AS					[x]
+			GROUP BY	[EndDate]
+			ORDER BY	[EndDate]						DESC
+"@
+			$sqlStoreCountParams = @{
+				query = $query;
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -528,7 +562,7 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			$storeCountResults = Invoke-Sqlcmd @sqlStgToProdParams
+			$storeCountResults = Invoke-Sqlcmd @sqlStoreCountParams
 			$storeCountHtml = "<style>
 			table {
 				font-family: consolas;
@@ -559,8 +593,27 @@ If ($continue -eq 'y') {
 				Add-Content -Value "$($storeCountResults.EndDate.Get($t))  |  $($storeCountResults.StoreCount.Get($t))" -Path $opsLog
 				$t++
 			}
-			$sql121Params = @{
-				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_121_Headers]";
+			$query = @"
+			SELECT		COUNT([RecordID])			AS		[Count]
+			FROM		(
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable121)_1]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable121)_2]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable121)_3]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable121)_4]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable121)_5]
+						)							AS		[x]
+"@
+			$sqlHeadersCountParams = @{
+				query = $query;
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -568,9 +621,28 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			$121CountResults = Invoke-Sqlcmd @sql121Params
-			$sql122Params = @{
-				query = "SELECT COUNT([RecordID]) AS [Count] FROM [dbo].[stg_122_Details]";
+			$sqlHeadersCountResults = Invoke-Sqlcmd @sqlHeadersCountParams
+			$query = @"
+			SELECT		COUNT([RecordID])			AS		[Count]
+			FROM		(
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable122)_1]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable122)_2]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable122)_3]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable122)_4]
+			UNION		ALL
+			SELECT		[RecordID]
+			FROM		[dbo].[$($stgTable122)_5]
+						)							AS		[x]
+"@
+			$sqlDetailsCountParams = @{
+				query = $query;
 				ServerInstance = $sqlServer;
 				Database = $database;
 				Username = $sqlUser;
@@ -578,12 +650,13 @@ If ($continue -eq 'y') {
 				QueryTimeout = 0;
 				ErrorAction = 'Stop';
 			}
-			$122CountResults = Invoke-Sqlcmd @sql122Params
-			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
+			$sqlDetailsCountResults = Invoke-Sqlcmd @sqlDetailsCountParams
 			Get-Job | Wait-Job
-			$totalFileRowCount = $(Receive-Job $job121122124) - $($transTypes.Split(',').Count * 5)
+			$totalFileRowCount = $(Receive-Job $rowsInFilesJobResults) - $($transTypes.Split(',').Count * 5)
 			Get-Job | Remove-Job
-			$totalSqlRowCount = $($121CountResults.Count) + $($122CountResults.Count)
+			$totalSqlRowCount = $($sqlHeadersCountResults.Count) + $($sqlDetailsCountResults.Count)
+			Add-Content -Value "$(Create-TimeStamp)  Total Headers Rows: $($sqlHeadersCountResults.Count.ToString('N0'))" -Path $opsLog
+			Add-Content -Value "$(Create-TimeStamp)  Total Details Rows: $($sqlDetailsCountResults.Count.ToString('N0'))" -Path $opsLog
 			$message = "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))  |  Total DB Rows: $($totalSqlRowCount.ToString('N0'))"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
@@ -604,17 +677,24 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
-			$sqlStgToProdParams = @{
-				query = "EXECUTE [dbo].[$moveSp]";
-				ServerInstance = $sqlServer;
-				Database = $database;
-				Username = $sqlUser;
-				Password = $sqlPass;
-				QueryTimeout = 0;
-				ErrorAction = 'Stop';
-			}
 			Write-Output "$(Create-TimeStamp)  Moving..."
-			Invoke-Sqlcmd @sqlStgToProdParams
+			$i = 1
+			While ($i -lt 6) {
+				$query = @"
+				EXECUTE [dbo].[$headersMoveSp] @StagingTable = '$($stgTable121)_$i', @ProdTable = '$prodTable121'
+				EXECUTE [dbo].[$detailsMoveSp] @StagingTable = '$($stgTable122)_$i', @ProdTable = '$prodTable122'
+"@
+				$sqlStgToProdParams = @{
+					query = $query;
+					ServerInstance = $sqlServer;
+					Database = $database;
+					Username = $sqlUser;
+					Password = $sqlPass;
+					QueryTimeout = 0;
+					ErrorAction = 'Stop';
+				}
+				Invoke-Sqlcmd @sqlStgToProdParams
+			}
 			$message = "$(Create-TimeStamp)  Move complete!"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog
@@ -633,46 +713,52 @@ If ($continue -eq 'y') {
 			$pkcTime = New-TimeSpan -Start $milestone_5 -End $milestone_6
 			$movTime = New-TimeSpan -Start $milestone_6 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message0 = "Start Time--------:  $startTimeText"
-			$message1 = "End Time----------:  $endTimeText"
-			$message2 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
-			$message3 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
-			$message4 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-			$message5 = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
-			$message6 = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
-			$message7 = "Create PK in STG--:  $($pkcTime.Hours.ToString("00")) h $($pkcTime.Minutes.ToString("00")) m $($pkcTime.Seconds.ToString("00")) s"
-			$message8 = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
-			$message9 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-			$messageX = "Total File Count--:  $fileCount"
-			$messageY = "Empty File Count--:  $emptyFileCount"
-			$messageZ = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
-			Write-Output $message0
-			Write-Output $message1
-			Write-Output $message2
-			Write-Output $message3
-			Write-Output $message4
-			Write-Output $message5
-			Write-Output $message6
-			Write-Output $message7
-			Write-Output $message8
-			Write-Output $message9
-			Write-Output $messageX
-			Write-Output $messageY
-			Write-Output $messageZ
+			$messageA = "Start Time--------:  $startTimeText"
+			$messageB = "End Time----------:  $endTimeText"
+			$messageC = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
+			$messageD = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
+			$messageE = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
+			$messageF = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
+			$messageG = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
+			$messageH = "Create PK in STG--:  $($pkcTime.Hours.ToString("00")) h $($pkcTime.Minutes.ToString("00")) m $($pkcTime.Seconds.ToString("00")) s"
+			$messageI = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
+			$messageJ = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+			$messageK = "Total File Count--:  $fileCount"
+			$messageL = "Empty File Count--:  $emptyFileCount"
+			$messageM = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
+			$messageN = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
+			$messageO = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
+			Write-Output $messageA
+			Write-Output $messageB
+			Write-Output $messageC
+			Write-Output $messageD
+			Write-Output $messageE
+			Write-Output $messageF
+			Write-Output $messageG
+			Write-Output $messageH
+			Write-Output $messageI
+			Write-Output $messageJ
+			Write-Output $messageK
+			Write-Output $messageL
+			Write-Output $messageM
+			Write-Output $messageN
+			Write-Output $messageO
 			Write-Output $emptyFileList
-			Add-Content -Value $message0 -Path $opsLog
-			Add-Content -Value $message1 -Path $opsLog
-			Add-Content -Value $message2 -Path $opsLog
-			Add-Content -Value $message3 -Path $opsLog
-			Add-Content -Value $message4 -Path $opsLog
-			Add-Content -Value $message5 -Path $opsLog
-			Add-Content -Value $message6 -Path $opsLog
-			Add-Content -Value $message7 -Path $opsLog
-			Add-Content -Value $message8 -Path $opsLog
-			Add-Content -Value $message9 -Path $opsLog
-			Add-Content -Value $messageX -Path $opsLog
-			Add-Content -Value $messageY -Path $opsLog
-			Add-Content -Value $messageZ -Path $opsLog
+			Add-Content -Value $messageA -Path $opsLog
+			Add-Content -Value $messageB -Path $opsLog
+			Add-Content -Value $messageC -Path $opsLog
+			Add-Content -Value $messageD -Path $opsLog
+			Add-Content -Value $messageE -Path $opsLog
+			Add-Content -Value $messageF -Path $opsLog
+			Add-Content -Value $messageG -Path $opsLog
+			Add-Content -Value $messageH -Path $opsLog
+			Add-Content -Value $messageI -Path $opsLog
+			Add-Content -Value $messageJ -Path $opsLog
+			Add-Content -Value $messageK -Path $opsLog
+			Add-Content -Value $messageL -Path $opsLog
+			Add-Content -Value $messageM -Path $opsLog
+			Add-Content -Value $messageN -Path $opsLog
+			Add-Content -Value $messageO -Path $opsLog
 			Add-Content -Value $emptyFileList -Path $opsLog
 			$params = @{
 				SmtpServer = $smtpServer;
@@ -683,22 +769,24 @@ If ($continue -eq 'y') {
 				BodyAsHtml = $true;
 				Subject = "BITC: $($processDate): ETL Process Finished";
 				Body = @"
-Raw files from the 7-11 data lake have been processed and inserted into the database and are ready for aggregation.<br>
+Raw files from the 7-11 data lake have been processed and inserted into the database.<br>
 <br>
 <font face='courier'>
-				$message0<br>
-				$message1<br>
-				$message2<br>
-				$message3<br>
-				$message4<br>
-				$message5<br>
-				$message6<br>
-				$message7<br>
-				$message8<br>
-				$message9<br>
-				$messageX<br>
-				$messageY<br>
-				$messageZ<br>
+				$messageA<br>
+				$messageB<br>
+				$messageC<br>
+				$messageD<br>
+				$messageE<br>
+				$messageF<br>
+				$messageG<br>
+				$messageH<br>
+				$messageI<br>
+				$messageJ<br>
+				$messageK<br>
+				$messageL<br>
+				$messageM<br>
+				$messageN<br>
+				$messageO<br>
 				</font>
 				<br>
 				Store Count By Day In Folder $processDate :<br>

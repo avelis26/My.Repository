@@ -35,7 +35,6 @@
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeStructuredFiles.ps1" />
     <Compile Include="PowerShell\Create-BitStoreReport.ps1" />
-    <Compile Include="PowerShell\AutoInsert-BitDataToSql.ps1" />
     <Compile Include="PowerShell\Insert-BitDataToSql.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
