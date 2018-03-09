@@ -7,7 +7,7 @@ CREATE PROCEDURE				[dbo].[usp_Staging_To_Prod_Details]
 									@ProdTable									varchar(32)
 AS
 SET NOCOUNT ON
-INSERT INTO						@ProdTable
+INSERT INTO						[@ProdTable]
 (
 								[RecordID],
 								[StoreNumber],
@@ -75,5 +75,5 @@ SELECT
 								[CsvFile],
 								[DataLakeFolder],
 								[Pk]
-FROM							@StagingTable
+FROM							[@StagingTable]
 GO
