@@ -12,8 +12,8 @@ Param(
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '01-26-2018'
-$endDate   = '01-28-2018'
+$startDate = '02-08-2018'
+$endDate   = '02-08-2018'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -22,7 +22,7 @@ $archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
 $errLogRootPath = 'H:\Err_Log\'
 ##   Enter the email address's desired for notifications and path for log:
-If ($test -eq $true) {
+If ($test.IsPresent -eq $true) {
 	$emailList = 'graham.pinkston@ansira.com'
 	$failEmailList = 'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
@@ -378,10 +378,10 @@ Function Confirm-Run {
 	Write-Host "Start Date    ::  $startDate"
 	Write-Host "End Date      ::  $endDate"
 	Write-Host "Transactions  ::  $transTypes"
-	Write-Host "Verbose       ::  $verbose"
 	Write-Host "stgTable121   ::  $stgTable121"
 	Write-Host "stgTable122   ::  $stgTable122"
-	Write-Host "Move SP       ::  $moveSp"
+	Write-Host "121 Move SP   ::  $headersMoveSp"
+	Write-Host "122 Move SP   ::  $detailsMoveSp"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
@@ -404,7 +404,7 @@ If ($policy -ne 'TrustAllCertsPolicy') {
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
-If ($autoDate -eq $null) {
+If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 	$continue = Confirm-Run
@@ -430,10 +430,14 @@ If ($continue -eq 'y') {
 			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$processDate = $year + $month + $day
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
-			Set-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog -ErrorAction Stop
-			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog -ErrorAction Stop
+			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
+				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+				Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
+			}
+			Else {
+				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+			}
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
@@ -442,18 +446,17 @@ If ($continue -eq 'y') {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 			}
-			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
-				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
-			}
 			If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
+			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog -ErrorAction Stop
+			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog -ErrorAction Stop
 # Get raw files
 			$getDataLakeRawFilesParams = @{
 				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
-				destinationRootPath = $($destinationRootPath + $processDate + '\');
+				destinationPath = $($destinationRootPath + $processDate + '\');
 				dataLakeStoreName = $dataLakeStoreName;
 				opsLog = $opsLog;
 			}
