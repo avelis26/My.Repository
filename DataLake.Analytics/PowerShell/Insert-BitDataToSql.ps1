@@ -1,4 +1,4 @@
-# Version  --  v2.0.1.2
+# Version  --  v2.0.1.3
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -83,7 +83,7 @@ $file = $null
 $fileCount = $null
 $emptyFileList = $null
 $storeCountResults = $null
-$i = 0
+$y = 0
 #######################################################################################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
@@ -192,7 +192,7 @@ Function Split-FilesAmongFolders {
 	[int]$divider = $($files.Count / $count) - 0.5
 	$i = 0
 	$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
-	Write-Verbose -Message $message
+	Write-Output -Message $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	While ($i -lt $($files.Count)) {
 		If ($i -lt $divider) {
@@ -472,12 +472,12 @@ If ($continue -eq 'y') {
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass)
 	Try {
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
-		While ($i -lt $range) {
+		While ($y -lt $range) {
 			$startTime = Get-Date
 			$startTimeText = $(Create-TimeStamp -forFileName)
-			$day = $($startDateObj.AddDays($i)).day.ToString("00")
-			$month = $($startDateObj.AddDays($i)).month.ToString("00")
-			$year = $($startDateObj.AddDays($i)).year.ToString("0000")
+			$day = $($startDateObj.AddDays($y)).day.ToString("00")
+			$month = $($startDateObj.AddDays($y)).month.ToString("00")
+			$year = $($startDateObj.AddDays($y)).year.ToString("0000")
 			$processDate = $year + $month + $day
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
@@ -729,7 +729,6 @@ If ($continue -eq 'y') {
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			$i = 1
 			$sqlStgToProdParams = @{
 				query = "EXECUTE [dbo].[$headersMoveSp]";
 				ServerInstance = $sqlServer;
@@ -871,8 +870,8 @@ If ($continue -eq 'y') {
 			}
 			Send-MailMessage @params
 			Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
-			$i++
-			If ($i -lt $range) {
+			$y++
+			If ($y -lt $range) {
 				Write-Output "Starting next day in 10..."
 				Start-Sleep -Seconds 1
 				Write-Output "9..."
