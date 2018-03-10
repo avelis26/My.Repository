@@ -1,4 +1,4 @@
-# Version  --  v2.0.1.1
+# Version  --  v2.0.1.2
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -15,7 +15,7 @@ Param(
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 $startDate = '02-08-2018'
-$endDate   = '03-10-2018'
+$endDate   = '03-12-2018'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -762,7 +762,7 @@ If ($continue -eq 'y') {
 # Move data from temp drive to archive
 			If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
 				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
-				Remove-Item -Path $($archiveRootPath + $processDate) -Force -ErrorAction Stop
+				Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
 				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
 			}
 			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
@@ -1037,5 +1037,6 @@ If ($continue -eq 'y') {
 	}
 	Finally {
 		Get-Job | Remove-Job
+		Remove-Item -Path $archiveRootPath -Recurse -Force -ErrorAction Stop
 	}
 }
