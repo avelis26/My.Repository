@@ -1,4 +1,4 @@
-# Version  --  v2.1.0.0
+# Version  --  v2.1.0.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -14,8 +14,8 @@ Param(
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '02-08-2018'
-$endDate   = '03-12-2018'
+$startDate = '03-12-2017'
+$endDate   = '04-12-2017'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -487,9 +487,10 @@ If ($continue -eq 'y') {
 			$processDate = $year + $month + $day
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null	
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
-				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
+				Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
+				
 			}
 			Else {
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
