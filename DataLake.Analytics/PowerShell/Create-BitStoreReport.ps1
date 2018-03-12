@@ -1,19 +1,20 @@
 # Init  --  v1.2.1.1
 ##########################################
 ##########################################
-$global:end = '2018-03-04'
+$end = '2018-03-04'
 ##########################################
 ##########################################
-$global:opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Ben.Smith@Ansira.com'
-$global:finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
+$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Ben.Smith@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
-$global:smtpServer = '10.128.1.125'
-$global:port = 25
-$global:fromAddr = 'noreply@7-11.com'
-$global:database = '7ELE'
-$global:sqlUser = 'sqladmin'
-$global:sqlPass = 'Password20!7!'
-$global:sqlServer = 'mstestsqldw.database.windows.net'
+$smtpServer = '10.128.1.125'
+$port = 25
+$fromAddr = 'noreply@7-11.com'
+$database = '7ELE'
+$sqlUser = 'sqladmin'
+$sqlPass = 'Password20!7!'
+$sqlServer = 'mstestsqldw.database.windows.net'
+$scriptStartTime = Get-Date
 ##########################################
 # add function to check last found log file and look for ::ETL SUCCESSFUL::
 # $path = 'H:\Ops_Log'
@@ -415,7 +416,6 @@ $global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) +
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($(Confirm-Run) -eq 'y') {
 	Try {
-		$totalStartTime = Get-Date
 		If ($endDate.DayOfWeek -ne 'Sunday') {
 			throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
 		}
