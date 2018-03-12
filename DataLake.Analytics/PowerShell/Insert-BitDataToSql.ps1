@@ -1,4 +1,4 @@
-# Version  --  v2.0.1.3
+# Version  --  v2.1.0.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -34,8 +34,8 @@ If ($test.IsPresent -eq $true) {
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	}
 }
 Else {
@@ -54,9 +54,13 @@ Else {
 	'tyler.bailey@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	}
 }
 ## Base name of staging tables to insert data to
