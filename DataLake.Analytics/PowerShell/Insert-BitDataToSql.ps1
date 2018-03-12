@@ -481,9 +481,9 @@ If ($continue -eq 'y') {
 			$processDate = $year + $month + $day
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
-				Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
+				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $opsLogRootPath..." -Path $opsLog -ErrorAction Stop
+				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			Else {
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
@@ -764,7 +764,7 @@ If ($continue -eq 'y') {
 				Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
 				Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
 			}
-			Add-Content -Value "$(Create-TimeStamp)  Moving folder to archive: $($destinationRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 			Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 			$endTime = Get-Date
@@ -1036,6 +1036,6 @@ If ($continue -eq 'y') {
 	}
 	Finally {
 		Get-Job | Remove-Job
-		Remove-Item -Path $archiveRootPath -Recurse -Force -ErrorAction Stop
+		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	}
 }
