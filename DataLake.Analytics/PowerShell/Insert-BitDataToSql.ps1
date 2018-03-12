@@ -29,9 +29,13 @@ If ($test.IsPresent -eq $true) {
 	$failEmailList = 'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	}
 }
 Else {
@@ -75,8 +79,6 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $extractorExe = "C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe"
-$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 ## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
