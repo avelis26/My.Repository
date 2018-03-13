@@ -1,4 +1,4 @@
-# Init  --  v0.0.0.2
+# Init  --  v0.0.0.3
 ##########################################
 $currentYearDate = '2018-03-12'
 $lastYearDate = '2017-03-13'
@@ -83,7 +83,6 @@ Function Execute-LocalStoreAndProduct {
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-
 	$endTime = Get-Date
 	$endTimeText = $(Create-TimeStamp -forFileName)
 	$spanObj = New-TimeSpan -Start $startTime -End $endTime
@@ -190,6 +189,7 @@ If ($(Confirm-Run) -eq 'y') {
 			ErrorAction = 'Stop';
 		}
 		$ceoResult = Invoke-Sqlcmd @sqlParams
+		Add-Content -Value "$(Create-TimeStamp)  $ceoResult" -Path $opsLog
 		# Report
 		$scriptEndTime = Get-Date
 		$scriptEndTimeText = $(Create-TimeStamp -forFileName)
@@ -236,6 +236,10 @@ If ($(Confirm-Run) -eq 'y') {
 				<font face='courier'>
 				Something bad happened!!!<br>
 				$ceoResult<br>
+				<br>
+				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
+				<br>
+				Error:  $($Error[0].Exception.Message)<br>
 				</font>
 "@
 		}
