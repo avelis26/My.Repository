@@ -83,7 +83,7 @@ Function Execute-LocalStoreAndProduct {
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+
 	$endTime = Get-Date
 	$endTimeText = $(Create-TimeStamp -forFileName)
 	$spanObj = New-TimeSpan -Start $startTime -End $endTime
