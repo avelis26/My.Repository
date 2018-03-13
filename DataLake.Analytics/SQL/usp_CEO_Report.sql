@@ -7,7 +7,6 @@ CREATE PROCEDURE					[dbo].[usp_CEO_Report]
 									@last_yr_date								date
 AS
 SET NOCOUNT ON
-EXEC								[dbo].[usp_Copy_Store_Product_Locally]
 DROP TABLE IF EXISTS				[dbo].[tmp_query_data_joined_CEO]
 CREATE TABLE						[dbo].[tmp_query_data_joined_CEO]			(
 									[RecordId]									[varchar](2)				NULL,
