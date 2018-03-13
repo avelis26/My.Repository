@@ -343,7 +343,6 @@ $query<br>
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
