@@ -1,4 +1,4 @@
-# Init  --  v0.0.0.5
+# Init  --  v0.0.0.6
 ##########################################
 $currentYearDate = '2018-03-12'
 $lastYearDate = '2017-03-13'
@@ -255,8 +255,6 @@ If ($(Confirm-Run) -eq 'y') {
 # Step 5 of 5: [dbo].[usp_CeoReport_5_5]
 		$query = "EXECUTE [dbo].[usp_CeoReport_5_5]"
 		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '5' -opsLog $opsLog
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
 		Start-Sleep -Seconds 2
 # Report
 		$scriptEndTime = Get-Date
@@ -264,7 +262,7 @@ If ($(Confirm-Run) -eq 'y') {
 		$totTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime
 		$message0 = "Start Time--------:  $scriptStartTimeText"
 		$message1 = "End Time----------:  $scriptEndTimeText"
-		$message2 = "Total Run Time----:  $($spanObj.Hours.ToString("00")) h $($spanObj.Minutes.ToString("00")) m $($spanObj.Seconds.ToString("00")) s"
+		$message2 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
