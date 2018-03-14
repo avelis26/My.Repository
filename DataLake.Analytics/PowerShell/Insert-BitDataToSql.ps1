@@ -1,4 +1,4 @@
-# Version  --  v2.1.0.3
+# Version  --  v3.0.0.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -63,7 +63,7 @@ Else {
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	}
 }
-## Base name of staging tables to insert data to
+## Base name of database tables
 [string]$stgTable121 = 'stg_121_Headers'
 [string]$stgTable122 = 'stg_122_Details'
 [string]$prodTable121 = 'prod_121_Headers'
@@ -86,7 +86,6 @@ $extractorExe = "C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe
 ## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
-$fileCount = $null
 $emptyFileList = $null
 $storeCountResults = $null
 $y = 0
@@ -96,7 +95,7 @@ Function Create-TimeStamp {
 	Param(
 		[switch]$forFileName
 	)
-	$now = Get-Date
+	$now = Get-Date -ErrorAction Stop
 	$day = $now.day.ToString("00")
 	$month = $now.month.ToString("00")
 	$year = $now.year.ToString("0000")
@@ -111,324 +110,6 @@ Function Create-TimeStamp {
 	}
 	Return $timeStamp
 }
-Function Get-DataLakeRawFiles {
-	[CmdletBinding()]
-	Param(
-		[string]$dataLakeSearchPath,
-		[string]$destinationPath,
-		[string]$dataLakeStoreName,
-		[string]$opsLog
-	)
-	Try {
-		If ($(Test-Path -Path $destinationPath) -eq $true) {
-			$message = "$(Create-TimeStamp)  Removing folder $destinationPath ..."
-			Write-Verbose -Message $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Remove-Item -Path $destinationPath -Force -Recurse -ErrorAction Stop | Out-Null
-		}
-		$message = "$(Create-TimeStamp)  Validating $dataLakeSearchPath exists in data lake..."
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$getParams = @{
-			Account = $dataLakeStoreName;
-			Path = $dataLakeSearchPath;
-			ErrorAction = 'SilentlyContinue';
-		}
-		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
-		If ($dataLakeFolder -eq $null) {
-			throw [System.IO.DirectoryNotFoundException] "$dataLakeSearchPath NOT FOUND!!!"
-		}
-		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$exportParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeFolder.Path);
-			Destination = $destinationPath;
-			Force = $true;
-			ErrorAction = 'SilentlyContinue';
-		}
-		Export-AzureRmDataLakeStoreItem @exportParams
-		$message = "$(Create-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	}
-	Catch {
-		throw $_
-	}
-}
-Function Split-FilesAmongFolders {
-	[CmdletBinding()]
-	Param(
-		[string]$inFolder,
-		[string]$opsLog
-	)
-	$global:fileCount = $null
-	$global:emptyFileCount = $null
-	$global:emptyFileList = @()
-	$files = Get-ChildItem -Path $inFolder -File -ErrorAction Stop
-	$emptyFiles = Get-ChildItem -Path $inFolder -File | Where-Object -FilterScript {$_.Length -lt 92}
-	$global:fileCount = $files.Count.ToString()
-	$global:emptyFileCount = $emptyFiles.Count.ToString()
-	$message = "$(Create-TimeStamp)  Found $fileCount total files..."
-	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
-	Write-Verbose -Message $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	ForEach ($emptyFile in $emptyFiles) {
-		$global:emptyFileList += $emptyFile.Name
-	}
-	$i = 1
-	$count = 5
-	$folderPreFix = 'bucket_'
-	While ($i -lt $($count + 1)) {
-		$dirName = $folderPreFix + $i
-		$dirPath = $inFolder + $dirName
-		If ($(Test-Path -Path $dirPath) -eq $false) {
-			$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
-			Write-Verbose -Message $message
-			New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
-		}
-		Else {
-			Get-ChildItem -Path $dirPath -Recurse | Remove-Item -Force -ErrorAction Stop
-		}
-		$i++
-	}
-	[int]$divider = $($files.Count / $count) - 0.5
-	$i = 0
-	$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
-	Write-Output -Message $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	While ($i -lt $($files.Count)) {
-		If ($i -lt $divider) {
-			$movePath = $inFolder + $folderPreFix + '1'
-		}
-		ElseIf ($i -ge $divider -and $i -lt $($divider * 2)) {
-			$movePath = $inFolder + $folderPreFix + '2'
-		}
-		ElseIf ($i -ge $($divider * 2) -and $i -lt $($divider * 3)) {
-			$movePath = $inFolder + $folderPreFix + '3'
-		}
-		ElseIf ($i -ge $($divider * 3) -and $i -lt $($divider * 4)) {
-			$movePath = $inFolder + $folderPreFix + '4'
-		}
-		Else {
-			$movePath = $inFolder + $folderPreFix + '5'
-		}
-		Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
-		$i++
-	}
-	$folders = Get-ChildItem -Path $inFolder -Directory
-	ForEach ($folder in $folders) {
-		$block = {
-			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-			$path = $args[0]
-			$files = Get-ChildItem -Path $path -Filter '*.gz' -File
-			ForEach ($file in $files) {
-				Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
-				Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
-			}
-		}
-		$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -ErrorAction Stop
-		Start-Sleep -Milliseconds 128
-	}
-	Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
-	Get-Job | Wait-Job
-	Get-Job | Remove-Job -ErrorAction Stop
-}
-Function Convert-BitFilesToCsv {
-	[CmdletBinding()]
-	Param(
-		[string]$inFolder,
-		[string]$transTypes,
-		[string]$extractorExe,
-		[string]$filePrefix,
-		[string]$opsLog
-	)
-	$folders = Get-ChildItem -Path $inFolder -Directory -ErrorAction Stop
-	ForEach ($folder in $folders) {
-		$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
-		If ($(Test-Path -Path $outputPath) -eq $false) {
-			$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
-			Write-Verbose -Message $message
-			New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
-		}
-		$block = {
-			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-			& $args[0] $args[1..4];
-			Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
-		}
-		$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
-		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$filePrefix" -ErrorAction Stop
-		Start-Sleep -Milliseconds 128
-	}
-	Write-Output "$(Create-TimeStamp)  Converting..."
-	Get-Job | Wait-Job
-	Get-Job | Remove-Job -ErrorAction Stop
-	Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
-	$folders = Get-ChildItem -Path $inFolder -Directory -ErrorAction Stop
-	ForEach ($folder in $folders) {
-		$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
-		$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json
-		If ($jsonObj.ResponseCode -ne 0) {
-			[string]$global:optimusError = $jsonObj.ResponseMsg
-			throw [OptimusException] "Optimus Failed!!!"
-		}
-		Else {
-			Add-Content -Value "$($folder.FullName)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "-------------------------------------------------" -Path $opsLog -ErrorAction Stop
-		}
-	}
-}
-Function Add-CsvsToSql {
-	[CmdletBinding()]
-	Param(
-		[System.IO.FileInfo[]]$structuredFiles,
-		[string]$errLogRoot,
-		[string]$opsLog
-	)
-	$hext = 1
-	$dext = 1
-	$jobN = 1
-	$jobBase = 'bcp_job_'
-	Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog -ErrorAction Stop
-	ForEach ($file in $structuredFiles) {
-		Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
-		If ($file.Name -like "*D1_121*") {
-			$table = "$($stgTable121)_$hext"
-			$formatFile = "C:\Scripts\XML\format121.xml"
-			$hext++
-		}
-		ElseIf ($file.Name -like "*D1_122*") {
-			$table = "$($stgTable122)_$dext"
-			$formatFile = "C:\Scripts\XML\format122.xml"
-			$dext++
-		}
-		Else {
-			throw [System.FormatException] "ERROR:: $($file.FullName) didn't mach any patteren!"
-		}
-		$errLogFile = $errLogRoot + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
-		$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 640000 -F 2 -t ',' -q -e '$errLogFile'"
-		$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)'"
-		$block = {
-			[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-			Import-Module SqlServer -ErrorAction Stop
-			[string[]]$jobResult = $($args[0]), $($args[1])
-			[string[]]$bcpResult = Invoke-Expression -Command $($args[0])
-			If ($bcpResult[$bcpResult.Count - 3] -notlike "*copied*") {
-				Return $bcpResult
-			}
-			Else {
-				$sqlParams = @{
-					query = $($args[1]);
-					ServerInstance = $($args[2]);
-					Database = $($args[3]);
-					Username = $($args[4]);
-					Password = $($args[5]);
-					QueryTimeout = 0;
-					ErrorAction = 'Stop';
-				}
-				Invoke-Sqlcmd @sqlParams
-			}
-			$jobResult += $bcpResult
-			Return $jobResult
-		}
-		[string]$jobName = $jobBase + $jobN
-		Start-Job -ScriptBlock $block -Name $jobName -ArgumentList `
-			"$command", ` #0
-			"$query", ` #1
-			"$sqlServer", ` #2
-			"$database", ` #3
-			"$sqlUser", ` #4
-			"$sqlPass" #5
-		$jobN++
-	}
-	Write-Output "$(Create-TimeStamp)  Inserting..."
-	Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog -ErrorAction Stop
-	$jobN = 1
-	While ($jobN -lt $($structuredFiles.Count + 1)) {
-		[string]$jobName = $jobBase + $jobN
-		Write-Output "$(Create-TimeStamp)  Waiting on $jobName..."
-		Get-Job -Name $jobName | Wait-Job
-		$global:bcpJobResults = Receive-Job -Name $jobName
-		If ($bcpJobResults[$bcpJobResults.Count - 3] -notlike "*copied*") {
-			Add-Content -Value "$(Create-TimeStamp)  BCP FAILED!!!" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
-			throw [System.Activities.WorkflowApplicationException] "ERROR:: BCP FAILED!"
-		}
-		Else {
-			Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
-			Remove-Job -Name $jobName
-		}
-		$jobN++
-	}
-}
-Function Add-PkToStgData {
-	[CmdletBinding()]
-	Param(
-		[string]$dataLakeFolder
-	)
-	$block = {
-		Import-Module SqlServer -ErrorAction Stop
-		$sqlParams = @{
-			query = "UPDATE $($args[0]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
-			ServerInstance = $($args[3]);
-			Database = $($args[4]);
-			Username = $($args[5]);
-			Password = $($args[6]);
-			QueryTimeout = 0;
-			ErrorAction = 'Stop';
-		}
-		Invoke-Sqlcmd @sqlParams
-		$sqlParams = @{
-			query = "UPDATE $($args[1]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
-			ServerInstance = $($args[3]);
-			Database = $($args[4]);
-			Username = $($args[5]);
-			Password = $($args[6]);
-			QueryTimeout = 0;
-			ErrorAction = 'Stop';
-		}
-		Invoke-Sqlcmd @sqlParams
-		Return 'Successful'
-	}
-	$jobBase = 'Pk_Job_'
-	$i = 1
-	While ($i -lt 6) {
-		[string]$jobName = $jobBase + $i
-		Start-Job -ScriptBlock $block -Name $jobName -ArgumentList `
-			"$($stgTable121)_$i", ` #0
-			"$($stgTable122)_$i", ` #1
-			"$dataLakeFolder", ` #2
-			"$sqlServer", ` #3
-			"$database", ` #4
-			"$sqlUser", ` #5
-			"$sqlPass" #6
-		$i++
-	}
-	$i = 1
-	While ($i -lt 6) {
-		[string]$jobName = $jobBase + $i
-		Get-Job -Name $jobName | Wait-Job
-		$pkResult = Receive-Job -Name $jobName
-		If ($pkResult -ne 'Successful') {
-			throw [PkError] 'Failed to create PKs in Staging!!!'
-		}
-		Else {
-			Remove-Job -Name $jobName
-		}
-		$i++
-	}
-}
 Function Confirm-Run {
 	Write-Host '********************************************************************' -ForegroundColor Magenta
 	Write-Host "Start Date    ::  $startDate"
@@ -439,7 +120,7 @@ Function Confirm-Run {
 	Write-Host "121 Move SP   ::  $headersMoveSp"
 	Write-Host "122 Move SP   ::  $detailsMoveSp"
 	Write-Host '********************************************************************' -ForegroundColor Magenta
-	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
+	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)" -ErrorAction Stop
 	Return $answer
 }
 # Init
@@ -476,11 +157,11 @@ If ($continue -eq 'y') {
 		Import-Module SqlServer -ErrorAction Stop
 		Import-Module AzureRM -ErrorAction Stop
 		Import-Module 7Zip -ErrorAction Stop
-		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
-		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass) -ErrorAction Stop
+		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
+		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 		Write-Debug -Message $credential.UserName
 		While ($y -lt $range) {
-			$startTime = Get-Date
+			$startTime = Get-Date -ErrorAction Stop
 			$startTimeText = $(Create-TimeStamp -forFileName)
 			$day = $($startDateObj.AddDays($y)).day.ToString("00")
 			$month = $($startDateObj.AddDays($y)).month.ToString("00")
@@ -490,61 +171,195 @@ If ($continue -eq 'y') {
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 				Write-Verbose -Message "Creating $opsLogRootPath..."
-				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null	
+				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 				Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
-				
 			}
 			Else {
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 			}
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-				Write-Verbose -Message "Creating $destinationRootPath..."
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog -ErrorAction Stop
+				$message = "Creating $destinationRootPath..."
+				Write-Verbose -Message $message
+				Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-				Write-Verbose -Message "Creating $archiveRootPath..."
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog -ErrorAction Stop
+				$message = "Creating $archiveRootPath..."
+				Write-Verbose -Message $message
+				Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $errLogRootPath) -eq $false) {
-				Write-Verbose -Message "Creating $errLogRootPath..."
-				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog -ErrorAction Stop
+				$message = "Creating $errLogRootPath..."
+				Write-Verbose -Message $message
+				Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			$message = "Logging into Azure..."
 			Write-Verbose -Message $message
 			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog -ErrorAction Stop
+			$message = "Login successful."
+			Write-Verbose -Message $message
+			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
-			$getDataLakeRawFilesParams = @{
-				dataLakeSearchPath = $($dataLakeSearchPathRoot + $processDate);
-				destinationPath = $($destinationRootPath + $processDate + '\');
-				dataLakeStoreName = $dataLakeStoreName;
-				opsLog = $opsLog;
+			$milestone_0 = Get-Date -ErrorAction Stop
+			If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
+				$message = "$(Create-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
+				Write-Verbose -Message $message
+				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+				Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop | Out-Null
 			}
-			Get-DataLakeRawFiles @getDataLakeRawFilesParams
+			$message = "$(Create-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			$getParams = @{
+				Account = $dataLakeStoreName;
+				Path = $($dataLakeSearchPathRoot + $processDate);
+				ErrorAction = 'Stop';
+			}
+			$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
+			$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			$exportParams = @{
+				Account = $dataLakeStoreName;
+				Path = $($dataLakeFolder.Path);
+				Destination = $($destinationRootPath + $processDate + '\');
+				Force = $true;
+				ErrorAction = 'Stop';
+			}
+			Export-AzureRmDataLakeStoreItem @exportParams
+			$message = "$(Create-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Seperate files into 5 seperate folders for paralell processing
 			$milestone_1 = Get-Date
-			$splitFilesAmongFoldersParams = @{
-				inFolder = $($destinationRootPath + $processDate + '\');
-				opsLog = $opsLog;
+			$fileCount = $null
+			$emptyFileCount = $null
+			$emptyFileList = @()
+			$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
+			$emptyFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop | Where-Object -FilterScript {$_.Length -lt 92}
+			$fileCount = $files.Count.ToString()
+			$emptyFileCount = $emptyFiles.Count.ToString()
+			$message = "$(Create-TimeStamp)  Found $fileCount total files..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			ForEach ($emptyFile in $emptyFiles) {
+				$emptyFileList += $emptyFile.Name
 			}
-			Split-FilesAmongFolders @splitFilesAmongFoldersParams
+			$i = 1
+			$count = 5
+			$folderPreFix = 'bucket_'
+			While ($i -lt $($count + 1)) {
+				$dirName = $folderPreFix + $i
+				$dirPath = $($destinationRootPath + $processDate + '\') + $dirName
+				If ($(Test-Path -Path $dirPath) -eq $false) {
+					$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
+					Write-Verbose -Message $message
+					New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
+				}
+				Else {
+					Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
+				}
+				$i++
+			}
+			[int]$divider = $($files.Count / $count) - 0.5
+			$i = 0
+			$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
+			Write-Output -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			While ($i -lt $($files.Count)) {
+				If ($i -lt $divider) {
+					$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '1'
+				}
+				ElseIf ($i -ge $divider -and $i -lt $($divider * 2)) {
+					$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '2'
+				}
+				ElseIf ($i -ge $($divider * 2) -and $i -lt $($divider * 3)) {
+					$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '3'
+				}
+				ElseIf ($i -ge $($divider * 3) -and $i -lt $($divider * 4)) {
+					$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '4'
+				}
+				Else {
+					$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '5'
+				}
+				Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
+				$i++
+			}
+			$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+			ForEach ($folder in $folders) {
+				$block = {
+					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					$path = $args[0]
+					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
+					ForEach ($file in $files) {
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+					}
+				}
+				$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
+				Write-Verbose -Message $message
+				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+				Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -ErrorAction Stop
+				Start-Sleep -Milliseconds 128
+			}
+			Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
+			Get-Job | Wait-Job
+			Get-Job | Remove-Job -ErrorAction Stop
 # Execute C# app as job on raw files to create CSV's
 			$milestone_2 = Get-Date
-			$convertBitFilesToCsvParams = @{
-				inFolder = $($destinationRootPath + $processDate + '\');
-				transTypes = $transTypes;
-				extractorExe = $extractorExe;
-				filePrefix = $processDate;
-				opsLog = $opsLog;
+			$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+			ForEach ($folder in $folders) {
+				$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
+				If ($(Test-Path -Path $outputPath) -eq $false) {
+					$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
+					Write-Verbose -Message $message
+					New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
+				}
+				$block = {
+					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					& $args[0] $args[1..4];
+					Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
+				}
+				$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
+				Write-Verbose -Message $message
+				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+				Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$processDate" -ErrorAction Stop
+				Start-Sleep -Milliseconds 128
 			}
-			Convert-BitFilesToCsv @convertBitFilesToCsvParams
+			Write-Output "$(Create-TimeStamp)  Converting..."
+			Get-Job | Wait-Job
+			Get-Job | Remove-Job -ErrorAction Stop
+			Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
+			$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+			ForEach ($folder in $folders) {
+				$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
+				$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+				If ($jsonObj.ResponseCode -ne 0) {
+					[string]$optimusError = $jsonObj.ResponseMsg
+					$errorParams = @{
+						Message = "Optimus Failed: $optimusError";
+						ErrorId = "$($jsonObj.ResponseCode)";
+						RecommendedAction = "Check ops log.";
+						ErrorAction = "Stop";
+					}
+					Write-Error @errorParams
+				}
+				Else {
+					Add-Content -Value "$($folder.FullName)" -Path $opsLog -ErrorAction Stop
+					Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
+					Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
+					Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
+				}
+			}
 # Insert CSV's to DB (stg tables)
-			$milestone_3 = Get-Date
+			$milestone_3 = Get-Date -ErrorAction Stop
 			$message = "$(Create-TimeStamp)  Truncating staging tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -574,26 +389,108 @@ If ($continue -eq 'y') {
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Filter "*Structured*" -ErrorAction Stop
-			$addCsvsToSqlParams = @{
-				structuredFiles = $structuredFiles;
-				errLogRoot = $errLogRootPath;
-				opsLog = $opsLog;
+			$hext = 1
+			$dext = 1
+			$jobN = 1
+			$jobBase = 'bcp_job_'
+			Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog -ErrorAction Stop
+			ForEach ($file in $structuredFiles) {
+				Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
+				If ($file.Name -like "*D1_121*") {
+					$table = "$($stgTable121)_$hext"
+					$formatFile = "C:\Scripts\XML\format121.xml"
+					$hext++
+				}
+				ElseIf ($file.Name -like "*D1_122*") {
+					$table = "$($stgTable122)_$dext"
+					$formatFile = "C:\Scripts\XML\format122.xml"
+					$dext++
+				}
+				Else {
+					$errorParams = @{
+						Message = "ERROR:: $($file.FullName) didn't mach any defined CSV file name patteren!";
+						ErrorId = "999";
+						RecommendedAction = "Fix it.";
+						ErrorAction = "Stop";
+					}
+					Write-Error @errorParams
+				}
+				$errLogFile = $errLogRootPath + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
+				$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 640000 -F 2 -t ',' -q -e '$errLogFile'"
+				$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)'"
+				$block = {
+					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					Import-Module SqlServer -ErrorAction Stop
+					[string[]]$jobResult = $($args[0]), $($args[1])
+					[string[]]$bcpResult = Invoke-Expression -Command $($args[0])
+					If ($bcpResult[$bcpResult.Count - 3] -notlike "*copied*") {
+						Return $bcpResult
+					}
+					Else {
+						$sqlParams = @{
+							query = $($args[1]);
+							ServerInstance = $($args[2]);
+							Database = $($args[3]);
+							Username = $($args[4]);
+							Password = $($args[5]);
+							QueryTimeout = 0;
+							ErrorAction = 'Stop';
+						}
+						Invoke-Sqlcmd @sqlParams
+					}
+					$jobResult += $bcpResult
+					Return $jobResult
+				}
+				[string]$jobName = $jobBase + $jobN
+				Start-Job -ScriptBlock $block -Name $jobName -ErrorAction Stop -ArgumentList `
+					"$command", ` #0
+					"$query", ` #1
+					"$sqlServer", ` #2
+					"$database", ` #3
+					"$sqlUser", ` #4
+					"$sqlPass" #5
+				$jobN++
 			}
-			Add-CsvsToSql @addCsvsToSqlParams
+			Write-Output "$(Create-TimeStamp)  Inserting..."
+			Add-Content -Value "$(Create-TimeStamp)  BCP Results:" -Path $opsLog -ErrorAction Stop
+			$jobN = 1
+			While ($jobN -lt $($structuredFiles.Count + 1)) {
+				[string]$jobName = $jobBase + $jobN
+				Write-Output "$(Create-TimeStamp)  Waiting on $jobName..."
+				Get-Job -Name $jobName -ErrorAction Stop | Wait-Job -ErrorAction Stop
+				$bcpJobResults = Receive-Job -Name $jobName -ErrorAction Stop
+				If ($bcpJobResults[$bcpJobResults.Count - 3] -notlike "*copied*") {
+					Add-Content -Value "$(Create-TimeStamp)  BCP FAILED!!!" -Path $opsLog -ErrorAction Stop
+					Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
+					$errorParams = @{
+						Message = "ERROR:: BCP FAILED!!!";
+						ErrorId = "999";
+						RecommendedAction = "Check log for BCP results.";
+						ErrorAction = "Stop";
+					}
+					Write-Error @errorParams
+				}
+				Else {
+					Add-Content -Value $bcpJobResults -Path $opsLog -ErrorAction Stop
+					Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
+					Remove-Job -Name $jobName -ErrorAction Stop
+				}
+				$jobN++
+			}
 # Count stores by day in stg header table and compare rows in database to rows in files
-			$milestone_4 = Get-Date
+			$milestone_4 = Get-Date -ErrorAction Stop
 			$block = {
-				$files = Get-ChildItem -Recurse -File -Path $($args[0]) -Filter "*Structured*"
+				$files = Get-ChildItem -Recurse -File -Path $($args[0]) -Filter "*Structured*" -ErrorAction Stop
 				$total = 0
 				ForEach ($file in $files) {
 					$count = 0
-					Get-Content -Path $($file.FullName) -ReadCount 250000 | ForEach-Object {$count += $_.Count}
+					Get-Content -Path $($file.FullName) -ReadCount 250000 -ErrorAction Stop | ForEach-Object {$count += $_.Count}
 					$total = $total + $count
 				}
 				Return $total
 			}
 			Write-Output "$(Create-TimeStamp)  Counting and comparing..."
-			$rowsInFilesJobResults = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')"
+			$rowsInFilesJobResults = Start-Job -ScriptBlock $block -ArgumentList "$($destinationRootPath + $processDate + '\')" -ErrorAction Stop
 			$query = @"
 				SELECT		CAST([EndDate] AS char(10))		AS [EndDate],
 							COUNT(DISTINCT([StoreNumber]))	AS [StoreCount]
@@ -719,27 +616,90 @@ If ($continue -eq 'y') {
 				ErrorAction = 'Stop';
 			}
 			$sqlDetailsCountResults = Invoke-Sqlcmd @sqlDetailsCountParams
-			Get-Job | Wait-Job
+			Get-Job | Wait-Job -ErrorAction Stop
 			$totalFileRowCount = $(Receive-Job $rowsInFilesJobResults) - $($transTypes.Split(',').Count * 5)
-			Get-Job | Remove-Job
+			Get-Job | Remove-Job -ErrorAction Stop
 			$totalSqlRowCount = $($sqlHeadersCountResults.Count) + $($sqlDetailsCountResults.Count)
 			Add-Content -Value "$(Create-TimeStamp)  Total Headers Rows: $($sqlHeadersCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Total Details Rows: $($sqlDetailsCountResults.Count.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Total File Rows: $($totalFileRowCount.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Total DB Rows: $($totalSqlRowCount.ToString('N0'))" -Path $opsLog -ErrorAction Stop
 			If ($totalFileRowCount -ne $totalSqlRowCount) {
-				throw [System.InvalidOperationException] "ROW COUNT MISMATCH"
+				$errorParams = @{
+					Message = "ERROR: ROW COUNT MISMATCH!!!";
+					ErrorId = "999";
+					RecommendedAction = "Fix it.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
 			}
-# Create PK and move data in DB from stg to prod
+# Create PK's in staging
 			$milestone_5 = Get-Date
 			$message = "$(Create-TimeStamp)  Creating PK's on data in staging tables..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Write-Output "$(Create-TimeStamp)  Adding PK's..."
-			Add-PkToStgData -dataLakeFolder $($dataLakeSearchPathRoot + $processDate)
+			$block = {
+				Import-Module SqlServer -ErrorAction Stop
+				$sqlParams = @{
+					query = "UPDATE $($args[0]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID])";
+					ServerInstance = $($args[3]);
+					Database = $($args[4]);
+					Username = $($args[5]);
+					Password = $($args[6]);
+					QueryTimeout = 0;
+					ErrorAction = 'Stop';
+				}
+				Invoke-Sqlcmd @sqlParams
+				$sqlParams = @{
+					query = "UPDATE $($args[1]) SET [DataLakeFolder] = '$($args[2])', [Pk] = CONCAT([StoreNumber],'-',[DayNumber],'-',[ShiftNumber],'-',[TransactionUID],'-',[SequenceNumber])";
+					ServerInstance = $($args[3]);
+					Database = $($args[4]);
+					Username = $($args[5]);
+					Password = $($args[6]);
+					QueryTimeout = 0;
+					ErrorAction = 'Stop';
+				}
+				Invoke-Sqlcmd @sqlParams
+				Return 'Successful'
+			}
+			$jobBase = 'Pk_Job_'
+			$i = 1
+			While ($i -lt 6) {
+				[string]$jobName = $jobBase + $i
+				Start-Job -ScriptBlock $block -Name $jobName -ErrorAction Stop -ArgumentList `
+					"$($stgTable121)_$i", ` #0
+					"$($stgTable122)_$i", ` #1
+					"$($dataLakeSearchPathRoot + $processDate)", ` #2
+					"$sqlServer", ` #3
+					"$database", ` #4
+					"$sqlUser", ` #5
+					"$sqlPass" #6
+				$i++
+			}
+			$i = 1
+			While ($i -lt 6) {
+				[string]$jobName = $jobBase + $i
+				Get-Job -Name $jobName -ErrorAction Stop | Wait-Job -ErrorAction Stop
+				$pkResult = Receive-Job -Name $jobName -ErrorAction Stop
+				If ($pkResult -ne 'Successful') {
+					$errorParams = @{
+						Message = "ERROR: Failed to create PK's in Staging!!!";
+						ErrorId = "999";
+						RecommendedAction = "Fix it.";
+						ErrorAction = "Stop";
+					}
+					Write-Error @errorParams
+				}
+				Else {
+					Remove-Job -Name $jobName -ErrorAction Stop
+				}
+				$i++
+			}
 			$message = "$(Create-TimeStamp)  Finished creating PK's on data in staging tables!"
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+# Move data in DB from stg to prod
 			$milestone_6 = Get-Date
 			$message = "$(Create-TimeStamp)  Moving data from staging tables to production tables..."
 			Write-Verbose -Message $message
@@ -774,6 +734,7 @@ If ($continue -eq 'y') {
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Move data from temp drive to archive
+			$milestone_7 = Get-Date
 			If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
 				Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 				Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
@@ -788,63 +749,71 @@ If ($continue -eq 'y') {
 			ForEach ($item in $emptyFileList) {
 				$htmlEmptyFileList += $item + '<br>'
 			}
-			$rawTime = New-TimeSpan -Start $startTime -End $milestone_1
+			$iniTime = New-TimeSpan -Start $startTime -End $milestone_0
+			$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 			$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 			$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
 			$insTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 			$couTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
 			$pkcTime = New-TimeSpan -Start $milestone_5 -End $milestone_6
-			$movTime = New-TimeSpan -Start $milestone_6 -End $endTime
+			$movTime = New-TimeSpan -Start $milestone_6 -End $milestone_7
+			$cleTime = New-TimeSpan -Start $milestone_7 -End $endTime
 			$totTime = New-TimeSpan -Start $startTime -End $endTime
-			$message0 = "Data Lake Folder--:  $($dataLakeSearchPathRoot + $processDate)"
-			$messageA = "Start Time--------:  $startTimeText"
-			$messageB = "End Time----------:  $endTimeText"
-			$messageC = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
-			$messageD = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
-			$messageE = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-			$messageF = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
-			$messageG = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
-			$messageH = "Create PK in STG--:  $($pkcTime.Hours.ToString("00")) h $($pkcTime.Minutes.ToString("00")) m $($pkcTime.Seconds.ToString("00")) s"
-			$messageI = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
-			$messageJ = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-			$messageK = "Total File Count--:  $fileCount"
-			$messageL = "Empty File Count--:  $emptyFileCount"
-			$messageM = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
-			$messageN = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
-			$messageO = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
-			Write-Output $message0
-			Write-Output $messageA
-			Write-Output $messageB
-			Write-Output $messageC
-			Write-Output $messageD
-			Write-Output $messageE
-			Write-Output $messageF
-			Write-Output $messageG
-			Write-Output $messageH
-			Write-Output $messageI
-			Write-Output $messageJ
-			Write-Output $messageK
-			Write-Output $messageL
-			Write-Output $messageM
-			Write-Output $messageN
-			Write-Output $messageO
+			$message01 = "Data Lake Folder--:  $($dataLakeSearchPathRoot + $processDate)"
+			$message02 = "Start Time--------:  $startTimeText"
+			$message03 = "End Time----------:  $endTimeText"
+			$message04 = "Initialization----:  $($iniTime.Hours.ToString("00")) h $($iniTime.Minutes.ToString("00")) m $($iniTime.Seconds.ToString("00")) s"
+			$message05 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
+			$message06 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
+			$message07 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
+			$message08 = "Insert To SQL DB--:  $($insTime.Hours.ToString("00")) h $($insTime.Minutes.ToString("00")) m $($insTime.Seconds.ToString("00")) s"
+			$message09 = "Count Stores------:  $($couTime.Hours.ToString("00")) h $($couTime.Minutes.ToString("00")) m $($couTime.Seconds.ToString("00")) s"
+			$message10 = "Create PK in STG--:  $($pkcTime.Hours.ToString("00")) h $($pkcTime.Minutes.ToString("00")) m $($pkcTime.Seconds.ToString("00")) s"
+			$message11 = "Move Data To Prod-:  $($movTime.Hours.ToString("00")) h $($movTime.Minutes.ToString("00")) m $($movTime.Seconds.ToString("00")) s"
+			$message12 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
+			$message13 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+			$message14 = "Total File Count--:  $fileCount"
+			$message15 = "Empty File Count--:  $emptyFileCount"
+			$message16 = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
+			$message17 = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
+			$message18 = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
+			Write-Output $message01
+			Write-Output $message02
+			Write-Output $message03
+			Write-Output $message04
+			Write-Output $message05
+			Write-Output $message06
+			Write-Output $message07
+			Write-Output $message08
+			Write-Output $message09
+			Write-Output $message10
+			Write-Output $message11
+			Write-Output $message12
+			Write-Output $message13
+			Write-Output $message14
+			Write-Output $message15
+			Write-Output $message16
+			Write-Output $message17
+			Write-Output $message18
 			Write-Output $emptyFileList
-			Add-Content -Value $message0 -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageA -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageB -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageC -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageD -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageE -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageF -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageG -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageH -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageI -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageJ -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageK -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageL -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageM -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageN -Path $opsLog -ErrorAction Stop
-			Add-Content -Value $messageO -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message01 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message02 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message03 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message04 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message05 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message06 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message07 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message08 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message09 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message10 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message11 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message12 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message13 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message14 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message15 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message16 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message17 -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message18 -Path $opsLog -ErrorAction Stop
 			Add-Content -Value $emptyFileList -Path $opsLog -ErrorAction Stop
 			$params = @{
 				SmtpServer = $smtpServer;
@@ -858,22 +827,24 @@ If ($continue -eq 'y') {
 					Raw files from the 7-11 data lake have been processed and inserted into the database.<br>
 					<br>
 					<font face='courier'>
-					$message0<br>
-					$messageA<br>
-					$messageB<br>
-					$messageC<br>
-					$messageD<br>
-					$messageE<br>
-					$messageF<br>
-					$messageG<br>
-					$messageH<br>
-					$messageI<br>
-					$messageJ<br>
-					$messageK<br>
-					$messageL<br>
-					$messageM<br>
-					$messageN<br>
-					$messageO<br>
+					$message01<br>
+					$message02<br>
+					$message03<br>
+					$message04<br>
+					$message05<br>
+					$message06<br>
+					$message07<br>
+					$message08<br>
+					$message09<br>
+					$message10<br>
+					$message11<br>
+					$message12<br>
+					$message13<br>
+					$message14<br>
+					$message15<br>
+					$message16<br>
+					$message17<br>
+					$message18<br>
 					</font>
 					<br>
 					Store Count By Day In Folder $processDate :<br>
@@ -912,124 +883,11 @@ If ($continue -eq 'y') {
 			}
 		}
 	}
-	Catch [System.InvalidOperationException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $failEmailList;
-			BodyAsHtml = $true;
-			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
-			Body = @"
-				<font face='consolas'>
-				File row count doesn't match database row count!!! Please check the ops log!!!<br><br>
-				<br>
-				Error:  $($Error[0].Exception.Message)<br>
-				</font>
-"@
-		}
-		Send-MailMessage @params
-	}
-	Catch [System.IO.DirectoryNotFoundException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $failEmailList;
-			BodyAsHtml = $true;
-			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
-			Body = @"
-				<font face='consolas'>
-				Something bad happened!!!<br><br>
-				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-				<br>
-				Error:  $($Error[0].Exception.Message)<br>
-				</font>
-"@
-		}
-		Send-MailMessage @params
-	}
-	Catch [System.FormatException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $failEmailList;
-			BodyAsHtml = $true;
-			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
-			Body = @"
-				<font face='consolas'>
-				Something bad happened!!!<br><br>
-				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-				<br>
-				Error:  $($Error[0].Exception.Message)<br>
-				</font>
-"@
-		}
-		Send-MailMessage @params
-	}
-	Catch [System.Activities.WorkflowApplicationException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $failEmailList;
-			BodyAsHtml = $true;
-			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
-			Body = @"
-				<font face='consolas'>
-				Something bad happened!!!<br><br>
-				Failed Command:  BCP<br>
-				<br>
-				$bcpJobResults<br>
-				</font>
-"@
-		}
-		Send-MailMessage @params
-	}
-	Catch [System.ArgumentOutOfRangeException] {
-		Write-Error -Exception $Error[0].Exception
-		Add-Content -Value $($Error[0].Exception.ToString()) -Path $opsLog -ErrorAction Stop
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $failEmailList;
-			BodyAsHtml = $true;
-			Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
-			Body = @"
-				<font face='consolas'>
-				Something bad happened!!!<br><br>
-				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-				<br>
-				Error:  $($Error[0].Exception.Message)<br>
-				</font>
-"@
-		}
-		Send-MailMessage @params
-	}
 	Catch {
-		$errorParams = @{
-			Exception = $Error[0].Exception;
-			Message = $Error[0].Exception.Message;
-			CategoryActivity = $Error[0].CategoryInfo.Activity;
-		}
-		Write-Error @errorParams
 		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -1041,9 +899,11 @@ If ($continue -eq 'y') {
 			Body = @"
 				<font face='consolas'>
 				Something bad happened!!!<br><br>
-				Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-				<br>
-				Error:  $($Error[0].Exception.Message)<br>
+				$($Error[0].CategoryInfo.Activity)<br>
+				$($Error[0].Exception.Message)<br>
+				$($Error[0].Exception.InnerExceptionMessage)<br>
+				$($Error[0].RecommendedAction)<br>
+				$($Error[0].Message)<br>
 				</font>
 "@
 		}
