@@ -6,7 +6,6 @@ SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE					[dbo].[usp_CeoReport_2_5]
-									@curr_yr_date								date,
 									@last_yr_date								date
 AS
 SET NOCOUNT ON

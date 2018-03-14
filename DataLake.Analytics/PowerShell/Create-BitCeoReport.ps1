@@ -1,4 +1,4 @@
-# Init  --  v0.0.0.3
+# Init  --  v0.0.0.5
 ##########################################
 $currentYearDate = '2018-03-12'
 $lastYearDate = '2017-03-13'
@@ -13,8 +13,6 @@ $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
-$scriptStartTime = Get-Date
-$scriptStartTimeText = $(Create-TimeStamp -forFileName)
 ##########################################
 ## select comp_dt
 ## from [dbo].[RPTS_Calendar]
@@ -48,68 +46,6 @@ Function Confirm-Run {
     $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
 	Return $answer
 }
-Function Execute-LocalStoreAndProduct {
-	$startTime = Get-Date
-	$startTimeText = $(Create-TimeStamp -forFileName)
-	$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
-	Add-Content -Value "$(Create-TimeStamp)  Updateing store and product tables..." -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $opsAddr;
-		BodyAsHtml = $true;
-		Subject = "BITC: CEO Report: 0 of 1: Dates: $currentYearDate | $lastYearDate";
-		Body = @"
-			<font face='courier'>
-			Start Time: $startTime<br>
-			$query<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$sqlParams = @{
-		query = $query;
-		ServerInstance = $sqlServer;
-		Database = $database;
-		Username = $sqlUser;
-		Password = $sqlPass;
-		QueryTimeout = 0;
-		ErrorAction = 'Stop';
-	}
-	$result = Invoke-Sqlcmd @sqlParams
-	$message = "Store And Product Tables Updated Successfully"
-	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	$endTime = Get-Date
-	$endTimeText = $(Create-TimeStamp -forFileName)
-	$spanObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time--------:  $startTimeText"
-	$message2 = "End Time----------:  $endTimeText"
-	$message3 = "Total Run Time----:  $($spanObj.Hours.ToString("00")) h $($spanObj.Minutes.ToString("00")) m $($spanObj.Seconds.ToString("00")) s"
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $opsAddr;
-		BodyAsHtml = $true;
-		Subject = "BITC: CEO Report: 0 of 1: Dates: $currentYearDate | $lastYearDate";
-		Body = @"
-			<font face='courier'>
-			$message<br>
-			$result<br>
-			$message1<br>
-			$message2<br>
-			$message3<br>
-			<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-}
 Function Execute-ShrinkLogFile {
 	$message = "Shrinking database log file..."
 	Write-Output $message
@@ -128,7 +64,80 @@ Function Execute-ShrinkLogFile {
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 }
+Function Execute-CeoAggregation {
+	[CmdletBinding()]
+	Param(
+		[string]$query,
+		[string]$currentYearDate,
+		[string]$lastYearDate,
+		[string]$step,
+		[string]$opsLog
+
+	)
+	$startTime = Get-Date
+	$startTimeText = $(Create-TimeStamp -forFileName)
+	$message = "Starting step $step of 5 for CEO report aggregation..."
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: CEO Report: $step of 5: Dates: $currentYearDate | $lastYearDate";
+		Body = @"
+			<font face='courier'>
+			$message<br>
+			Start Time: $startTimeText<br>
+			$query<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
+	$sqlParams = @{
+		query = $query;
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+		ErrorAction = 'Stop';
+	}
+	Invoke-Sqlcmd @sqlParams
+	$message = "Step $step of 5 for CEO report aggregation completed successfully."
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	$endTime = Get-Date
+	$endTimeText = $(Create-TimeStamp -forFileName)
+	$spanObj = New-TimeSpan -Start $startTime -End $endTime
+	$message1 = "Start Time--------:  $startTimeText"
+	$message2 = "End Time----------:  $endTimeText"
+	$message3 = "Total Run Time----:  $($spanObj.Hours.ToString("00")) h $($spanObj.Minutes.ToString("00")) m $($spanObj.Seconds.ToString("00")) s"
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: CEO Report: $step of 5: Dates: $currentYearDate | $lastYearDate";
+		Body = @"
+			<font face='courier'>
+			$message<br>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
+}
 # Init
+$scriptStartTime = Get-Date
+$scriptStartTimeText = $(Create-TimeStamp -forFileName)
 $opsLog = "H:\Ops_Log\BITC_$($currentYearDate)_" + $(Create-TimeStamp -forFileName) + "_CEO_Report.log"
 [DateTime]$currentYearDateObj = Get-Date -Date $currentYearDate
 [DateTime]$lastYearDateObj = Get-Date -Date $lastYearDate
@@ -154,14 +163,12 @@ If ($(Confirm-Run) -eq 'y') {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
-		# Step 0: Update local store and product tables
-		Execute-LocalStoreAndProduct
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 1: Run ceo_agg
-		$query = "EXECUTE [dbo].[usp_CEO_Report] @curr_yr_date = '$currentYearDate', @last_yr_date = '$lastYearDate'"
-		Add-Content -Value "$(Create-TimeStamp)  Starting CEO aggregate query..." -Path $opsLog
+# Step 0 of 5: Update local store and product tables
+		$startTime = Get-Date
+		$startTimeText = $(Create-TimeStamp -forFileName)
+		$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
+		$message = "Updateing store and product tables..."
+		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 		Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
 		$params = @{
 			SmtpServer = $smtpServer;
@@ -170,10 +177,11 @@ If ($(Confirm-Run) -eq 'y') {
 			From = $fromAddr;
 			To = $opsAddr;
 			BodyAsHtml = $true;
-			Subject = "BITC: CEO Report: 1 of 1: Dates: $currentYearDate | $lastYearDate";
+			Subject = "BITC: CEO Report: 0 of 5: Dates: $currentYearDate | $lastYearDate";
 			Body = @"
 				<font face='courier'>
-				Start Time: $startTime<br>
+				$message<br>
+				Start Time: $startTimeText<br>
 				$query<br>
 				</font>
 "@
@@ -188,9 +196,69 @@ If ($(Confirm-Run) -eq 'y') {
 			QueryTimeout = 0;
 			ErrorAction = 'Stop';
 		}
-		$ceoResult = Invoke-Sqlcmd @sqlParams
-		Add-Content -Value "$(Create-TimeStamp)  $ceoResult" -Path $opsLog
-		# Report
+		Invoke-Sqlcmd @sqlParams
+		$message = "Store And Product Tables Updated Successfully"
+		Write-Output $message
+		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+		$endTime = Get-Date
+		$endTimeText = $(Create-TimeStamp -forFileName)
+		$0spanObj = New-TimeSpan -Start $startTime -End $endTime
+		$message1 = "Start Time--------:  $startTimeText"
+		$message2 = "End Time----------:  $endTimeText"
+		$message3 = "Total Run Time----:  $($0spanObj.Hours.ToString("00")) h $($0spanObj.Minutes.ToString("00")) m $($0spanObj.Seconds.ToString("00")) s"
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $opsAddr;
+			BodyAsHtml = $true;
+			Subject = "BITC: CEO Report: 0 of 5: Dates: $currentYearDate | $lastYearDate";
+			Body = @"
+				<font face='courier'>
+				$message<br>
+				$message1<br>
+				$message2<br>
+				$message3<br>
+				<br>
+				</font>
+"@
+		}
+		Send-MailMessage @params
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Step 1 of 5: [dbo].[usp_CeoReport_1_5]
+		$sqlQuery = "EXECUTE [dbo].[usp_CeoReport_1_5] @curr_yr_date = '$currentYearDate'"
+		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '1' -opsLog $opsLog
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Step 2 of 5: [dbo].[usp_CeoReport_2_5]
+		$query = "EXECUTE [dbo].[usp_CeoReport_2_5] @last_yr_date = '$lastYearDate'"
+		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '2' -opsLog $opsLog
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Step 3 of 5: [dbo].[usp_CeoReport_3_5]
+		$query = "EXECUTE [dbo].[usp_CeoReport_3_5]"
+		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '3' -opsLog $opsLog
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Step 4 of 5: [dbo].[usp_CeoReport_4_5]
+		$query = "EXECUTE [dbo].[usp_CeoReport_4_5]"
+		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '4' -opsLog $opsLog
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Step 5 of 5: [dbo].[usp_CeoReport_5_5]
+		$query = "EXECUTE [dbo].[usp_CeoReport_5_5]"
+		Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '5' -opsLog $opsLog
+		Start-Sleep -Seconds 420
+		Execute-ShrinkLogFile
+		Start-Sleep -Seconds 2
+# Report
 		$scriptEndTime = Get-Date
 		$scriptEndTimeText = $(Create-TimeStamp -forFileName)
 		$totTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime

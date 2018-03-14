@@ -6,8 +6,7 @@ SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE					[dbo].[usp_CeoReport_1_5]
-									@curr_yr_date								date,
-									@last_yr_date								date
+									@curr_yr_date								date
 AS
 SET NOCOUNT ON
 DROP TABLE IF EXISTS				[dbo].[tmp_query_data_joined_CEO]
