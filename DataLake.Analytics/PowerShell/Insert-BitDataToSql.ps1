@@ -1,4 +1,4 @@
-# Version  --  v2.1.0.1
+# Version  --  v2.1.0.3
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -9,7 +9,7 @@
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
-	[parameter(Mandatory = $false)][switch]$test = $true
+	[parameter(Mandatory = $false)][switch]$test
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
@@ -471,13 +471,14 @@ Else {
 	$continue = 'y'
 }
 If ($continue -eq 'y') {
-	Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
-	Import-Module SqlServer -ErrorAction Stop
-	Import-Module AzureRM -ErrorAction Stop
-	Import-Module 7Zip -ErrorAction Stop
-	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass)
 	Try {
+		Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+		Import-Module SqlServer -ErrorAction Stop
+		Import-Module AzureRM -ErrorAction Stop
+		Import-Module 7Zip -ErrorAction Stop
 		$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj).Days + 1
+		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass) -ErrorAction Stop
+		Write-Debug -Message $credential.UserName
 		While ($y -lt $range) {
 			$startTime = Get-Date
 			$startTimeText = $(Create-TimeStamp -forFileName)
@@ -485,8 +486,10 @@ If ($continue -eq 'y') {
 			$month = $($startDateObj.AddDays($y)).month.ToString("00")
 			$year = $($startDateObj.AddDays($y)).year.ToString("0000")
 			$processDate = $year + $month + $day
+			Write-Debug -Message $processDate
 			$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 			If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+				Write-Verbose -Message "Creating $opsLogRootPath..."
 				New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null	
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 				Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
@@ -496,18 +499,23 @@ If ($continue -eq 'y') {
 				Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 			}
 			If ($(Test-Path -Path $destinationRootPath) -eq $false) {
+				Write-Verbose -Message "Creating $destinationRootPath..."
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $destinationRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+				Write-Verbose -Message "Creating $archiveRootPath..."
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $archiveRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 			}
 			If ($(Test-Path -Path $errLogRootPath) -eq $false) {
+				Write-Verbose -Message "Creating $errLogRootPath..."
 				Add-Content -Value "$(Create-TimeStamp)  Creating folder: $errLogRootPath..." -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop | Out-Null
 			}
-			Add-Content -Value "$(Create-TimeStamp)  Logging into Azure..." -Path $opsLog -ErrorAction Stop
+			$message = "Logging into Azure..."
+			Write-Verbose -Message $message
+			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
 			Add-Content -Value "$(Create-TimeStamp)  Login successful." -Path $opsLog -ErrorAction Stop
 # Get raw files
