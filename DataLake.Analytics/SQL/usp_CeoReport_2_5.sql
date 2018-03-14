@@ -1,31 +1,59 @@
 USE									[7ELE]
 GO
-DROP PROCEDURE IF EXISTS			[dbo].[usp_Aggregate_1_2]
+DROP PROCEDURE IF EXISTS			[dbo].[usp_CeoReport_2_5]
 GO
 SET ANSI_NULLS ON
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE					[dbo].[usp_Aggregate_1_2]
+CREATE PROCEDURE					[dbo].[usp_CeoReport_2_5]
+									@curr_yr_date								date,
+									@last_yr_date								date
 AS
 SET NOCOUNT ON
-INSERT INTO							[dbo].[tmp_query_data_FINAL]
-SELECT								[tqj].*,
-									[ept].[PSA_Cd],
-									[ept].[PSA_Ds],
-									[ept].[Category_Cd],
-									[ept].[Category_Ds],
-									[ept].[SubCategory_Cd]
-FROM								[dbo].[tmp_query_data_joined]			AS							[tqj]
-INNER JOIN							[dbo].[ext_storeTable]					AS							[est]
-ON									[tqj].[StoreNumber]						=							[est].[Store_Id]
-INNER JOIN							[dbo].[ext_productTable]				AS							[ept]
-ON									[ept].[slin]							=							[tqj].[ProductNumber]
-AND									[ept].[UPC]								=							[tqj].[PLUNumber]
-WHERE								[tqj].[RecordType]						IN							(1,5,18)
-AND									[tqj].[Aborted]							=							0
-AND									[tqj].[VoidFlag]						=							0
-CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Tmp_Final]
-ON									[dbo].[tmp_query_data_FINAL]
-WITH								(DROP_EXISTING = OFF,
-									COMPRESSION_DELAY = 0)
-ON									[PRIMARY]
+INSERT INTO							[dbo].[tmp_query_data_joined_CEO]
+SELECT								[th].[RecordId],
+									[th].[StoreNumber],
+									[th].[TransactionType],
+									[th].[DayNumber],
+									[th].[ShiftNumber],
+									[th].[TransactionUID],
+									[Aborted],
+									[DeviceNumber],
+									[DeviceType],
+									[EmployeeNumber],
+									[th].[EndDate],
+									[EndTime],
+									[StartDate],
+									[StartTime],
+									[Status],
+									[TotalAmount],
+									[TransactionCode],
+									[TransactionSequence],
+									[RewardMemberID],
+									[SequenceNumber],
+									[ProductNumber],
+									[PLUNumber],
+									[RecordAmount],
+									[RecordCount],
+									[RecordType],
+									[SizeIndx],
+									[ErrorCorrectionFlag],
+									[PriceOverideFlag],
+									[TaxableFlag],
+									[VoidFlag],
+									[RecommendedFlag],
+									[PriceMultiple],
+									[CarryStatus],
+									[TaxOverideFlag],
+									[PromotionCount],
+									[SalesPrice],
+									[MUBasePrice],
+									[HostItemId],
+									[CouponCount]
+FROM								[dbo].[prod_122_Details_CEO]				AS							[td]
+INNER JOIN							[dbo].[prod_121_Headers_CEO]				AS							[th]
+ON									[td].[StoreNumber]							=							[th].[StoreNumber]
+AND									[td].[DayNumber]							=							[th].[DayNumber]
+AND									[td].[ShiftNumber]							=							[th].[ShiftNumber]
+AND									[td].[TransactionUID]						=							[th].[TransactionUID]
+WHERE								[th].[EndDate]								=							@last_yr_date
