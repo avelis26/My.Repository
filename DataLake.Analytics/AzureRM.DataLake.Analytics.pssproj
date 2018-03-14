@@ -41,6 +41,11 @@
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\usp_CeoReport_1_5.sql" />
+    <Content Include="SQL\usp_CeoReport_2_5.sql" />
+    <Content Include="SQL\usp_CeoReport_3_5.sql" />
+    <Content Include="SQL\usp_CeoReport_4_5.sql" />
+    <Content Include="SQL\usp_CeoReport_5_5.sql" />
     <Content Include="SQL\usp_StoreReport_1_4.sql" />
     <Content Include="SQL\usp_StoreReport_2_4.sql" />
     <Content Include="SQL\usp_StoreReport_3_4.sql" />
