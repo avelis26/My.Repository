@@ -1,4 +1,4 @@
-# Version  --  v3.0.0.2
+# Version  --  v3.0.1.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -11,7 +11,27 @@ Param(
 	[parameter(Mandatory = $false)][switch]$autoDate,
 	[parameter(Mandatory = $false)][switch]$test
 )
-Add-Content -Value "$(Get-Date)  Insert-BitDataToSql Start" -Path 'H:\Ops_Log\bitc.log'
+Function Create-TimeStamp {
+	[CmdletBinding()]
+	Param(
+		[switch]$forFileName
+	)
+	$now = Get-Date -ErrorAction Stop
+	$day = $now.day.ToString("00")
+	$month = $now.month.ToString("00")
+	$year = $now.year.ToString("0000")
+	$hour = $now.hour.ToString("00")
+	$minute = $now.minute.ToString("00")
+	$second = $now.second.ToString("00")
+	If ($forFileName -eq $true) {
+		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
+	}
+	Else {
+		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	}
+	Return $timeStamp
+}
+Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
@@ -91,39 +111,6 @@ $emptyFileList = $null
 $storeCountResults = $null
 $y = 0
 #######################################################################################################
-Function Create-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	$now = Get-Date -ErrorAction Stop
-	$day = $now.day.ToString("00")
-	$month = $now.month.ToString("00")
-	$year = $now.year.ToString("0000")
-	$hour = $now.hour.ToString("00")
-	$minute = $now.minute.ToString("00")
-	$second = $now.second.ToString("00")
-	If ($forFileName -eq $true) {
-		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
-	}
-	Else {
-		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
-	}
-	Return $timeStamp
-}
-Function Confirm-Run {
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-	Write-Host "Start Date    ::  $startDate"
-	Write-Host "End Date      ::  $endDate"
-	Write-Host "Transactions  ::  $transTypes"
-	Write-Host "stgTable121   ::  $stgTable121"
-	Write-Host "stgTable122   ::  $stgTable122"
-	Write-Host "121 Move SP   ::  $headersMoveSp"
-	Write-Host "122 Move SP   ::  $detailsMoveSp"
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-	$answer = Read-Host -Prompt "Are you sure you want to start? (y/n)" -ErrorAction Stop
-	Return $answer
-}
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -145,14 +132,30 @@ If ($policy -ne 'TrustAllCertsPolicy') {
 If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-	$continue = Confirm-Run
 }
 Else {
 	$startDateObj = Get-Date -ErrorAction Stop
 	$endDateObj = $startDateObj
-	$continue = 'y'
 }
-If ($continue -eq 'y') {
+Write-Host '********************************************************************' -ForegroundColor Magenta
+Write-Host "Start Date    ::  $startDate"
+Write-Host "End Date      ::  $endDate"
+Write-Host "Transactions  ::  $transTypes"
+Write-Host "stgTable121   ::  $stgTable121"
+Write-Host "stgTable122   ::  $stgTable122"
+Write-Host "121 Move SP   ::  $headersMoveSp"
+Write-Host "122 Move SP   ::  $detailsMoveSp"
+Write-Host '********************************************************************' -ForegroundColor Magenta
+Write-Host "Starting script in 5..."
+Start-Sleep -Seconds 1
+Write-Host "4..."
+Start-Sleep -Seconds 1
+Write-Host "3..."
+Start-Sleep -Seconds 1
+Write-Host "2..."
+Start-Sleep -Seconds 1
+Write-Host "1..."
+Start-Sleep -Seconds 1
 	Try {
 		Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
 		Import-Module SqlServer -ErrorAction Stop
@@ -915,7 +918,6 @@ If ($continue -eq 'y') {
 	Finally {
 		Get-Job | Remove-Job
 		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
-		Add-Content -Value "$(Get-Date)  Insert-BitDataToSql End" -Path 'H:\Ops_Log\bitc.log'
+		Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
 		[Environment]::Exit($exitCode)
 	}
-} # if
