@@ -1,4 +1,4 @@
-# Version  --  v3.0.1.2
+# Version  --  v3.0.1.3
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -203,7 +203,7 @@ Try {
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 		$message = "Login successful."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
