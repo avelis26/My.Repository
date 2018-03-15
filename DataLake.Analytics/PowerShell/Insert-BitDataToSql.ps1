@@ -35,8 +35,8 @@ Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: S
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '03-12-2017'
-$endDate   = '04-12-2017'
+$startDate = '08-13-2017'
+$endDate   = '08-13-2017'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
