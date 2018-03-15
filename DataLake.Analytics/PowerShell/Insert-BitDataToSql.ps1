@@ -1,4 +1,4 @@
-# Version  --  v3.0.0.1
+# Version  --  v3.0.0.2
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -11,6 +11,7 @@ Param(
 	[parameter(Mandatory = $false)][switch]$autoDate,
 	[parameter(Mandatory = $false)][switch]$test
 )
+Add-Content -Value "$(Get-Date)  Insert-BitDataToSql Start" -Path 'H:\Ops_Log\bitc.log'
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
