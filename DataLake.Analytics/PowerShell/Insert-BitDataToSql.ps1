@@ -881,8 +881,9 @@ If ($continue -eq 'y') {
 				Write-Output "Too late :P"
 				Start-Sleep -Milliseconds 256
 			}
-		}
-	}
+		} # while
+		$exitCode = 0
+	} # try
 	Catch {
 		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
@@ -908,9 +909,11 @@ If ($continue -eq 'y') {
 "@
 		}
 		Send-MailMessage @params
+		$exitCode = 1
 	}
 	Finally {
 		Get-Job | Remove-Job
 		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
+		[Environment]::Exit($exitCode)
 	}
-}
+} # if
