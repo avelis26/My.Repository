@@ -915,6 +915,7 @@ If ($continue -eq 'y') {
 	Finally {
 		Get-Job | Remove-Job
 		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
+		Add-Content -Value "$(Get-Date)  Insert-BitDataToSql End" -Path 'H:\Ops_Log\bitc.log'
 		[Environment]::Exit($exitCode)
 	}
 } # if
