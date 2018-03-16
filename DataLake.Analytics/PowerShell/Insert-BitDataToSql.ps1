@@ -1,4 +1,4 @@
-# Version  --  v3.0.1.3
+# Version  --  v3.1.0.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -9,29 +9,9 @@
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
-	[parameter(Mandatory = $false)][switch]$test
+	[parameter(Mandatory = $false)][switch]$test,
+	[parameter(Mandatory = $false)][switch]$scale
 )
-Function Create-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	$now = Get-Date -ErrorAction Stop
-	$day = $now.day.ToString("00")
-	$month = $now.month.ToString("00")
-	$year = $now.year.ToString("0000")
-	$hour = $now.hour.ToString("00")
-	$minute = $now.minute.ToString("00")
-	$second = $now.second.ToString("00")
-	If ($forFileName -eq $true) {
-		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
-	}
-	Else {
-		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
-	}
-	Return $timeStamp
-}
-Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
@@ -111,6 +91,52 @@ $emptyFileList = $null
 $storeCountResults = $null
 $y = 0
 #######################################################################################################
+Function Create-TimeStamp {
+	[CmdletBinding()]
+	Param(
+		[switch]$forFileName
+	)
+	$now = Get-Date -ErrorAction Stop
+	$day = $now.day.ToString("00")
+	$month = $now.month.ToString("00")
+	$year = $now.year.ToString("0000")
+	$hour = $now.hour.ToString("00")
+	$minute = $now.minute.ToString("00")
+	$second = $now.second.ToString("00")
+	If ($forFileName -eq $true) {
+		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
+	}
+	Else {
+		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+	}
+	Return $timeStamp
+}
+Function Scale-AzureSqlDatabase {
+	[CmdletBinding()]
+	Param(
+		[string]$size
+	)
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $failEmailList;
+		BodyAsHtml = $true;
+		Subject = "BITC: Scaling Database to $size";
+		Body = "$(Create-TimeStamp -forFileName)"
+	}
+	Send-MailMessage @params
+	$params = @{
+		ResourceGroupName = 'CRM-TEST-RG';
+		ServerName = 'mstestsqldw';
+		DatabaseName = '7ELE';
+		Edition = 'Premium';
+		RequestedServiceObjectiveName = $size;
+	}
+	Set-AzureRmSqlDatabase @params
+}
+Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -128,6 +154,9 @@ If ($policy -ne 'TrustAllCertsPolicy') {
 	}
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
+If ($scale.IsPresent -eq $true) {
+	Scale-AzureSqlDatabase -size 'P6'
 }
 If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
@@ -916,6 +945,9 @@ Catch {
 	$exitCode = 1
 }
 Finally {
+	If ($scale.IsPresent -eq $true) {
+		Scale-AzureSqlDatabase -size 'P1'
+	}
 	Get-Job | Remove-Job
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
