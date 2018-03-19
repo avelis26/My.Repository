@@ -1,7 +1,11 @@
-# Init  --  v1.2.1.1
+# Init  --  v1.3.0.0
 ##########################################
 ##########################################
-$end = '2018-03-04'
+$startDateObj = Get-Date
+$day = $($startDateObj.AddDays(-1)).day.ToString("00")
+$month = $($startDateObj.AddDays(-1)).month.ToString("00")
+$year = $($startDateObj.AddDays(-1)).year.ToString("0000")
+$end = $year + '-' + $month + '-' + $day
 ##########################################
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Ben.Smith@Ansira.com'
@@ -43,14 +47,6 @@ Function Create-TimeStamp {
 	}
 	Return $timeStamp
 }
-Function Confirm-Run {
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-	Write-Host "Start Date    ::  $start"
-	Write-Host "End Date      ::  $end"
-	Write-Host '********************************************************************' -ForegroundColor Magenta
-    $answer = Read-Host -Prompt "Are you sure you want to start? (y/n)"
-	Return $answer
-}
 Function Execute-AggregateOneOne {
 	$startTime = Get-Date
 	$message = "Store Report: 1 of 8 For Date Range: $start - $end"
@@ -67,10 +63,10 @@ Function Execute-AggregateOneOne {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-Start Time: $(Get-Date)<br>
-$query<br>
-</font>
+			<font face='courier'>
+			Start Time: $(Get-Date)<br>
+			$query<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -101,12 +97,12 @@ $query<br>
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
+			<font face='courier'>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -127,10 +123,10 @@ Function Execute-AggregateOneTwo {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-Start Time: $(Get-Date)<br>
-$query<br>
-</font>
+			<font face='courier'>
+			Start Time: $(Get-Date)<br>
+			$query<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -161,12 +157,12 @@ $query<br>
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
+			<font face='courier'>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -193,10 +189,10 @@ Function Execute-AggregateOneThree {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-Start Time: $(Get-Date)<br>
-$query<br>
-</font>
+			<font face='courier'>
+			Start Time: $(Get-Date)<br>
+			$query<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -227,17 +223,17 @@ $query<br>
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-The results have been loaded into:<br>
-<br>
-Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-Database------------:  [7ELE]<br>
-Tables--------------:  [dbo].[Agg1_DaypartAggregate]<br>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
+			<font face='courier'>
+			The results have been loaded into:<br>
+			<br>
+			Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
+			Database------------:  [7ELE]<br>
+			Tables--------------:  [dbo].[Agg1_DaypartAggregate]<br>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -258,10 +254,10 @@ Function Execute-AggregateTwo {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-Start Time: $(Get-Date)<br>
-$query<br>
-</font>
+			<font face='courier'>
+			Start Time: $(Get-Date)<br>
+			$query<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -292,17 +288,17 @@ $query<br>
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-The results have been loaded into:<br>
-<br>
-Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-Database------------:  [7ELE]<br>
-Tables--------------:  [dbo].[Agg2_StoreTxnItems]<br>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
+			<font face='courier'>
+			The results have been loaded into:<br>
+			<br>
+			Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
+			Database------------:  [7ELE]<br>
+			Tables--------------:  [dbo].[Agg2_StoreTxnItems]<br>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -323,10 +319,10 @@ Function Execute-LocalStoreAndProduct {
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-Start Time: $(Get-Date)<br>
-$query<br>
-</font>
+			<font face='courier'>
+			Start Time: $(Get-Date)<br>
+			$query<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -357,14 +353,14 @@ $query<br>
 		BodyAsHtml = $true;
 		Subject = "BITC: $message";
 		Body = @"
-<font face='courier'>
-The results have been loaded into:<br>
-<br>
-$message1<br>
-$message2<br>
-$message3<br>
-<br>
-</font>
+			<font face='courier'>
+			The results have been loaded into:<br>
+			<br>
+			$message1<br>
+			$message2<br>
+			$message3<br>
+			<br>
+			</font>
 "@
 	}
 	Send-MailMessage @params
@@ -413,126 +409,124 @@ $global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) +
 [string]$weekFiveStart = $($weekFiveStartDate.year.ToString("0000")) + '-' + $($weekFiveStartDate.month.ToString("00")) + '-' + $($weekFiveStartDate.day.ToString("00"))
 [string]$weekFiveEnd = $($weekFiveEndDate.year.ToString("0000")) + '-' + $($weekFiveEndDate.month.ToString("00")) + '-' + $($weekFiveEndDate.day.ToString("00"))
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($(Confirm-Run) -eq 'y') {
-	Try {
-		If ($endDate.DayOfWeek -ne 'Sunday') {
-			throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
-		}
-		Import-Module SqlServer -ErrorAction Stop
-		If ($policy -ne 'TrustAllCertsPolicy') {
-			add-type @"
-			using System.Net;
-			using System.Security.Cryptography.X509Certificates;
-			public class TrustAllCertsPolicy : ICertificatePolicy {
-				public bool CheckValidationResult(
-					ServicePoint srvPoint, X509Certificate certificate,
-					WebRequest request, int certificateProblem
-				) {
-					return true;
-				}
+Try {
+	If ($endDate.DayOfWeek -ne 'Sunday') {
+		throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
+	}
+	Import-Module SqlServer -ErrorAction Stop
+	If ($policy -ne 'TrustAllCertsPolicy') {
+		add-type @"
+		using System.Net;
+		using System.Security.Cryptography.X509Certificates;
+		public class TrustAllCertsPolicy : ICertificatePolicy {
+			public bool CheckValidationResult(
+				ServicePoint srvPoint, X509Certificate certificate,
+				WebRequest request, int certificateProblem
+			) {
+				return true;
 			}
-"@
-			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
-		# Step 0: Update local store and product tables
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		Execute-LocalStoreAndProduct
-		Start-Sleep -Seconds 2
-		# Step 1: Run agg1-1
-		Execute-AggregateOneOne
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 2: Run agg1-2
-		Execute-AggregateOneTwo
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 3: Run agg1-3-1
-		Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd -step '3'
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 4: Run agg1-3-2
-		Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd -step '4'
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 5: Run agg1-3-3
-		Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd -step '5'
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 6: Run agg1-3-4
-		Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd -step '6'
-		Start-Sleep -Seconds 420
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 7: Run agg1-3-5
-		Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd -step '7'
-		Start-Sleep -Seconds 2
-		Execute-ShrinkLogFile
-		Start-Sleep -Seconds 2
-		# Step 8: Run agg2
-		Execute-AggregateTwo
-		Start-Sleep -Seconds 2
-		# Report
-		$totalEndTime = Get-Date
-		$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
-		$message0 = "Start Time-----------:  $($startTime.DateTime)"
-		$message1 = "End Time-------------:  $($endTime.DateTime)"
-		$message2 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $finalAddr;
-			BodyAsHtml = $true;
-			Subject = "BITC: Store Report Data For: $start - $end Is Ready";
-			Body = @"
-Ben (or Anna), please start the Alteryx process to create the store reports and drop them into the outbound 7Reports folder.<br>
-<br>
-<font face='courier'>
-$message0<br>
-$message1<br>
-$message2<br>
-</font>
 "@
-		}
-		Send-MailMessage @params
+		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 	}
-	Catch [System.ArgumentOutOfRangeException] {
-		Write-Error -Exception $Error[0].Exception
-	}
-	Catch {
-		Start-Sleep -Seconds 2
-		$message = "BIT Store Report Data For Date Range: $start - $end FAILED!!!"
-		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
-		$params = @{
-			SmtpServer = $smtpServer;
-			Port = $port;
-			UseSsl = 0;
-			From = $fromAddr;
-			To = $opsAddr;
-			BodyAsHtml = $true;
-			Subject = "BITC: $message";
-			Body = @"
-<font face='courier'>
-Something bad happened!!!<br>
-$aggOneResult<br>
-$aggOneTwoResult<br>
-$aggOneThreeResult<br>
-$aggTwoResult<br>
-</font>
+	# Step 0: Update local store and product tables
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	Execute-LocalStoreAndProduct
+	Start-Sleep -Seconds 2
+	# Step 1: Run agg1-1
+	Execute-AggregateOneOne
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 2: Run agg1-2
+	Execute-AggregateOneTwo
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 3: Run agg1-3-1
+	Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd -step '3'
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 4: Run agg1-3-2
+	Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd -step '4'
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 5: Run agg1-3-3
+	Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd -step '5'
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 6: Run agg1-3-4
+	Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd -step '6'
+	Start-Sleep -Seconds 420
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 7: Run agg1-3-5
+	Execute-AggregateOneThree -dateStart $weekFiveStart -dateEnd $weekFiveEnd -step '7'
+	Start-Sleep -Seconds 2
+	Execute-ShrinkLogFile
+	Start-Sleep -Seconds 2
+	# Step 8: Run agg2
+	Execute-AggregateTwo
+	Start-Sleep -Seconds 2
+	# Report
+	$totalEndTime = Get-Date
+	$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
+	$message0 = "Start Time-----------:  $($startTime.DateTime)"
+	$message1 = "End Time-------------:  $($endTime.DateTime)"
+	$message2 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $finalAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: Store Report Data For: $start - $end Is Ready";
+		Body = @"
+			Ben (or Anna), please start the Alteryx process to create the store reports and drop them into the outbound 7Reports folder.<br>
+			<br>
+			<font face='courier'>
+			$message0<br>
+			$message1<br>
+			$message2<br>
+			</font>
 "@
-		}
-		Send-MailMessage @params
 	}
+	Send-MailMessage @params
+}
+Catch [System.ArgumentOutOfRangeException] {
+	Write-Error -Exception $Error[0].Exception
+}
+Catch {
+	Start-Sleep -Seconds 2
+	$message = "BIT Store Report Data For Date Range: $start - $end FAILED!!!"
+	Write-Output $message
+	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
+	Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $opsAddr;
+		BodyAsHtml = $true;
+		Subject = "BITC: $message";
+		Body = @"
+			<font face='courier'>
+			Something bad happened!!!<br>
+			$aggOneResult<br>
+			$aggOneTwoResult<br>
+			$aggOneThreeResult<br>
+			$aggTwoResult<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
 }
