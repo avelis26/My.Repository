@@ -1,8 +1,8 @@
 USE								[7ELE]
 GO
-DROP PROCEDURE IF EXISTS		[dbo].[usp_Database_Maintenance]
+DROP PROCEDURE IF EXISTS		[dbo].[usp_Update_Statistics]
 GO
-CREATE PROCEDURE				[dbo].[usp_Database_Maintenance]
+CREATE PROCEDURE				[dbo].[usp_Update_Statistics]
 AS
 SET NOCOUNT ON
 DECLARE							@tableSchema							NVARCHAR(128)

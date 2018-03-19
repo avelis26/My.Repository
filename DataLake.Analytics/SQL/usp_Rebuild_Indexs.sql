@@ -1,8 +1,8 @@
 USE								[7ELE]
 GO
-DROP PROCEDURE IF EXISTS		[dbo].[usp_Database_Maintenance]
+DROP PROCEDURE IF EXISTS		[dbo].[usp_Rebuild_Indexs]
 GO
-CREATE PROCEDURE				[dbo].[usp_Database_Maintenance]
+CREATE PROCEDURE				[dbo].[usp_Rebuild_Indexs]
 AS
 SET NOCOUNT ON
 DECLARE							rebuildindexes							CURSOR
