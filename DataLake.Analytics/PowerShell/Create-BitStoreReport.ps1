@@ -1,5 +1,6 @@
-# Init  --  v1.3.0.1
+# Init  --  v1.3.0.2
 ##########################################
+# Fix error hanlding
 ##########################################
 $startDateObj = Get-Date
 $day = $($startDateObj.AddDays(-1)).day.ToString("00")
