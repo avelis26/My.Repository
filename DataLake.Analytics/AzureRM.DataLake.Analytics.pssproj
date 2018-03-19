@@ -36,6 +36,7 @@
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeStructuredFiles.ps1" />
     <Compile Include="PowerShell\Create-BitStoreReport.ps1" />
+    <Compile Include="PowerShell\Initialize-ForStoreReport.ps1" />
     <Compile Include="PowerShell\Insert-BitDataToSql.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
@@ -46,6 +47,7 @@
     <Content Include="SQL\usp_CeoReport_3_5.sql" />
     <Content Include="SQL\usp_CeoReport_4_5.sql" />
     <Content Include="SQL\usp_CeoReport_5_5.sql" />
+    <Content Include="SQL\usp_Rebuild_Indexs.sql" />
     <Content Include="SQL\usp_StoreReport_1_4.sql" />
     <Content Include="SQL\usp_StoreReport_2_4.sql" />
     <Content Include="SQL\usp_StoreReport_3_4.sql" />
@@ -54,7 +56,7 @@
     <Content Include="SQL\usp_Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\usp_Delete_Old_Data.sql" />
-    <Content Include="SQL\usp_Database_Maintenance.sql" />
+    <Content Include="SQL\usp_Update_Statistics.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Details_CEO.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Headers.sql" />
     <Content Include="SQL\shrink-log.sql" />
