@@ -413,6 +413,29 @@ Try {
 	If ($endDate.DayOfWeek -ne 'Sunday') {
 		throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
 	}
+	$filter = $($startDateObj.year.ToString("0000")) + $($startDateObj.month.ToString("00")) + $($startDateObj.day.ToString("00"))
+	$path = 'H:\Ops_Log\ETL\Store'
+	$continue = $null
+	$shouldExit = 0
+	While ($continue -ne 1) {
+		$file = Get-ChildItem -Path $path -Filter $filter -File
+		$content = Get-Content -Path $file.FullName -Tail 1
+		If ($content -eq '::ETL SUCCESSFUL::') {
+			$continue = 1
+		}
+		Start-Sleep -Seconds 60
+		$shouldExit++
+		If ($shouldExit -gt 120) {
+			$errorParams = @{
+				Message = "Store report aggregation script failed to start because current day ETL status unknown!!!";
+				ErrorId = "5";
+				RecommendedAction = "Check ops log.";
+				ErrorAction = "Stop";
+			}
+			Write-Error @errorParams
+		}
+	}
+
 	Import-Module SqlServer -ErrorAction Stop
 	If ($policy -ne 'TrustAllCertsPolicy') {
 		add-type @"

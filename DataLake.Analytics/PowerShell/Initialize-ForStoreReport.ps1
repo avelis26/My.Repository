@@ -3,7 +3,7 @@
 ######################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$size
+	[parameter(Mandatory = $false)][string]$size
 )
 [string[]]$emailList = `
 	'graham.pinkston@ansira.com', `
