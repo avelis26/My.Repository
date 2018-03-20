@@ -1,7 +1,4 @@
-# Init  --  v0.8.1.0
-##########################################
-#$currentYearDate = '2018-03-12'
-#$lastYearDate = '2017-03-13'
+# Init  --  v0.9.0.1
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
@@ -13,10 +10,6 @@ $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
-##########################################
-## SELECT		[comp_dt]
-## FROM			[dbo].[RPTS_Calendar]
-## WHERE		[calendar_dt] = DATEADD(day, -1, CAST(GETDATE() AS DATE))
 ##########################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
@@ -256,25 +249,25 @@ Try {
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 # Step 2 of 5: [dbo].[usp_CeoReport_2_5]
-	$query = "EXECUTE [dbo].[usp_CeoReport_2_5] @last_yr_date = '$lastYearDate'"
+	$sqlQuery = "EXECUTE [dbo].[usp_CeoReport_2_5] @last_yr_date = '$lastYearDate'"
 	Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '2' -opsLog $opsLog
 	Start-Sleep -Seconds 420
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 # Step 3 of 5: [dbo].[usp_CeoReport_3_5]
-	$query = "EXECUTE [dbo].[usp_CeoReport_3_5]"
+	$sqlQuery = "EXECUTE [dbo].[usp_CeoReport_3_5]"
 	Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '3' -opsLog $opsLog
 	Start-Sleep -Seconds 420
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 # Step 4 of 5: [dbo].[usp_CeoReport_4_5]
-	$query = "EXECUTE [dbo].[usp_CeoReport_4_5]"
+	$sqlQuery = "EXECUTE [dbo].[usp_CeoReport_4_5]"
 	Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '4' -opsLog $opsLog
 	Start-Sleep -Seconds 420
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 # Step 5 of 5: [dbo].[usp_CeoReport_5_5]
-	$query = "EXECUTE [dbo].[usp_CeoReport_5_5]"
+	$sqlQuery = "EXECUTE [dbo].[usp_CeoReport_5_5]"
 	Execute-CeoAggregation -query $sqlQuery -currentYearDate $currentYearDate -lastYearDate $lastYearDate -step '5' -opsLog $opsLog
 	Start-Sleep -Seconds 2
 # Report
@@ -303,14 +296,14 @@ Try {
 "@
 	}
 	Send-MailMessage @params
-}
-Catch [System.ArgumentOutOfRangeException] {
-	Write-Error -Exception $Error[0].Exception
+	$exitCode = 0
 }
 Catch {
 	Start-Sleep -Seconds 2
-	Add-Content -Value "$(Create-TimeStamp)  BITC: CEO Report: FAILED:" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $ceoResult" -Path $opsLog
+	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -320,15 +313,20 @@ Catch {
 		BodyAsHtml = $true;
 		Subject = "BITC: CEO Report: FAILED: Dates: $currentYearDate | $lastYearDate";
 		Body = @"
-			<font face='courier'>
-			Something bad happened!!!<br>
-			$ceoResult<br>
-			<br>
-			Failed Command:  $($Error[0].CategoryInfo.Activity)<br>
-			<br>
-			Error:  $($Error[0].Exception.Message)<br>
+			<font face='consolas'>
+			Something bad happened!!!<br><br>
+			$($Error[0].CategoryInfo.Activity)<br>
+			$($Error[0].Exception.Message)<br>
+			$($Error[0].Exception.InnerExceptionMessage)<br>
+			$($Error[0].RecommendedAction)<br>
+			$($Error[0].Message)<br>
 			</font>
 "@
 	}
 	Send-MailMessage @params
+	$exitCode = 1
+}
+Finally {
+	Get-Job | Remove-Job
+	[Environment]::Exit($exitCode)
 }
