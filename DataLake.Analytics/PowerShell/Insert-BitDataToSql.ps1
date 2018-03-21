@@ -1,8 +1,7 @@
-# Version  --  v3.1.0.0
+# Version  --  v3.1.0.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
-## add logic to compare row count from output.json
 ## finish error handling for optimus failure
 ######################################################
 [CmdletBinding()]
@@ -116,17 +115,7 @@ Function Scale-AzureSqlDatabase {
 	Param(
 		[string]$size
 	)
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $failEmailList;
-		BodyAsHtml = $true;
-		Subject = "BITC: Scaling Database to $size";
-		Body = "$(Create-TimeStamp -forFileName)"
-	}
-	Send-MailMessage @params
+	Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
 	$params = @{
 		ResourceGroupName = 'CRM-TEST-RG';
 		ServerName = 'mstestsqldw';
@@ -134,7 +123,9 @@ Function Scale-AzureSqlDatabase {
 		Edition = 'Premium';
 		RequestedServiceObjectiveName = $size;
 	}
+	Write-Output '$(Create-TimeStamp)  Scaling database...'
 	Set-AzureRmSqlDatabase @params
+	Add-Content -Value "$(Create-TimeStamp)  Database scaling successful." -Path $opsLog -ErrorAction Stop
 }
 Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
@@ -155,9 +146,6 @@ If ($policy -ne 'TrustAllCertsPolicy') {
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
-If ($scale.IsPresent -eq $true) {
-	Scale-AzureSqlDatabase -size 'P6'
-}
 If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
@@ -165,6 +153,8 @@ If ($autoDate.IsPresent -eq $false) {
 Else {
 	$startDateObj = Get-Date -ErrorAction Stop
 	$endDateObj = $startDateObj
+	$startDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+	$endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 }
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Start Date    ::  $startDate"
@@ -236,6 +226,9 @@ Try {
 		$message = "Login successful."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		If ($scale.IsPresent -eq $true) {
+			Scale-AzureSqlDatabase -size 'P6'
+		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
 		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
