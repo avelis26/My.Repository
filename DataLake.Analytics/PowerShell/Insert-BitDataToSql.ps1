@@ -1,4 +1,4 @@
-# Version  --  v3.1.0.2
+# Version  --  v3.1.0.3
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -125,7 +125,7 @@ Function Scale-AzureSqlDatabase {
 		Edition = 'Premium';
 		RequestedServiceObjectiveName = $size;
 	}
-	Write-Output '$(Create-TimeStamp)  Scaling database...'
+	Write-Output "$(Create-TimeStamp)  Scaling database..."
 	Set-AzureRmSqlDatabase @params
 	Add-Content -Value "$(Create-TimeStamp)  Database scaling successful." -Path $opsLog -ErrorAction Stop
 }
