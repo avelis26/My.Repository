@@ -1,4 +1,4 @@
-# Version  --  v3.1.0.1
+# Version  --  v3.1.0.2
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -71,6 +71,7 @@ Else {
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
+$databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -116,6 +117,7 @@ Function Scale-AzureSqlDatabase {
 		[string]$size
 	)
 	Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
+	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
 	$params = @{
 		ResourceGroupName = 'CRM-TEST-RG';
 		ServerName = 'mstestsqldw';
@@ -222,7 +224,7 @@ Try {
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -Force -ErrorAction Stop
 		$message = "Login successful."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
@@ -231,6 +233,7 @@ Try {
 		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
+		Set-AzureRmContext -Subscription $dataLakeSubId -ErrorAction Stop
 		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
 			$message = "$(Create-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
 			Write-Verbose -Message $message
