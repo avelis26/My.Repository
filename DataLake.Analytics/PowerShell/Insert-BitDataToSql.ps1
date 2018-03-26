@@ -1,4 +1,4 @@
-# Version  --  v3.1.0.5
+# Version  --  v3.1.1.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -322,25 +322,48 @@ Try {
 			$i++
 		}
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		$jobI = 0
+		$jobBaseName = 'decompress_job_'
 		ForEach ($folder in $folders) {
 			$block = {
-				[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-				$path = $args[0]
-				$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
-				ForEach ($file in $files) {
-					Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
-					Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+				Try {
+					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					$path = $args[0]
+					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
+					ForEach ($file in $files) {
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+					}
+					Return 0
+				}
+				Catch {
+					Return 1
 				}
 			}
 			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 			Write-Verbose -Message $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
+			$jobI++
 			Start-Sleep -Milliseconds 128
 		}
 		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
-		Get-Job | Wait-Job
-		Get-Job | Remove-Job -ErrorAction Stop
+		$r = 0
+		While ($r -lt $($folders.Count)) {
+			Write-Output "Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
+			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
+			If ($dJobResult -ne 0) {
+				$errorParams = @{
+					Message = "Decompression Failed!!!";
+					ErrorId = "44";
+					RecommendedAction = "Check ops log and GZ files.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
+		}
 # Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
