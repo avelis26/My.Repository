@@ -1,4 +1,4 @@
-# Version  --  v3.1.1.1
+# Version  --  v3.1.1.3
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -299,7 +299,7 @@ Try {
 		[int]$divider = $($files.Count / $count) - 0.5
 		$i = 0
 		$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
-		Write-Output -Message $message
+		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		While ($i -lt $($files.Count)) {
 			If ($i -lt $divider) {
@@ -973,7 +973,7 @@ Finally {
 	If ($scale.IsPresent -eq $true) {
 		Scale-AzureSqlDatabase -size 'P1'
 	}
-	Get-Job | Remove-Job
+	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
 	[Environment]::Exit($exitCode)
