@@ -1,4 +1,4 @@
-# Version  --  v3.1.1.3
+# Version  --  v3.1.1.5
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -322,7 +322,7 @@ Try {
 		}
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		$jobI = 0
-		$jobBaseName = 'decompress_job_'
+		$jobBaseName = 'unzip_job_'
 		ForEach ($folder in $folders) {
 			$block = {
 				Try {
@@ -362,6 +362,7 @@ Try {
 				Write-Error @errorParams
 			}
 			Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
+			$r++
 		}
 # Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
@@ -970,7 +971,9 @@ Catch {
 	$exitCode = 1
 }
 Finally {
+	Write-Output 'Finally...'
 	If ($scale.IsPresent -eq $true) {
+		Write-Output 'Scaling DB...'
 		Scale-AzureSqlDatabase -size 'P1'
 	}
 	Get-Job | Remove-Job -Force
