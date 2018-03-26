@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.2
+# Init  --  v1.3.0.3
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -20,13 +20,6 @@ $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
 $scriptStartTime = Get-Date
-##########################################
-# add function to check last found log file and look for ::ETL SUCCESSFUL::
-# $path = 'H:\Ops_Log'
-# $lastLogFile = Get-ChildItem -Path $path -File -Filter "*BITC.log" | Sort-Object -Property LastWriteTime | Select-Object -Last 1
-# $logContent = Get-Content -Path $lastLogFile
-# If ($logContent[$logContent.Count - 1] -eq '::ETL SUCCESSFUL::') {do the things})
-# Else {wait to do the things}
 ##########################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
