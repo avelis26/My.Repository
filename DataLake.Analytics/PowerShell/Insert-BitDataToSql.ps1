@@ -1,4 +1,4 @@
-# Version  --  v3.1.0.4
+# Version  --  v3.1.0.5
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -938,13 +938,13 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	If ($(Test-Path -Path $($archiveRootPath + '_Error')) -eq $false) {
-		$message = "Creating $($archiveRootPath + '_Error')..."
+	If ($(Test-Path -Path $($archiveRootPath + 'ERROR')) -eq $false) {
+		$message = "Creating $($archiveRootPath + 'ERROR')..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $($archiveRootPath + '_Error') -Force -ErrorAction Stop | Out-Null
+		New-Item -ItemType Directory -Path $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop | Out-Null
 	}
-	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($archiveRootPath + '_Error') -Force -ErrorAction Stop
+	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop
 	$exitCode = 1
 }
 Finally {
