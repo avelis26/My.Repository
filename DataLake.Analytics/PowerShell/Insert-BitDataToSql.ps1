@@ -1,8 +1,7 @@
-# Version  --  v3.1.1.0
+# Version  --  v3.1.1.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
-## finish error handling for optimus failure
 ######################################################
 [CmdletBinding()]
 Param(
@@ -331,13 +330,13 @@ Try {
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
 						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
 					}
-					Return 0
+					Return 'pass'
 				}
 				Catch {
-					Return 1
+					Return 'fail'
 				}
 			}
 			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
@@ -353,7 +352,7 @@ Try {
 			Write-Output "Waiting for decompress job: $($jobBaseName + $r.ToString())..."
 			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
 			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
-			If ($dJobResult -ne 0) {
+			If ($dJobResult -ne 'pass') {
 				$errorParams = @{
 					Message = "Decompression Failed!!!";
 					ErrorId = "44";
@@ -948,7 +947,7 @@ Catch {
 		From = $fromAddr;
 		To = $failEmailList;
 		BodyAsHtml = $true;
-		Subject = "BITC: ::ERROR:: FAILED For $processDate!!!";
+		Subject = "BITC: ::ERROR:: ETL Failed For $processDate!!!";
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
