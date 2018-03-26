@@ -63,10 +63,10 @@ Else {
 	}
 }
 ## Base name of database tables
-[string]$stgTable121 = 'stg_121_Headers'
-[string]$stgTable122 = 'stg_122_Details'
-[string]$prodTable121 = 'prod_121_Headers'
-[string]$prodTable122 = 'prod_122_Details'
+$stgTable121 = 'stg_121_Headers'
+$stgTable122 = 'stg_122_Details'
+$prodTable121 = 'prod_121_Headers'
+$prodTable122 = 'prod_122_Details'
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
