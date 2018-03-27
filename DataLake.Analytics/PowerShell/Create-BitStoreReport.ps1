@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.3
+# Init  --  v1.3.0.4
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -234,7 +234,7 @@ Function Execute-AggregateOneThree {
 }
 Function Execute-AggregateTwo {
 	$startTime = Get-Date
-	$message = "Store Report: 8 of 8 For Date Range: $dateStart - $dateEnd"
+	$message = "Store Report: 8 of 8 For Date Range: $start - $end"
 	$query = "EXECUTE [dbo].[usp_Aggregate_Two]"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
@@ -265,7 +265,7 @@ Function Execute-AggregateTwo {
 		ErrorAction = 'Stop';
 	}
 	$aggTwoResult = Invoke-Sqlcmd @sqlAggTwoParams
-	$message = $message = "Store Report: 8 of 8 For Date Range: $dateStart - $dateEnd Completed Successfully"
+	$message = $message = "Store Report: 8 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
@@ -489,10 +489,10 @@ Try {
 	Execute-AggregateTwo
 	Start-Sleep -Seconds 2
 	# Report
-	$totalEndTime = Get-Date
-	$totTime = New-TimeSpan -Start $totalStartTime -End $totalEndTime
-	$message0 = "Start Time-----------:  $($startTime.DateTime)"
-	$message1 = "End Time-------------:  $($endTime.DateTime)"
+	$endDateObj = Get-Date
+	$totTime = New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop
+	$message0 = "Start Time-----------:  $($startDateObj.Hour.ToString("00")) hours $($startDateObj.Minute.ToString("00")) minutes $($startDateObj.Second.ToString("00")) seconds"
+	$message1 = "End Time-------------:  $($endDateObj.Hour.ToString("00")) hours $($endDateObj.Minute.ToString("00")) minutes $($endDateObj.Second.ToString("00")) seconds"
 	$message2 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
 	$params = @{
 		SmtpServer = $smtpServer;
@@ -514,18 +514,11 @@ Try {
 	}
 	Send-MailMessage @params
 }
-Catch [System.ArgumentOutOfRangeException] {
-	Write-Error -Exception $Error[0].Exception
-}
 Catch {
-	Start-Sleep -Seconds 2
-	$message = "BIT Store Report Data For Date Range: $start - $end FAILED!!!"
-	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneOneResult" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneTwoResult" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggOneThreeResult" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $aggTwoResult" -Path $opsLog
+	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -533,14 +526,15 @@ Catch {
 		From = $fromAddr;
 		To = $opsAddr;
 		BodyAsHtml = $true;
-		Subject = "BITC: $message";
+		Subject = "BITC: Store Report Data For Date Range: $start - $end FAILED!!!";
 		Body = @"
-			<font face='courier'>
-			Something bad happened!!!<br>
-			$aggOneResult<br>
-			$aggOneTwoResult<br>
-			$aggOneThreeResult<br>
-			$aggTwoResult<br>
+			<font face='consolas'>
+			Something bad happened!!!<br><br>
+			$($Error[0].CategoryInfo.Activity)<br>
+			$($Error[0].Exception.Message)<br>
+			$($Error[0].Exception.InnerExceptionMessage)<br>
+			$($Error[0].RecommendedAction)<br>
+			$($Error[0].Message)<br>
 			</font>
 "@
 	}
