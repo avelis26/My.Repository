@@ -1,15 +1,20 @@
+# Version  --  v3.1.1.5
+######################################################
+## need to imporve multithreading
+## Add logic to check bcp error file for content
+######################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
-	[parameter(Mandatory = $false)][switch]$autoDate = $false,
-	[parameter(Mandatory = $false)][switch]$test = $true,
-	[parameter(Mandatory = $false)][switch]$scale = $false
+	[parameter(Mandatory = $false)][switch]$autoDate,
+	[parameter(Mandatory = $false)][switch]$test,
+	[parameter(Mandatory = $false)][switch]$scale
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '02-24-2018'
-$endDate   = '02-24-2018'
+$startDate = '08-13-2017'
+$endDate   = '08-13-2017'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -23,15 +28,45 @@ If ($test.IsPresent -eq $true) {
 	$failEmailList = 'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
-		$headersMoveSp = 'usp_Hadoop_To_Hadoop_Headers'
-		$detailsMoveSp = 'usp_Hadoop_To_Hadoop_Details'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+	}
+	ElseIf ($report -eq 'c') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+	}
+}
+Else {
+	[string[]]$emailList = `
+	'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'tyler.bailey@ansira.com', `
+	'DIST-SEI_CRM_STATUS@7-11.com', `
+	'catherine.wells@ansira.com', `
+	'britten.morse@ansira.com', `
+	'Geri.Shaeffer@Ansira.com', `
+	'megan.morace@ansira.com'
+	[string[]]$failEmailList = `
+	'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'tyler.bailey@ansira.com'
+	If ($report -eq 's') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+	}
+	ElseIf ($report -eq 'c') {
+		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
+		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	}
 }
 ## Base name of database tables
-$stgTable121 = 'Hadoop_121_Headers_1'
-$stgTable122 = 'Hadoop_122_Details_1'
-$prodTable121 = 'Hadoop_121_Headers'
-$prodTable122 = 'Hadoop_122_Details'
+$stgTable121 = 'stg_121_Headers'
+$stgTable122 = 'stg_122_Details'
+$prodTable121 = 'prod_121_Headers'
+$prodTable122 = 'prod_122_Details'
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
@@ -74,6 +109,24 @@ Function Create-TimeStamp {
 		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
 	}
 	Return $timeStamp
+}
+Function Scale-AzureSqlDatabase {
+	[CmdletBinding()]
+	Param(
+		[string]$size
+	)
+	Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
+	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
+	$params = @{
+		ResourceGroupName = 'CRM-TEST-RG';
+		ServerName = 'mstestsqldw';
+		DatabaseName = '7ELE';
+		Edition = 'Premium';
+		RequestedServiceObjectiveName = $size;
+	}
+	Write-Output "$(Create-TimeStamp)  Scaling database..."
+	Set-AzureRmSqlDatabase @params
+	Add-Content -Value "$(Create-TimeStamp)  Database scaling successful." -Path $opsLog -ErrorAction Stop
 }
 Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
@@ -174,6 +227,9 @@ Try {
 		$message = "Login successful."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		If ($scale.IsPresent -eq $true) {
+			Scale-AzureSqlDatabase -size 'P6'
+		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
 		Set-AzureRmContext -Subscription $dataLakeSubId -ErrorAction Stop
@@ -360,8 +416,16 @@ Try {
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$query = @"
-			TRUNCATE TABLE [dbo].[$stgTable121];
-			TRUNCATE TABLE [dbo].[$stgTable122];
+			TRUNCATE TABLE [dbo].[$($stgTable121)_1];
+			TRUNCATE TABLE [dbo].[$($stgTable121)_2];
+			TRUNCATE TABLE [dbo].[$($stgTable121)_3];
+			TRUNCATE TABLE [dbo].[$($stgTable121)_4];
+			TRUNCATE TABLE [dbo].[$($stgTable121)_5];
+			TRUNCATE TABLE [dbo].[$($stgTable122)_1];
+			TRUNCATE TABLE [dbo].[$($stgTable122)_2];
+			TRUNCATE TABLE [dbo].[$($stgTable122)_3];
+			TRUNCATE TABLE [dbo].[$($stgTable122)_4];
+			TRUNCATE TABLE [dbo].[$($stgTable122)_5];
 "@
 		$sqlTruncateParams = @{
 			query = $query;
@@ -377,16 +441,22 @@ Try {
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$structuredFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Filter "*Structured*" -ErrorAction Stop
+		$hext = 1
+		$dext = 1
+		$jobN = 1
+		$jobBase = 'bcp_job_'
 		Add-Content -Value "$(Create-TimeStamp)  Starting BCP jobs..." -Path $opsLog -ErrorAction Stop
 		ForEach ($file in $structuredFiles) {
 			Write-Output "$(Create-TimeStamp)  Inserting $($file.FullName)..."
 			If ($file.Name -like "*D1_121*") {
-				$table = $stgTable121
+				$table = "$($stgTable121)_$hext"
 				$formatFile = "C:\Scripts\XML\format121.xml"
+				$hext++
 			}
 			ElseIf ($file.Name -like "*D1_122*") {
-				$table = $stgTable122
+				$table = "$($stgTable122)_$dext"
 				$formatFile = "C:\Scripts\XML\format122.xml"
+				$dext++
 			}
 			Else {
 				$errorParams = @{
@@ -400,7 +470,7 @@ Try {
 			$errLogFile = $errLogRootPath + $($file.BaseName) + '_' + $($file.Directory.Name) + '_BCP_Error.log'
 			$command = "bcp $table in $($file.FullName) -S $sqlServer -d $database -U $sqlUser -P $sqlPass -f $formatFile -b 640000 -F 2 -t ',' -q -e '$errLogFile'"
 			$query = "UPDATE $table SET [CsvFile] = '$($file.FullName)'"
-
+			$block = {
 				[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 				Import-Module SqlServer -ErrorAction Stop
 				[string[]]$jobResult = $($args[0]), $($args[1])
@@ -422,7 +492,7 @@ Try {
 				}
 				$jobResult += $bcpResult
 				Return $jobResult
-
+			}
 			[string]$jobName = $jobBase + $jobN
 			Start-Job -ScriptBlock $block -Name $jobName -ErrorAction Stop -ArgumentList `
 				"$command", ` #0
