@@ -1,4 +1,4 @@
-# Version  --  v0.9.1.0
+# Version  --  v0.9.1.1
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -21,6 +21,10 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $extractorExe = "C:\Scripts\C#\Hadoop\Ansira.Sel.BITC.DataExtract.Processor.exe"
+$azCopyExe = "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe"
+$az121Dest = 'https://bitcclusterdatastorage.blob.core.windows.net/ansiracluster/bitc/121header'
+$az122Dest = 'https://bitcclusterdatastorage.blob.core.windows.net/ansiracluster/bitc/122detail'
+$azDestKey = 'JeOkTNin5+tRR64gGVWCT+6wW9YesqFLGw1YH2JNV7biSYTbbt9jvgn7kZ/bbFWqanCnLqexz5KWpTDdjofQaQ=='
 $y = 0
 #######################################################################################################
 Function Create-TimeStamp {
@@ -255,7 +259,8 @@ Try {
 			$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
 			If ($(Test-Path -Path $outputPath) -eq $false) {
 				$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
-				Write-Verbose -Message $message
+				Write-Output $message
+				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
 			}
 			$block = {
@@ -264,9 +269,9 @@ Try {
 				Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
 			}
 			$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
-			Write-Verbose -Message $message
+			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$processDate" -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
 			Start-Sleep -Milliseconds 128
 		}
 		Write-Output "$(Create-TimeStamp)  Converting..."
@@ -294,14 +299,38 @@ Try {
 				Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
 			}
 		}
+# Upload CSV's to blob storage
+		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_121*" -File -ErrorAction Stop
+		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_122*" -File -ErrorAction Stop
+		ForEach ($file in $121files) {
+			$command = "AzCopy /Source:$($file.FullName) /Dest:$az121Dest /DestKey:$azDestKey"
+			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Invoke-Expression -Command $command -ErrorAction Stop
+		}
+		ForEach ($file in $122files) {
+			$command = "AzCopy /Source:$($file.FullName) /Dest:$az122Dest /DestKey:$azDestKey"
+			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Invoke-Expression -Command $command -ErrorAction Stop
+		}
 # Move data from temp drive to archive
 		$milestone_3 = Get-Date
 		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-			Add-Content -Value "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+			$message = "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
+			$message = "$(Create-TimeStamp)  Folder removed successfully."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		}
-		Add-Content -Value "$(Create-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+
+		$message = "$(Create-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
