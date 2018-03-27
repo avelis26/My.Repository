@@ -297,7 +297,7 @@ Try {
 			}
 		}
 # Upload CSV's to blob storage
-		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_121*" -File -ErrorAction Stop
+<#		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_121*" -File -ErrorAction Stop
 		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_122*" -File -ErrorAction Stop
 		ForEach ($file in $121files) {
 			$command = "$azCopyExe /Source:$($file.FullName) /Dest:$az121Dest /DestKey:$azDestKey"
@@ -312,7 +312,7 @@ Try {
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Invoke-Expression -Command $command -ErrorAction Stop
-		}
+		}#>
 # Move data from temp drive to archive
 		$milestone_3 = Get-Date
 		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
