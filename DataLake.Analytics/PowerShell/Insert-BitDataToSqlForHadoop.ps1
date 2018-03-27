@@ -1,20 +1,15 @@
-# Version  --  v3.1.1.5
-######################################################
-## need to imporve multithreading
-## Add logic to check bcp error file for content
-######################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
-	[parameter(Mandatory = $false)][switch]$autoDate,
-	[parameter(Mandatory = $false)][switch]$test,
-	[parameter(Mandatory = $false)][switch]$scale
+	[parameter(Mandatory = $false)][switch]$autoDate = $false,
+	[parameter(Mandatory = $false)][switch]$test = $true,
+	[parameter(Mandatory = $false)][switch]$scale = $false
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '08-13-2017'
-$endDate   = '08-13-2017'
+$startDate = '02-25-2018'
+$endDate   = '02-25-2018'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -28,45 +23,34 @@ If ($test.IsPresent -eq $true) {
 	$failEmailList = 'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+		$headersMoveSp = 'usp_Hadoop_To_Hadoop_Headers'
+		$detailsMoveSp = 'usp_Hadoop_To_Hadoop_Details'
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+		$headersMoveSp = 'usp_Hadoop_To_Hadoop_Headers_CEO'
+		$detailsMoveSp = 'usp_Hadoop_To_Hadoop_Details_CEO'
 	}
 }
 Else {
-	[string[]]$emailList = `
-	'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
-	'tyler.bailey@ansira.com', `
-	'DIST-SEI_CRM_STATUS@7-11.com', `
-	'catherine.wells@ansira.com', `
-	'britten.morse@ansira.com', `
-	'Geri.Shaeffer@Ansira.com', `
-	'megan.morace@ansira.com'
-	[string[]]$failEmailList = `
-	'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
-	'tyler.bailey@ansira.com'
+	[string[]]$emailList = 'graham.pinkston@ansira.com'
+	[string[]]$failEmailList = 'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+		$headersMoveSp = 'usp_Hadoop_To_Hadoop_Headers'
+		$detailsMoveSp = 'usp_Hadoop_To_Hadoop_Details'
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+		$headersMoveSp = 'usp_Hadoop_To_Hadoop_Headers_CEO'
+		$detailsMoveSp = 'usp_Hadoop_To_Hadoop_Details_CEO'
 	}
 }
 ## Base name of database tables
-$stgTable121 = 'stg_121_Headers'
-$stgTable122 = 'stg_122_Details'
-$prodTable121 = 'prod_121_Headers'
-$prodTable122 = 'prod_122_Details'
+$stgTable121 = 'Hadoop_121_Headers'
+$stgTable122 = 'Hadoop_122_Details'
+$prodTable121 = 'Hadoop_121_Headers'
+$prodTable122 = 'Hadoop_122_Details'
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
