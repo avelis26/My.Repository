@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.1
+# Version  --  v0.9.1.0
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -153,53 +153,146 @@ Try {
 		$message = "$(Create-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Decompress files for processing
+# Seperate files into 5 folders and decompress in paralell
 		$milestone_1 = Get-Date
 		$fileCount = $null
-		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter '*.gz' -File -ErrorAction Stop
+		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
 		$fileCount = $files.Count.ToString()
 		$message = "$(Create-TimeStamp)  Found $fileCount total files..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$dirPath = $($destinationRootPath + $processDate + '\bucket_1\')
-		If ($(Test-Path -Path $dirPath) -eq $false) {
-			$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
+		$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$i = 1
+		$count = 5
+		$folderPreFix = 'bucket_'
+		While ($i -lt $($count + 1)) {
+			$dirName = $folderPreFix + $i
+			$dirPath = $($destinationRootPath + $processDate + '\') + $dirName
+			If ($(Test-Path -Path $dirPath) -eq $false) {
+				$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
+				Write-Output $message
+				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
+			}
+			Else {
+				Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
+			}
+			$i++
+		}
+		[int]$divider = $($files.Count / $count) - 0.5
+		$i = 0
+		$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		While ($i -lt $($files.Count)) {
+			If ($i -lt $divider) {
+				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '1'
+			}
+			ElseIf ($i -ge $divider -and $i -lt $($divider * 2)) {
+				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '2'
+			}
+			ElseIf ($i -ge $($divider * 2) -and $i -lt $($divider * 3)) {
+				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '3'
+			}
+			ElseIf ($i -ge $($divider * 3) -and $i -lt $($divider * 4)) {
+				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '4'
+			}
+			Else {
+				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '5'
+			}
+			Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
+			$i++
+		}
+		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		$jobI = 0
+		$jobBaseName = 'unzip_job_'
+		ForEach ($folder in $folders) {
+			$block = {
+				Try {
+					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					$path = $args[0]
+					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
+					ForEach ($file in $files) {
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+					}
+					Return 'pass'
+				}
+				Catch {
+					Return 'fail'
+				}
+			}
+			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 			Write-Output $message
-			New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
+			$jobI++
+			Start-Sleep -Milliseconds 128
 		}
-		Else {
-			Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
-		}
-		Write-Output "$(Create-TimeStamp)  Decompressing..."
-		ForEach ($file in $files) {
-			Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $dirPath -ErrorAction Stop | Out-Null
-			Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
+		$r = 0
+		While ($r -lt $($folders.Count)) {
+			Write-Output "Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
+			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
+			If ($dJobResult -ne 'pass') {
+				$errorParams = @{
+					Message = "Decompression Failed!!!";
+					ErrorId = "44";
+					RecommendedAction = "Check ops log and GZ files.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
+			$r++
 		}
 # Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
-		$message = "$(Create-TimeStamp)  Starting convert job:  $dirPath..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		& $extractorExe "$dirPath", "$($destinationRootPath + $processDate + '\')", "$transTypes", "$processDate"
-		
-		
-		Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
-		$outputFile = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -File -Filter "*output*" -ErrorAction Stop
-		$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-		If ($jsonObj.ResponseCode -ne 0) {
-			[string]$optimusError = $jsonObj.ResponseMsg
-			$errorParams = @{
-				Message = "Optimus Failed: $optimusError";
-				ErrorId = "$($jsonObj.ResponseCode)";
-				RecommendedAction = "Check ops log.";
-				ErrorAction = "Stop";
+		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		ForEach ($folder in $folders) {
+			$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
+			If ($(Test-Path -Path $outputPath) -eq $false) {
+				$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
+				Write-Verbose -Message $message
+				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
 			}
-			Write-Error @errorParams
+			$block = {
+				[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+				& $args[0] $args[1..4];
+				Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
+			}
+			$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
+			Write-Verbose -Message $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$processDate" -ErrorAction Stop
+			Start-Sleep -Milliseconds 128
 		}
-		Else {
-			Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
+		Write-Output "$(Create-TimeStamp)  Converting..."
+		Get-Job | Wait-Job
+		Get-Job | Remove-Job -ErrorAction Stop
+		Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
+		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		ForEach ($folder in $folders) {
+			$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
+			$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+			If ($jsonObj.ResponseCode -ne 0) {
+				[string]$optimusError = $jsonObj.ResponseMsg
+				$errorParams = @{
+					Message = "Optimus Failed: $optimusError";
+					ErrorId = "$($jsonObj.ResponseCode)";
+					RecommendedAction = "Check ops log.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			Else {
+				Add-Content -Value "$($folder.FullName)" -Path $opsLog -ErrorAction Stop
+				Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
+				Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
+				Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
+			}
 		}
 # Move data from temp drive to archive
 		$milestone_3 = Get-Date
