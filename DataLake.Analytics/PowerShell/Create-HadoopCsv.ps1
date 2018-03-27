@@ -1,4 +1,4 @@
-# Version  --  v0.9.1.1
+# Version  --  v0.9.1.4
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -165,9 +165,6 @@ Try {
 		$message = "$(Create-TimeStamp)  Found $fileCount total files..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$message = "$(Create-TimeStamp)  Found $emptyFileCount EMPTY files..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$i = 1
 		$count = 5
 		$folderPreFix = 'bucket_'
@@ -300,17 +297,17 @@ Try {
 			}
 		}
 # Upload CSV's to blob storage
-		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_121*" -File -ErrorAction Stop
-		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_122*" -File -ErrorAction Stop
+		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_121*" -File -ErrorAction Stop
+		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_122*" -File -ErrorAction Stop
 		ForEach ($file in $121files) {
-			$command = "AzCopy /Source:$($file.FullName) /Dest:$az121Dest /DestKey:$azDestKey"
+			$command = "$azCopyExe /Source:$($file.FullName) /Dest:$az121Dest /DestKey:$azDestKey"
 			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Invoke-Expression -Command $command -ErrorAction Stop
 		}
 		ForEach ($file in $122files) {
-			$command = "AzCopy /Source:$($file.FullName) /Dest:$az122Dest /DestKey:$azDestKey"
+			$command = "$azCopyExe /Source:$($file.FullName) /Dest:$az122Dest /DestKey:$azDestKey"
 			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
