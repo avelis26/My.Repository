@@ -1,6 +1,5 @@
-# Version  --  v0.9.0.0
+# Version  --  v0.9.0.1
 #######################################################################################################
-
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true)][string]$startDate,
@@ -81,7 +80,7 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+	Write-Output "$(Create-TimeStamp)  Importing AzureRm, and 7Zip modules..."
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip -ErrorAction Stop
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
