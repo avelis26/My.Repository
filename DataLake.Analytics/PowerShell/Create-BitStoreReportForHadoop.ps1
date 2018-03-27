@@ -376,7 +376,7 @@ Function Execute-ShrinkLogFile {
 # Init
 $global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
-[DateTime]$startDate = $endDate
+[DateTime]$startDate = Get-Date -Date '2002-01-01'
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 $filter = $($startDateObj.year.ToString("0000")) + $($startDateObj.month.ToString("00")) + $($startDateObj.day.ToString("00"))
