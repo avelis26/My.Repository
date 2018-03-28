@@ -1,4 +1,4 @@
-# Version  --  v3.1.1.5
+# Version  --  v3.1.2.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -8,7 +8,8 @@ Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
 	[parameter(Mandatory = $false)][switch]$test,
-	[parameter(Mandatory = $false)][switch]$scale
+	[parameter(Mandatory = $false)][switch]$scale,
+	[parameter(Mandatory = $false)][switch]$exit
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
@@ -115,7 +116,6 @@ Function Scale-AzureSqlDatabase {
 	Param(
 		[string]$size
 	)
-	Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
 	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
 	$params = @{
 		ResourceGroupName = 'CRM-TEST-RG';
@@ -907,7 +907,6 @@ Try {
 "@
 		}
 		Send-MailMessage @params
-		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 		$y++
 		If ($y -lt $range) {
 			Write-Output "Starting next day in 10..."
@@ -973,11 +972,18 @@ Catch {
 Finally {
 	Write-Output 'Finally...'
 	If ($scale.IsPresent -eq $true) {
-		Write-Output 'Scaling DB...'
-		Scale-AzureSqlDatabase -size 'P1'
+		$size = 'P1'
+		Write-Output "Scaling DB to size $size..."
+		Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
+		Scale-AzureSqlDatabase -size $size
 	}
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
-	[Environment]::Exit($exitCode)
+	If ($exitCode -eq 0) {
+		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
+	}
+	If ($exit.IsPresent -eq $true) {
+		[Environment]::Exit($exitCode)
+	}
 }
