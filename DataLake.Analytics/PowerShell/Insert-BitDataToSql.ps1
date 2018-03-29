@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.1
+# Version  --  v3.1.2.2
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -333,11 +333,12 @@ Try {
 			$block = {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					Import-Module 7Zip -ErrorAction Stop
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop | Out-Null
 					}
 					Return 'pass'
 				}
@@ -346,7 +347,7 @@ Try {
 				}
 			}
 			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
-			Write-Verbose -Message $message
+			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 			$jobI++
@@ -355,8 +356,13 @@ Try {
 		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
 		$r = 0
 		While ($r -lt $($folders.Count)) {
-			Write-Output "Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			$message = "$(Create-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
+			$message = "$(Create-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 			If ($dJobResult -ne 'pass') {
 				$errorParams = @{

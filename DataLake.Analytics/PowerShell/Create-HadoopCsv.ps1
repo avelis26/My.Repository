@@ -1,4 +1,4 @@
-# Version  --  v0.9.1.4
+# Version  --  v0.9.1.5
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -212,11 +212,12 @@ Try {
 			$block = {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					Import-Module 7Zip -ErrorAction Stop
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop | Out-Null
 					}
 					Return 'pass'
 				}
@@ -234,8 +235,13 @@ Try {
 		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
 		$r = 0
 		While ($r -lt $($folders.Count)) {
-			Write-Output "Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			$message = "$(Create-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
+			$message = "$(Create-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 			If ($dJobResult -ne 'pass') {
 				$errorParams = @{
