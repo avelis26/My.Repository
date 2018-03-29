@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.2
+# Version  --  v3.1.2.4
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -176,7 +176,7 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Verbose -Message "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+	Write-Output "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip -ErrorAction Stop
@@ -337,8 +337,8 @@ Try {
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop | Out-Null
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop > $null
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
 					}
 					Return 'pass'
 				}
@@ -363,6 +363,7 @@ Try {
 			$message = "$(Create-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			$dJobResult = $null
 			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 			If ($dJobResult -ne 'pass') {
 				$errorParams = @{

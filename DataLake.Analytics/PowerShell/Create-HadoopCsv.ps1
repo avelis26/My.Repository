@@ -216,8 +216,8 @@ Try {
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop | Out-Null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop | Out-Null
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop > $null
+						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
 					}
 					Return 'pass'
 				}
@@ -242,6 +242,7 @@ Try {
 			$message = "$(Create-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			$dJobResult = $null
 			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 			If ($dJobResult -ne 'pass') {
 				$errorParams = @{
