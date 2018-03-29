@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.4
+# Version  --  v3.1.2.5
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -332,6 +332,7 @@ Try {
 		ForEach ($folder in $folders) {
 			$block = {
 				Try {
+					$ProgressPreference = 'SilentlyContinue'
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					Import-Module 7Zip -ErrorAction Stop
 					$path = $args[0]
