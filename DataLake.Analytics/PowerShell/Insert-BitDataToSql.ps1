@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.0
+# Version  --  v3.1.2.1
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -126,7 +126,6 @@ Function Scale-AzureSqlDatabase {
 	}
 	Write-Output "$(Create-TimeStamp)  Scaling database..."
 	Set-AzureRmSqlDatabase @params
-	Add-Content -Value "$(Create-TimeStamp)  Database scaling successful." -Path $opsLog -ErrorAction Stop
 }
 Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
@@ -228,7 +227,14 @@ Try {
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 		If ($scale.IsPresent -eq $true) {
-			Scale-AzureSqlDatabase -size 'P6'
+			$size = 'P6'
+			$message = "$(Create-TimeStamp)  Scaling database to $size..."
+			Write-Output $message
+			Add-Content -Value  -Path $opsLog -ErrorAction Stop	
+			Scale-AzureSqlDatabase -size $size
+			$message = "$(Create-TimeStamp)  Database scaling successful."
+			Write-Output $message
+			Add-Content -Value  -Path $opsLog -ErrorAction Stop
 		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
