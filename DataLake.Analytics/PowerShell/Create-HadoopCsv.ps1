@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.3
+# Version  --  v0.9.7.4
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -204,7 +204,7 @@ Try {
 			$block = {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-					Import-Module 7Zip -ErrorAction Stop
+					Import-Module 7Zip4Powershell -ErrorAction Stop
 					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
@@ -455,13 +455,6 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	If ($(Test-Path -Path $($destinationRootPath + 'ERROR')) -eq $false) {
-		$message = "Creating $($destinationRootPath + 'ERROR')..."
-		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $($destinationRootPath + 'ERROR') -Force -ErrorAction Stop | Out-Null
-	}
-	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($destinationRootPath + 'ERROR') -Force -ErrorAction Stop
 	$exitCode = 1
 }
 Finally {
