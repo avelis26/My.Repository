@@ -1,10 +1,18 @@
-# Version  --  v0.9.7.6
+# Version  --  v0.9.7.7
 #######################################################################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true)][string]$startDate,
 	[parameter(Mandatory = $true)][string]$endDate
 )
+################################
+################################
+################################
+# MAKE SURE THIS IS CORRECT!!!
+$7zipMod = '7zip'
+################################
+################################
+################################
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
@@ -84,7 +92,7 @@ Start-Sleep -Seconds 1
 Try {
 	Write-Output "$(Create-TimeStamp)  Importing AzureRm, and 7Zip modules..."
 	Import-Module AzureRM -ErrorAction Stop
-	Import-Module 7Zip4PowerShell -ErrorAction Stop
+	Import-Module $7zipMod -ErrorAction Stop
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	While ($y -lt $range) {
@@ -204,7 +212,7 @@ Try {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					$ProgressPreference = 'SilentlyContinue'
-					Import-Module 7Zip4Powershell -ErrorAction Stop
+					Import-Module $7zipMod -ErrorAction Stop
 					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
