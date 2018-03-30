@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.6
+# Version  --  v3.1.2.7
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -227,7 +227,7 @@ Try {
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 		If ($scale.IsPresent -eq $true) {
-			$size = 'P6'
+			$size = 'P15'
 			$message = "$(Create-TimeStamp)  Scaling database to $size..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
