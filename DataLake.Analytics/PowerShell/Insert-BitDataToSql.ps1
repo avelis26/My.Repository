@@ -332,8 +332,8 @@ Try {
 		ForEach ($folder in $folders) {
 			$block = {
 				Try {
-					$ProgressPreference = 'SilentlyContinue'
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					$ProgressPreference = 'SilentlyContinue'
 					Import-Module 7Zip -ErrorAction Stop
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop

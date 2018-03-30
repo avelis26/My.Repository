@@ -203,6 +203,7 @@ Try {
 			$block = {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+					$ProgressPreference = 'SilentlyContinue'
 					Import-Module 7Zip4Powershell -ErrorAction Stop
 					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
