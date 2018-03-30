@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.1
+# Version  --  v1.0.0.2
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -354,7 +354,6 @@ Try {
 		$uplTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 		$cleTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
-		$message01 = "Data Lake Folder--:  $($dataLakeSearchPathRoot + $processDate)"
 		$message02 = "Start Time--------:  $startTimeText"
 		$message03 = "End Time----------:  $endTimeText"
 		$message04 = "Initialization----:  $($iniTime.Hours.ToString("00")) h $($iniTime.Minutes.ToString("00")) m $($iniTime.Seconds.ToString("00")) s"
@@ -365,7 +364,6 @@ Try {
 		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
 		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
 		$message11 = "Total File Count--:  $fileCount"
-		Write-Output $message01
 		Write-Output $message02
 		Write-Output $message03
 		Write-Output $message04
@@ -376,7 +374,6 @@ Try {
 		Write-Output $message09
 		Write-Output $message10
 		Write-Output $message11
-		Add-Content -Value $message01 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message02 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message03 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message04 -Path $opsLog -ErrorAction Stop
@@ -394,12 +391,11 @@ Try {
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "BITC: $($processDate): Hadoop ETL Process Finished";
+			Subject = "Allspark: $($processDate): Hadoop ETL Process Finished";
 			Body = @"
-				Raw files from the 7-11 data lake have been processed and ready for hadoop.<br>
+				Optimus has processed the raw files from $($dataLakeSearchPathRoot + $processDate) and uploaded them to blob storage for hadoop.<br>
 				<br>
 				<font face='courier'>
-				$message01<br>
 				$message02<br>
 				$message03<br>
 				$message04<br>
