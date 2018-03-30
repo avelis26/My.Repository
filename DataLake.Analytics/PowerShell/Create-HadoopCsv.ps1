@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.1
+# Version  --  v0.9.7.2
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -109,12 +109,6 @@ Try {
 			Write-Output $message
 			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
-		}
-		If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-			$message = "Creating $archiveRootPath..."
-			Write-Output $message
-			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-			New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop | Out-Null
 		}
 		$message = "Logging into Azure..."
 		Write-Output $message
@@ -462,18 +456,17 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	If ($(Test-Path -Path $($archiveRootPath + 'ERROR')) -eq $false) {
-		$message = "Creating $($archiveRootPath + 'ERROR')..."
+	If ($(Test-Path -Path $($destinationRootPath + 'ERROR')) -eq $false) {
+		$message = "Creating $($destinationRootPath + 'ERROR')..."
 		Write-Output $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop | Out-Null
+		New-Item -ItemType Directory -Path $($destinationRootPath + 'ERROR') -Force -ErrorAction Stop | Out-Null
 	}
-	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop
+	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($destinationRootPath + 'ERROR') -Force -ErrorAction Stop
 	$exitCode = 1
 }
 Finally {
 	Write-Output 'Finally...'
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
-	[Environment]::Exit($exitCode)
 }
