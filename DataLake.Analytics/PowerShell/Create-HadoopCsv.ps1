@@ -1,4 +1,4 @@
-# Version  --  v0.9.1.5
+# Version  --  v0.9.7.0
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -20,11 +20,10 @@ $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction St
 $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
-$extractorExe = "C:\Scripts\C#\Hadoop\Ansira.Sel.BITC.DataExtract.Processor.exe"
-$azCopyExe = "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe"
-$az121Dest = 'https://bitcclusterdatastorage.blob.core.windows.net/ansiracluster/bitc/121header'
-$az122Dest = 'https://bitcclusterdatastorage.blob.core.windows.net/ansiracluster/bitc/122detail'
-$azDestKey = 'JeOkTNin5+tRR64gGVWCT+6wW9YesqFLGw1YH2JNV7biSYTbbt9jvgn7kZ/bbFWqanCnLqexz5KWpTDdjofQaQ=='
+$bumblebee = "C:\Scripts\C#\Bumblebee\Ansira.Sel.Bitc.Bumblebee.exe"
+$optimus = "C:\Scripts\C#\Optimus\Ansira.Sel.BITC.DataExtract.Processor.exe"
+$121blobPath = 'bitc/121header/'
+$121blobPath = 'bitc/122detail/'
 $y = 0
 #######################################################################################################
 Function Create-TimeStamp {
@@ -275,7 +274,7 @@ Try {
 			$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList "$extractorExe", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList "$optimus", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
 			Start-Sleep -Milliseconds 128
 		}
 		Write-Output "$(Create-TimeStamp)  Converting..."
@@ -304,38 +303,47 @@ Try {
 			}
 		}
 # Upload CSV's to blob storage
-<#		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_121*" -File -ErrorAction Stop
-		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*D1_122*" -File -ErrorAction Stop
-		ForEach ($file in $121files) {
-			$command = "$azCopyExe /Source:$($file.FullName) /Dest:$az121Dest /DestKey:$azDestKey"
+		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*Structured*" -File -ErrorAction Stop
+		ForEach ($file in $files) {
+			If ($file.Name -like "*D1_121*") {
+				$destination = $121blobPath
+			}
+			ElseIF ($file.Name -like "*D1_122*") {
+				$destination = $122blobPath
+			}
+			Else {
+				$errorParams = @{
+					Message = "ERROR: File name: $($file.FullName) doesn't match any defined pattern!!!";
+					ErrorId = "999";
+					RecommendedAction = "Fix it.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			$command = "& $bumblebee $($file.FullName) $destination"
 			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Invoke-Expression -Command $command -ErrorAction Stop
+			$result = Invoke-Expression -Command $command -ErrorAction Stop
+			If ($result -ne 0) {
+				$errorParams = @{
+					Message = "ERROR: Bumblebee failed to upload $($file.FullName)!!!";
+					ErrorId = "888";
+					RecommendedAction = "Fix it.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			$message = "$(Create-TimeStamp)  File uploaded successfully."
+			Write-Output $message
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		}
-		ForEach ($file in $122files) {
-			$command = "$azCopyExe /Source:$($file.FullName) /Dest:$az122Dest /DestKey:$azDestKey"
-			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Invoke-Expression -Command $command -ErrorAction Stop
-		}#>
-# Move data from temp drive to archive
+# Delete data from temp drive
 		$milestone_3 = Get-Date
-		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-			$message = "$(Create-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-			$message = "$(Create-TimeStamp)  Folder removed successfully."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		}
-
-		$message = "$(Create-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..."
+		$message = "$(Create-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
+		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(Create-TimeStamp -forFileName)
