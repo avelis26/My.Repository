@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.5
+# Version  --  v3.1.2.6
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -230,11 +230,11 @@ Try {
 			$size = 'P6'
 			$message = "$(Create-TimeStamp)  Scaling database to $size..."
 			Write-Output $message
-			Add-Content -Value  -Path $opsLog -ErrorAction Stop	
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 			Scale-AzureSqlDatabase -size $size
 			$message = "$(Create-TimeStamp)  Database scaling successful."
 			Write-Output $message
-			Add-Content -Value  -Path $opsLog -ErrorAction Stop
+			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
@@ -987,8 +987,8 @@ Finally {
 	Write-Output 'Finally...'
 	If ($scale.IsPresent -eq $true) {
 		$size = 'P1'
-		Write-Output "Scaling DB to size $size..."
-		Add-Content -Value "$(Create-TimeStamp)  Scaling database to $szie..." -Path $opsLog -ErrorAction Stop
+		Write-Output "Scaling database to size $size..."
+		Add-Content -Value "$(Create-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
 		Scale-AzureSqlDatabase -size $size
 	}
 	Get-Job | Remove-Job -Force
