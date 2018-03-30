@@ -85,7 +85,7 @@ Start-Sleep -Seconds 1
 Try {
 	Write-Output "$(Create-TimeStamp)  Importing AzureRm, and 7Zip modules..."
 	Import-Module AzureRM -ErrorAction Stop
-	Import-Module 7Zip -ErrorAction Stop
+	Import-Module 7Zip4PowerShell -ErrorAction Stop
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	While ($y -lt $range) {
