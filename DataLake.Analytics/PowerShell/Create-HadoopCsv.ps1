@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.5
+# Version  --  v0.9.7.6
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -220,7 +220,6 @@ Try {
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 			$jobI++
-			Start-Sleep -Milliseconds 128
 		}
 		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
 		$r = 0
