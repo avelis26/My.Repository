@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.0
+# Version  --  v1.0.0.1
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -16,10 +16,8 @@ $7zipMod = '7zip'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
-$emailList = 'graham.pinkston@ansira.com'
-#, 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
-$failEmailList = 'graham.pinkston@ansira.com'
-#, 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
+$emailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
+$failEmailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
 $opsLogRootPath = 'C:\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
@@ -304,6 +302,7 @@ Try {
 			}
 		}
 # Upload CSV's to blob storage
+		$milestone_3 = Get-Date
 		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*Structured*" -File -ErrorAction Stop
 		ForEach ($file in $files) {
 			If ($file.Name -like "*D1_121*") {
@@ -340,7 +339,7 @@ Try {
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		}
 # Delete data from temp drive
-		$milestone_3 = Get-Date
+		$milestone_4 = Get-Date
 		$message = "$(Create-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -352,7 +351,8 @@ Try {
 		$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 		$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-		$cleTime = New-TimeSpan -Start $milestone_3 -End $endTime
+		$uplTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+		$cleTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
 		$message01 = "Data Lake Folder--:  $($dataLakeSearchPathRoot + $processDate)"
 		$message02 = "Start Time--------:  $startTimeText"
@@ -361,9 +361,10 @@ Try {
 		$message05 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
 		$message06 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
 		$message07 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-		$message08 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
-		$message09 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-		$message10 = "Total File Count--:  $fileCount"
+		$message08 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
+		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
+		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+		$message11 = "Total File Count--:  $fileCount"
 		Write-Output $message01
 		Write-Output $message02
 		Write-Output $message03
@@ -374,6 +375,7 @@ Try {
 		Write-Output $message08
 		Write-Output $message09
 		Write-Output $message10
+		Write-Output $message11
 		Add-Content -Value $message01 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message02 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message03 -Path $opsLog -ErrorAction Stop
@@ -384,6 +386,7 @@ Try {
 		Add-Content -Value $message08 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message09 -Path $opsLog -ErrorAction Stop
 		Add-Content -Value $message10 -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $message11 -Path $opsLog -ErrorAction Stop
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -406,6 +409,7 @@ Try {
 				$message08<br>
 				$message09<br>
 				$message10<br>
+				$message11<br>
 				</font>
 "@
 		}
