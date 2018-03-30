@@ -1,18 +1,18 @@
-# Version  --  v0.9.7.8
+# Version  --  v0.9.7.9
 #######################################################################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true)][string]$startDate,
 	[parameter(Mandatory = $true)][string]$endDate
 )
-################################
-################################
-################################
-# MAKE SURE THIS IS CORRECT!!!
+########################################
+########################################
+########################################
+##### MAKE SURE THIS IS CORRECT!!! #####
 $7zipMod = '7zip'
-################################
-################################
-################################
+########################################
+########################################
+########################################
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
@@ -32,7 +32,7 @@ $dataLakeStoreName = '711dlprodcons01'
 $bumblebee = "C:\Scripts\C#\Bumblebee\Ansira.Sel.Bitc.Bumblebee.exe"
 $optimus = "C:\Scripts\C#\Optimus\Ansira.Sel.BITC.DataExtract.Processor.exe"
 $121blobPath = 'bitc/121header/'
-$121blobPath = 'bitc/122detail/'
+$122blobPath = 'bitc/122detail/'
 $y = 0
 #######################################################################################################
 Function Create-TimeStamp {
@@ -326,7 +326,7 @@ Try {
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$result = Invoke-Expression -Command $command -ErrorAction Stop
-			If ($result -ne 0) {
+			If ($result[$result.Count - 1] -notLike "*Successfully*") {
 				$errorParams = @{
 					Message = "ERROR: Bumblebee failed to upload $($file.FullName)!!!";
 					ErrorId = "888";
