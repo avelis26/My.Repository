@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.4
+# Version  --  v0.9.7.5
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -113,13 +113,12 @@ Try {
 		$message = "Logging into Azure..."
 		Write-Output $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		Login-AzureRmAccount -Credential $credential -Force -ErrorAction Stop
+		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 		$message = "Login successful."
 		Write-Output $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
-		Set-AzureRmContext -Subscription $dataLakeSubId -ErrorAction Stop
 		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
 			$message = "$(Create-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
 			Write-Output $message
