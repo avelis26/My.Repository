@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.7
+# Version  --  v0.9.7.8
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -212,7 +212,7 @@ Try {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					$ProgressPreference = 'SilentlyContinue'
-					Import-Module $7zipMod -ErrorAction Stop
+					Import-Module $args[1] -ErrorAction Stop
 					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
@@ -227,7 +227,7 @@ Try {
 			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName), $7zipMod -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 			$jobI++
 		}
 		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
