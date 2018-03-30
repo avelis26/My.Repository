@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.0
+# Version  --  v0.9.7.1
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -8,10 +8,9 @@ Param(
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
-$archiveRootPath = 'H:\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com'
-$opsLogRootPath = 'H:\Ops_Log\ETL\Hadoop\'
+$opsLogRootPath = 'C:\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -46,7 +45,7 @@ Function Create-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -475,6 +474,6 @@ Catch {
 Finally {
 	Write-Output 'Finally...'
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
-	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'H:\Ops_Log\bitc.log'
+	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
 	[Environment]::Exit($exitCode)
 }
