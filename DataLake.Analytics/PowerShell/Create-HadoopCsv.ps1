@@ -1,4 +1,4 @@
-# Version  --  v0.9.7.2
+# Version  --  v0.9.7.3
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -205,10 +205,9 @@ Try {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					Import-Module 7Zip -ErrorAction Stop
-					$path = $args[0]
-					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
+					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop > $null
+						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
 						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
 					}
 					Return 'pass'
@@ -467,6 +466,7 @@ Catch {
 }
 Finally {
 	Write-Output 'Finally...'
+	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
 }
