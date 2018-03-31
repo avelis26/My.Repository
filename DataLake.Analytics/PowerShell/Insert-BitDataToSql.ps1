@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.7
+# Version  --  v3.1.2.8
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -116,15 +116,15 @@ Function Scale-AzureSqlDatabase {
 	Param(
 		[string]$size
 	)
-	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
+	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop > $null
 	$params = @{
 		ResourceGroupName = 'CRM-TEST-RG';
 		ServerName = 'mstestsqldw';
 		DatabaseName = '7ELE';
 		Edition = 'Premium';
 		RequestedServiceObjectiveName = $size;
+		ErrorAction = 'Stop';
 	}
-	Write-Output "$(Create-TimeStamp)  Scaling database..."
 	Set-AzureRmSqlDatabase @params
 }
 Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
