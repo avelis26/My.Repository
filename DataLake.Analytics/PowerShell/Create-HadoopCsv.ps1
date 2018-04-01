@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.2
+# Version  --  v1.0.0.3
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -393,7 +393,7 @@ Try {
 			BodyAsHtml = $true;
 			Subject = "Allspark: $($processDate): Hadoop ETL Process Finished";
 			Body = @"
-				Optimus has processed the raw files from $($dataLakeSearchPathRoot + $processDate) and uploaded them to blob storage for hadoop.<br>
+				Optimus has processed the raw files from<b> $($dataLakeSearchPathRoot + $processDate) </b>and uploaded them to blob storage for hadoop.<br>
 				<br>
 				<font face='courier'>
 				$message02<br>
