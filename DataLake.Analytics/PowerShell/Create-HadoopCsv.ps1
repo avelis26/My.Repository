@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.3
+# Version  --  v1.0.0.4
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -445,6 +445,16 @@ Catch {
 	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
+	$path = 'C:\Ops_Log\ETL\Error\'
+	If ($(Test-Path -Path $path) -eq $false) {
+		Write-Output "Creating $path..."
+		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
+		Add-Content -Value "$(Create-TimeStamp)  Created folder: $path" -Path $opsLog -ErrorAction Stop
+	}
+	$message = "$(Create-TimeStamp)  Moving data to $path..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	Move-Item -Path $($destinationRootPath + $processDate + '\') -Destination $path -Force -ErrorAction Stop
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
