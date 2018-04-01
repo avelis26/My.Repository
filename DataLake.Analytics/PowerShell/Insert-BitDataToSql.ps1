@@ -2,6 +2,7 @@
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
+# add error text to email from optimus
 ######################################################
 [CmdletBinding()]
 Param(

@@ -6,6 +6,7 @@ Param(
 	[parameter(Mandatory = $true)][string]$endDate
 )
 ########################################
+# add error text to email from optimus
 ########################################
 ########################################
 ##### MAKE SURE THIS IS CORRECT!!! #####
