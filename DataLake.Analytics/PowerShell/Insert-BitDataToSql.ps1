@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.8
+# Version  --  v3.1.2.9
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -180,7 +180,7 @@ Try {
 	Write-Output "$(Create-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
-	Import-Module 7Zip -ErrorAction Stop
+	Import-Module 7Zip4powershell -ErrorAction Stop
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	Write-Debug -Message $credential.UserName
@@ -335,7 +335,7 @@ Try {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					$ProgressPreference = 'SilentlyContinue'
-					Import-Module 7Zip -ErrorAction Stop
+					Import-Module 7Zip4powershell -ErrorAction Stop
 					$path = $args[0]
 					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
