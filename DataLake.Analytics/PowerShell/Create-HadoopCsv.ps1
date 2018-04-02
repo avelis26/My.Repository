@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.5
+# Version  --  v1.0.0.6
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -479,6 +479,17 @@ Catch {
 }
 Finally {
 	Write-Output 'Finally...'
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = 'graham.pinkston@ansira.com';
+		BodyAsHtml = $true;
+		Subject = "Allspark: Hadoop ETL Process Finished For Range $startDate - $endDate";
+		Body = "Queue up the next range."
+	}
+	Send-MailMessage @params
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
