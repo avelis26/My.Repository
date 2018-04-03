@@ -12,9 +12,9 @@ Param(
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
-##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
+##   Enter the range of aggregate files you want to download in yyyy-mm-dd format:
 $startDate = '1984-08-13'
-$endDate   = '08-13-2017'
+$endDate   = '1984-08-13'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
@@ -30,11 +30,27 @@ If ($test.IsPresent -eq $true) {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+		If ($autoDate.IsPresent -eq $false) {
+			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+		}
+		Else {
+			$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
+			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+		}
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+		If ($autoDate.IsPresent -eq $false) {
+			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+		}
+		Else {
+			$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
+			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+		}
 	}
 }
 Else {
@@ -70,7 +86,6 @@ $prodTable122 = 'prod_122_Details'
 #######################################################################################################
 ## These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
-$databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -128,14 +143,6 @@ If ($policy -ne 'TrustAllCertsPolicy') {
 	}
 "@
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
-If ($autoDate.IsPresent -eq $false) {
-	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
-	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-}
-Else {
-	$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
-	$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 }
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Start Date    ::  $startDate"

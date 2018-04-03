@@ -32,8 +32,6 @@
     <Compile Include="PowerShell\Invoke-CeoReport.ps1" />
     <Compile Include="PowerShell\Create-BitStoreReportForHadoop.ps1" />
     <Compile Include="PowerShell\Add-EjDataToHadoop.ps1" />
-    <Compile Include="PowerShell\Create-TmpHeaderTable.ps1" />
-    <Compile Include="PowerShell\Execute-BitAggregateProcedure.ps1" />
     <Compile Include="PowerShell\Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeStructuredFiles.ps1" />
