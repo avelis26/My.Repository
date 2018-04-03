@@ -51,7 +51,7 @@ Catch [System.ArgumentOutOfRangeException] {
 	Send-MailMessage @params
 	Exit 1
 }
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	$now = Get-Date
 	$day = $now.day.ToString("00")
 	$month = $now.month.ToString("00")
@@ -65,7 +65,7 @@ Function Create-TimeStamp {
 Try {
 	$message = "Updating Master Product and Store Tables"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -97,7 +97,7 @@ Try {
 	$sqlConnection.Close()
 	$message = "Product and store tables updated successfully."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -112,7 +112,7 @@ Try {
 }
 Catch {
 	$message = "Updating Master Product And Store Tables FAILED!!!"
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	Write-Error -Exception $($Error[0].Exception) -Message $message
 	$params = @{
 		SmtpServer = $smtpServer;
@@ -146,7 +146,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
 		$startTime = Get-Date
-		Function Create-TimeStamp {
+		Function New-TimeStamp {
 			$now = Get-Date
 			$day = $now.day.ToString("00")
 			$month = $now.month.ToString("00")
@@ -160,7 +160,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 		$opsLog = "H:\Ops_Log\uspAggregateTables_agg1.log"
 		$message = "Starting aggregate query 1 for date range $($args[0]) - $($args[1])..."
 		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 		$params = @{
 			SmtpServer = $($args[2]);
 			Port = $($args[3]);
@@ -200,10 +200,10 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 		Write-Output $message1
 		Write-Output $message2
 		Write-Output $message3
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message1" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message2" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message3" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message1" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message2" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message3" -Path $opsLog
 		$params = @{
 			SmtpServer = $($args[2]);
 			Port = $($args[3]);
@@ -268,7 +268,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
 		$startTime = Get-Date
-		Function Create-TimeStamp {
+		Function New-TimeStamp {
 			$now = Get-Date
 			$day = $now.day.ToString("00")
 			$month = $now.month.ToString("00")
@@ -282,7 +282,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 		$opsLog = "H:\Ops_Log\uspAggregateTables_agg2.log"
 		$message = "Starting aggregate query 2 for date range $($args[0]) - $($args[1])..."
 		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 		$params = @{
 			SmtpServer = $($args[2]);
 			Port = $($args[3]);
@@ -322,10 +322,10 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 		Write-Output $message1
 		Write-Output $message2
 		Write-Output $message3
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message1" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message2" -Path $opsLog
-		Add-Content -Value "$(Create-TimeStamp)  $message3" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message1" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message2" -Path $opsLog
+		Add-Content -Value "$(New-TimeStamp)  $message3" -Path $opsLog
 		$params = @{
 			SmtpServer = $($args[2]);
 			Port = $($args[3]);

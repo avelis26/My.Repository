@@ -11,7 +11,7 @@ $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
 ##########################################
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
 		[switch]$forFileName
@@ -34,7 +34,7 @@ Function Create-TimeStamp {
 Function Execute-ShrinkLogFile {
 	$message = "Shrinking database log file..."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$sqlShrinkParams = @{
 		query = "EXECUTE [dbo].[usp_Shrink_Log]";
 		ServerInstance = $sqlServer;
@@ -47,7 +47,7 @@ Function Execute-ShrinkLogFile {
 	Invoke-Sqlcmd @sqlShrinkParams
 	$message = "Database log file shrunk successfully."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 Function Execute-CeoAggregation {
 	[CmdletBinding()]
@@ -60,10 +60,10 @@ Function Execute-CeoAggregation {
 
 	)
 	$startTime = Get-Date
-	$startTimeText = $(Create-TimeStamp -forFileName)
+	$startTimeText = $(New-TimeStamp -forFileName)
 	$message = "Starting step $step of 5 for CEO report aggregation..."
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -93,9 +93,9 @@ Function Execute-CeoAggregation {
 	Invoke-Sqlcmd @sqlParams
 	$message = "Step $step of 5 for CEO report aggregation completed successfully."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
-	$endTimeText = $(Create-TimeStamp -forFileName)
+	$endTimeText = $(New-TimeStamp -forFileName)
 	$spanObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time--------:  $startTimeText"
 	$message2 = "End Time----------:  $endTimeText"
@@ -139,8 +139,8 @@ $comp_da = $comp_dt.comp_dt.Day.ToString('00')
 $lastYearDate = $comp_yr + '-' + $comp_mo + '-' + $comp_da
 $currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(Get-Date).AddDays(-1).Month.ToString('00')) + '-' + $($(Get-Date).AddDays(-1).Day.ToString('00'))
 $scriptStartTime = Get-Date
-$scriptStartTimeText = $(Create-TimeStamp -forFileName)
-$opsLog = "H:\Ops_Log\BITC_$($currentYearDate)_" + $(Create-TimeStamp -forFileName) + "_CEO_Report.log"
+$scriptStartTimeText = $(New-TimeStamp -forFileName)
+$opsLog = "H:\Ops_Log\BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
 [DateTime]$currentYearDateObj = Get-Date -Date $currentYearDate
 [DateTime]$lastYearDateObj = Get-Date -Date $lastYearDate
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -179,11 +179,11 @@ Try {
 	}
 # Step 0 of 5: Update local store and product tables
 	$startTime = Get-Date
-	$startTimeText = $(Create-TimeStamp -forFileName)
+	$startTimeText = $(New-TimeStamp -forFileName)
 	$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
 	$message = "Updateing store and product tables..."
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -213,9 +213,9 @@ Try {
 	Invoke-Sqlcmd @sqlParams
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
-	$endTimeText = $(Create-TimeStamp -forFileName)
+	$endTimeText = $(New-TimeStamp -forFileName)
 	$0spanObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time--------:  $startTimeText"
 	$message2 = "End Time----------:  $endTimeText"
@@ -272,7 +272,7 @@ Try {
 	Start-Sleep -Seconds 2
 # Report
 	$scriptEndTime = Get-Date
-	$scriptEndTimeText = $(Create-TimeStamp -forFileName)
+	$scriptEndTimeText = $(New-TimeStamp -forFileName)
 	$totTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime
 	$message0 = "Start Time--------:  $scriptStartTimeText"
 	$message1 = "End Time----------:  $scriptEndTimeText"

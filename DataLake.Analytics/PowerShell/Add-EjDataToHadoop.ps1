@@ -34,7 +34,7 @@ $121blobPath = 'bitc/121header/'
 $122blobPath = 'bitc/122detail/'
 $y = 0
 #######################################################################################################
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
 		[switch]$forFileName
@@ -54,7 +54,7 @@ Function Create-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'C:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -91,14 +91,14 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(Create-TimeStamp)  Importing AzureRm, and 7Zip modules..."
+	Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules..."
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module $7zipMod -ErrorAction Stop
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	While ($y -lt $range) {
 		$startTime = Get-Date -ErrorAction Stop
-		$startTimeText = $(Create-TimeStamp -forFileName)
+		$startTimeText = $(New-TimeStamp -forFileName)
 		$day = $($startDateObj.AddDays($y)).day.ToString("00")
 		$month = $($startDateObj.AddDays($y)).month.ToString("00")
 		$year = $($startDateObj.AddDays($y)).year.ToString("0000")
@@ -107,34 +107,34 @@ Try {
 		If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 			Write-Output "Creating $opsLogRootPath..."
 			New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
-			Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "$(Create-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
 		}
 		Else {
-			Add-Content -Value "$(Create-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 		}
 		If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 			$message = "Creating $destinationRootPath..."
 			Write-Output $message
-			Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
 		}
 		$message = "Logging into Azure..."
 		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 		$message = "Login successful."
 		Write-Output $message
-		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
 		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
-			$message = "$(Create-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
+			$message = "$(New-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop | Out-Null
 		}
-		$message = "$(Create-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
+		$message = "$(New-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$getParams = @{
@@ -143,7 +143,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
-		$message = "$(Create-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
+		$message = "$(New-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$exportParams = @{
@@ -154,7 +154,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams
-		$message = "$(Create-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
+		$message = "$(New-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Seperate files into 5 folders and decompress in paralell
@@ -162,7 +162,7 @@ Try {
 		$fileCount = $null
 		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
 		$fileCount = $files.Count.ToString()
-		$message = "$(Create-TimeStamp)  Found $fileCount total files..."
+		$message = "$(New-TimeStamp)  Found $fileCount total files..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$i = 1
@@ -172,7 +172,7 @@ Try {
 			$dirName = $folderPreFix + $i
 			$dirPath = $($destinationRootPath + $processDate + '\') + $dirName
 			If ($(Test-Path -Path $dirPath) -eq $false) {
-				$message = "$(Create-TimeStamp)  Creating folder:  $dirPath ..."
+				$message = "$(New-TimeStamp)  Creating folder:  $dirPath ..."
 				Write-Output $message
 				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
 			}
@@ -183,7 +183,7 @@ Try {
 		}
 		[int]$divider = $($files.Count / $count) - 0.5
 		$i = 0
-		$message = "$(Create-TimeStamp)  Separating files into bucket folders..."
+		$message = "$(New-TimeStamp)  Separating files into bucket folders..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		While ($i -lt $($files.Count)) {
@@ -225,20 +225,20 @@ Try {
 					Return 'fail'
 				}
 			}
-			$message = "$(Create-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
+			$message = "$(New-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName), $7zipMod -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 			$jobI++
 		}
-		Write-Output "$(Create-TimeStamp)  Spliting and decompressing..."
+		Write-Output "$(New-TimeStamp)  Spliting and decompressing..."
 		$r = 0
 		While ($r -lt $($folders.Count)) {
-			$message = "$(Create-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
+			$message = "$(New-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
-			$message = "$(Create-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
+			$message = "$(New-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$dJobResult = $null
@@ -261,7 +261,7 @@ Try {
 		ForEach ($folder in $folders) {
 			$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
 			If ($(Test-Path -Path $outputPath) -eq $false) {
-				$message = "$(Create-TimeStamp)  Creating folder:  $outputPath ..."
+				$message = "$(New-TimeStamp)  Creating folder:  $outputPath ..."
 				Write-Output $message
 				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
@@ -271,16 +271,16 @@ Try {
 				& $args[0] $args[1..4];
 				Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
 			}
-			$message = "$(Create-TimeStamp)  Starting convert job:  $($folder.FullName)..."
+			$message = "$(New-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Start-Job -ScriptBlock $block -ArgumentList "$optimus", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
 			Start-Sleep -Milliseconds 128
 		}
-		Write-Output "$(Create-TimeStamp)  Converting..."
+		Write-Output "$(New-TimeStamp)  Converting..."
 		Get-Job | Wait-Job
 		Get-Job | Remove-Job -ErrorAction Stop
-		Add-Content -Value "$(Create-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		ForEach ($folder in $folders) {
 			$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
@@ -322,7 +322,7 @@ Try {
 				Write-Error @errorParams
 			}
 			$command = "& $bumblebee $($file.FullName) $destination"
-			$message = "$(Create-TimeStamp)  Sending To Blob:  $command"
+			$message = "$(New-TimeStamp)  Sending To Blob:  $command"
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			$result = Invoke-Expression -Command $command -ErrorAction Stop
@@ -335,19 +335,19 @@ Try {
 				}
 				Write-Error @errorParams
 			}
-			$message = "$(Create-TimeStamp)  File uploaded successfully."
+			$message = "$(New-TimeStamp)  File uploaded successfully."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		}
 # Delete data from temp drive
 		$milestone_4 = Get-Date
-		$message = "$(Create-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
+		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
-		$endTimeText = $(Create-TimeStamp -forFileName)
+		$endTimeText = $(New-TimeStamp -forFileName)
 		$iniTime = New-TimeSpan -Start $startTime -End $milestone_0
 		$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
@@ -449,9 +449,9 @@ Catch {
 	If ($(Test-Path -Path $path) -eq $false) {
 		Write-Output "Creating $path..."
 		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
-		Add-Content -Value "$(Create-TimeStamp)  Created folder: $path" -Path $opsLog -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  Created folder: $path" -Path $opsLog -ErrorAction Stop
 	}
-	$message = "$(Create-TimeStamp)  Moving data to $path..."
+	$message = "$(New-TimeStamp)  Moving data to $path..."
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	Move-Item -Path $($destinationRootPath + $processDate + '\') -Destination $path -Force -ErrorAction Stop
@@ -492,5 +492,5 @@ Finally {
 	Send-MailMessage @params
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
-	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
 }

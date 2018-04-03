@@ -20,7 +20,7 @@ $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
 ##########################################
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
 		[switch]$forFileName
@@ -45,8 +45,8 @@ Function Execute-AggregateOneOne {
 	$message = "Store Report: 1 of 8 For Date Range: $start - $end"
 	$query = "EXECUTE [dbo].[usp_Aggregate_1_1] @StartDate = '$start', @EndDate = '$end'"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -75,7 +75,7 @@ Function Execute-AggregateOneOne {
 	$global:aggOneOneResult = Invoke-Sqlcmd @sqlAggOneOneParams
 	$message = "Store Report: 1 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time-----: $($startTime.DateTime)"
@@ -105,8 +105,8 @@ Function Execute-AggregateOneTwo {
 	$message = "Store Report: 2 of 8 For Date Range: $start - $end"
 	$query = "EXECUTE [dbo].[usp_Aggregate_1_2]"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -135,7 +135,7 @@ Function Execute-AggregateOneTwo {
 	$global:aggOneTwoResult = Invoke-Sqlcmd @sqlAggOneTwoParams
 	$message = "Store Report: 2 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time-----: $($startTime.DateTime)"
@@ -171,8 +171,8 @@ Function Execute-AggregateOneThree {
 	$message = "Store Report: $step of 8 For Date Range: $dateStart - $dateEnd"
 	$query = "EXECUTE [dbo].[usp_Aggregate_1_3] @StartDate = '$dateStart', @EndDate = '$dateEnd'"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -201,7 +201,7 @@ Function Execute-AggregateOneThree {
 	$global:aggOneThreeResult = Invoke-Sqlcmd @sqlAggOneThreeParams
 	$message = "Store Report: $step of 8 For Date Range: $dateStart - $dateEnd Completed Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time-----: $($startTime.DateTime)"
@@ -236,8 +236,8 @@ Function Execute-AggregateTwo {
 	$message = "Store Report: 8 of 8 For Date Range: $start - $end"
 	$query = "EXECUTE [dbo].[usp_Aggregate_Two]"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -266,7 +266,7 @@ Function Execute-AggregateTwo {
 	$aggTwoResult = Invoke-Sqlcmd @sqlAggTwoParams
 	$message = $message = "Store Report: 8 of 8 For Date Range: $start - $end Completed Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time-----: $($startTime.DateTime)"
@@ -301,8 +301,8 @@ Function Execute-LocalStoreAndProduct {
 	$message = "Store Report: 0 of 8 For Date Range: $dateStart - $dateEnd"
 	$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $query" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $query" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -331,7 +331,7 @@ Function Execute-LocalStoreAndProduct {
 	$result = Invoke-Sqlcmd @sqlSandPParams
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time-----: $($startTime.DateTime)"
@@ -360,7 +360,7 @@ Function Execute-LocalStoreAndProduct {
 Function Execute-ShrinkLogFile {
 	$message = "Shrinking database log file..."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$sqlShrinkParams = @{
 		query = "EXECUTE [dbo].[usp_Shrink_Log]";
 		ServerInstance = $sqlServer;
@@ -373,10 +373,10 @@ Function Execute-ShrinkLogFile {
 	Invoke-Sqlcmd @sqlShrinkParams
 	$message = "Database log file shrunk successfully."
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 # Init
-$global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) + "_Store_Report.log"
+$global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))

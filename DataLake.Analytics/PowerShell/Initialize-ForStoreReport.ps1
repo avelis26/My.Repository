@@ -21,7 +21,7 @@ $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
 		[switch]$forFileName
@@ -73,7 +73,7 @@ Try {
 		To = $emailList;
 		BodyAsHtml = $true;
 		Subject = "BITC: Scaling Database to $size";
-		Body = "$(Create-TimeStamp -forFileName)"
+		Body = "$(New-TimeStamp -forFileName)"
 	}
 	Send-MailMessage @params
 	$params = @{
@@ -105,7 +105,7 @@ Try {
 		To = $emailList;
 		BodyAsHtml = $true;
 		Subject = "BITC: Deleting Old Data";
-		Body = "$(Create-TimeStamp -forFileName)"
+		Body = "$(New-TimeStamp -forFileName)"
 	}
 	Send-MailMessage @params
 	$params = @{
@@ -128,7 +128,7 @@ Try {
 		To = $emailList;
 		BodyAsHtml = $true;
 		Subject = "BITC: Updating Database Statistics";
-		Body = "$(Create-TimeStamp -forFileName)"
+		Body = "$(New-TimeStamp -forFileName)"
 	}
 	Send-MailMessage @params
 	$params = @{

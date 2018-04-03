@@ -33,7 +33,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
 $startTime = Get-Date
-Function Create-TimeStamp {
+Function New-TimeStamp {
 	$now = Get-Date
 	$day = $now.day.ToString("00")
 	$month = $now.month.ToString("00")
@@ -46,7 +46,7 @@ Function Create-TimeStamp {
 }
 $message = "Creating Temp Header Table for date range: $start - $end"
 Write-Output $message
-Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 $params = @{
 	SmtpServer = $smtpServer;
 	Port = $port;
@@ -79,8 +79,8 @@ Try {
 	$sqlConnection.Close()
 	$message = "Temp Header Table For Date Range: $start - $end Created"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
-	Add-Content -Value "$(Create-TimeStamp)  $result" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $result" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
 	$message1 = "Start Time----------:  $($startTime.DateTime)"
@@ -129,7 +129,7 @@ Catch {
 	Start-Sleep -Seconds 2
 	$message = "Temp header table creation for date range: $start - $end FAILED!!!"
 	Write-Output $message
-	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
+	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
