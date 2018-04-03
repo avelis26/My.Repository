@@ -1,11 +1,11 @@
-# Init  --  v1.3.0.4
+# Init  --  v1.3.0.6
 ##########################################
 # Fix error hanlding
 ##########################################
-$startDateObj = Get-Date
-$day = $($startDateObj.AddDays(-1)).day.ToString("00")
-$month = $($startDateObj.AddDays(-1)).month.ToString("00")
-$year = $($startDateObj.AddDays(-1)).year.ToString("0000")
+$scriptStartTime = Get-Date
+$day = $($scriptStartTime.AddDays(-1)).day.ToString("00")
+$month = $($scriptStartTime.AddDays(-1)).month.ToString("00")
+$year = $($scriptStartTime.AddDays(-1)).year.ToString("0000")
 $end = $year + '-' + $month + '-' + $day
 ##########################################
 ##########################################
@@ -19,7 +19,6 @@ $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
-$scriptStartTime = Get-Date
 ##########################################
 Function Create-TimeStamp {
 	[CmdletBinding()]
@@ -79,9 +78,9 @@ Function Execute-AggregateOneOne {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$message1 = "Start Time-----: $($startTime.DateTime)"
+	$message2 = "End Time-------: $($endTime.DateTime)"
+	$message3 = "Total Run Time-: $($spandObj.Hours.ToString("00")) h $($spandObj.Minutes.ToString("00")) m $($spandObj.Seconds.ToString("00")) s"
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -139,9 +138,9 @@ Function Execute-AggregateOneTwo {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$message1 = "Start Time-----: $($startTime.DateTime)"
+	$message2 = "End Time-------: $($endTime.DateTime)"
+	$message3 = "Total Run Time-: $($spandObj.Hours.ToString("00")) h $($spandObj.Minutes.ToString("00")) m $($spandObj.Seconds.ToString("00")) s"
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -205,9 +204,9 @@ Function Execute-AggregateOneThree {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$message1 = "Start Time-----: $($startTime.DateTime)"
+	$message2 = "End Time-------: $($endTime.DateTime)"
+	$message3 = "Total Run Time-: $($spandObj.Hours.ToString("00")) h $($spandObj.Minutes.ToString("00")) m $($spandObj.Seconds.ToString("00")) s"
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -220,9 +219,9 @@ Function Execute-AggregateOneThree {
 			<font face='courier'>
 			The results have been loaded into:<br>
 			<br>
-			Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-			Database------------:  [7ELE]<br>
-			Tables--------------:  [dbo].[Agg1_DaypartAggregate]<br>
+			Server---: [MsTestSqlDw.Database.Windows.Net]<br>
+			Database-: [7ELE]<br>
+			Table----: [dbo].[Agg1_DaypartAggregate]<br>
 			$message1<br>
 			$message2<br>
 			$message3<br>
@@ -270,9 +269,9 @@ Function Execute-AggregateTwo {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$message1 = "Start Time-----: $($startTime.DateTime)"
+	$message2 = "End Time-------: $($endTime.DateTime)"
+	$message3 = "Total Run Time-: $($spandObj.Hours.ToString("00")) h $($spandObj.Minutes.ToString("00")) m $($spandObj.Seconds.ToString("00")) s"
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -285,9 +284,9 @@ Function Execute-AggregateTwo {
 			<font face='courier'>
 			The results have been loaded into:<br>
 			<br>
-			Server--------------:  [MsTestSqlDw.Database.Windows.Net]<br>
-			Database------------:  [7ELE]<br>
-			Tables--------------:  [dbo].[Agg2_StoreTxnItems]<br>
+			Server---: [MsTestSqlDw.Database.Windows.Net]<br>
+			Database-: [7ELE]<br>
+			Table----: [dbo].[Agg2_StoreTxnItems]<br>
 			$message1<br>
 			$message2<br>
 			$message3<br>
@@ -335,9 +334,9 @@ Function Execute-LocalStoreAndProduct {
 	Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog
 	$endTime = Get-Date
 	$spandObj = New-TimeSpan -Start $startTime -End $endTime
-	$message1 = "Start Time----------:  $($startTime.DateTime)"
-	$message2 = "End Time------------:  $($endTime.DateTime)"
-	$message3 = "Total Run Time------:  $($spandObj.Hours.ToString("00")) hours $($spandObj.Minutes.ToString("00")) minutes $($spandObj.Seconds.ToString("00")) seconds"
+	$message1 = "Start Time-----: $($startTime.DateTime)"
+	$message2 = "End Time-------: $($endTime.DateTime)"
+	$message3 = "Total Run Time-: $($spandObj.Hours.ToString("00")) h $($spandObj.Minutes.ToString("00")) m $($spandObj.Seconds.ToString("00")) s"
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -348,7 +347,6 @@ Function Execute-LocalStoreAndProduct {
 		Subject = "BITC: $message";
 		Body = @"
 			<font face='courier'>
-			The results have been loaded into:<br>
 			<br>
 			$message1<br>
 			$message2<br>
@@ -403,7 +401,7 @@ $global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(Create-TimeStamp -forFileName) +
 [string]$weekFiveStart = $($weekFiveStartDate.year.ToString("0000")) + '-' + $($weekFiveStartDate.month.ToString("00")) + '-' + $($weekFiveStartDate.day.ToString("00"))
 [string]$weekFiveEnd = $($weekFiveEndDate.year.ToString("0000")) + '-' + $($weekFiveEndDate.month.ToString("00")) + '-' + $($weekFiveEndDate.day.ToString("00"))
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-$filter = $($startDateObj.year.ToString("0000")) + $($startDateObj.month.ToString("00")) + $($startDateObj.day.ToString("00"))
+$filter = $($scriptStartTime.year.ToString("0000")) + $($scriptStartTime.month.ToString("00")) + $($scriptStartTime.day.ToString("00"))
 $path = 'H:\Ops_Log\ETL\Store'
 $continue = $null
 $shouldExit = 0
@@ -489,10 +487,10 @@ Try {
 	Execute-AggregateTwo
 	Start-Sleep -Seconds 2
 	# Report
-	$endDateObj = Get-Date
-	$totTime = New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop
-	$message0 = "Start Time-----------:  $($startDateObj.Hour.ToString("00")) hours $($startDateObj.Minute.ToString("00")) minutes $($startDateObj.Second.ToString("00")) seconds"
-	$message1 = "End Time-------------:  $($endDateObj.Hour.ToString("00")) hours $($endDateObj.Minute.ToString("00")) minutes $($endDateObj.Second.ToString("00")) seconds"
+	$scriptEndTime = Get-Date
+	$totTime = New-TimeSpan -Start $scriptEndTime -End $scriptEndTime -ErrorAction Stop
+	$message0 = "Start Time-----------:  $($scriptStartTime.DateTime)"
+	$message1 = "End Time-------------:  $($scriptEndTime.DateTime)"
 	$message2 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
 	$params = @{
 		SmtpServer = $smtpServer;
@@ -503,7 +501,7 @@ Try {
 		BodyAsHtml = $true;
 		Subject = "BITC: Store Report Data For: $start - $end Is Ready";
 		Body = @"
-			Ben (or Anna), please start the Alteryx process to create the store reports and drop them into the outbound 7Reports folder.<br>
+			Ben (or Anna), please start the Alteryx process and drop the reports into the outbound 7Reports file share.<br>
 			<br>
 			<font face='courier'>
 			$message0<br>
