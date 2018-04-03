@@ -1,4 +1,4 @@
-# Version  --  v3.1.2.9
+# Version  --  v3.1.3.0
 ######################################################
 ## need to imporve multithreading
 ## Add logic to check bcp error file for content
@@ -8,14 +8,12 @@
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
-	[parameter(Mandatory = $false)][switch]$test,
-	[parameter(Mandatory = $false)][switch]$scale,
-	[parameter(Mandatory = $false)][switch]$exit
+	[parameter(Mandatory = $false)][switch]$test
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
-$startDate = '08-13-2017'
+$startDate = '1984-08-13'
 $endDate   = '08-13-2017'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
@@ -112,22 +110,6 @@ Function Create-TimeStamp {
 	}
 	Return $timeStamp
 }
-Function Scale-AzureSqlDatabase {
-	[CmdletBinding()]
-	Param(
-		[string]$size
-	)
-	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop > $null
-	$params = @{
-		ResourceGroupName = 'CRM-TEST-RG';
-		ServerName = 'mstestsqldw';
-		DatabaseName = '7ELE';
-		Edition = 'Premium';
-		RequestedServiceObjectiveName = $size;
-		ErrorAction = 'Stop';
-	}
-	Set-AzureRmSqlDatabase @params
-}
 Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
@@ -152,10 +134,8 @@ If ($autoDate.IsPresent -eq $false) {
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 }
 Else {
-	$startDateObj = Get-Date -ErrorAction Stop
-	$endDateObj = $startDateObj
-	$startDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
-	$endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+	$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
+	$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 }
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Start Date    ::  $startDate"
@@ -227,16 +207,6 @@ Try {
 		$message = "Login successful."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(Create-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		If ($scale.IsPresent -eq $true) {
-			$size = 'P15'
-			$message = "$(Create-TimeStamp)  Scaling database to $size..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-			Scale-AzureSqlDatabase -size $size
-			$message = "$(Create-TimeStamp)  Database scaling successful."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		}
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
 		Set-AzureRmContext -Subscription $dataLakeSubId -ErrorAction Stop
@@ -986,19 +956,11 @@ Catch {
 }
 Finally {
 	Write-Output 'Finally...'
-	If ($scale.IsPresent -eq $true) {
-		$size = 'P1'
-		Write-Output "Scaling database to size $size..."
-		Add-Content -Value "$(Create-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
-		Scale-AzureSqlDatabase -size $size
-	}
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
 	Add-Content -Value "$(Create-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
 	If ($exitCode -eq 0) {
 		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 	}
-	If ($exit.IsPresent -eq $true) {
-		[Environment]::Exit($exitCode)
-	}
 }
+Return $exitCode
