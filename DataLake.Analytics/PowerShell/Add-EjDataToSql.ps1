@@ -1,4 +1,4 @@
-# Version  --  v3.1.3.2
+# Version  --  v3.1.3.3
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -142,6 +142,22 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+If ($policy -ne 'TrustAllCertsPolicy') {
+	Add-Type -TypeDefinition @"
+		using System.Net;
+		using System.Security.Cryptography.X509Certificates;
+		public class TrustAllCertsPolicy : ICertificatePolicy {
+			public bool CheckValidationResult(
+				ServicePoint srvPoint, X509Certificate certificate,
+				WebRequest request, int certificateProblem
+			) {
+				return true;
+			}
+		}
+"@
+	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Start Date    ::  $startDate"
 Write-Host "End Date      ::  $endDate"
