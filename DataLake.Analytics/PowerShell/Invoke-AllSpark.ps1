@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.1
+# Version  --  v0.9.0.2
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -73,6 +73,7 @@ Function Set-AzureSqlDatabaseSize {
 	}
 	Set-AzureRmSqlDatabase @params
 }
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
 Try {
 	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 	If ($scale.IsPresent -eq $true) {
@@ -164,6 +165,7 @@ Catch {
 	$exitCode = 1
 }
 Finally {
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
 		[Environment]::Exit($exitCode)	
 	}

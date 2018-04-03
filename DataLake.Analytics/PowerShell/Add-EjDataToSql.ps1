@@ -1,4 +1,4 @@
-# Version  --  v3.1.3.0
+# Version  --  v3.1.3.1
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -123,7 +123,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: Insert-BitDataToSql :: Start" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -946,8 +946,8 @@ Catch {
 Finally {
 	Write-Output 'Finally...'
 	Get-Job | Remove-Job -Force
-	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: Insert-BitDataToSql :: End" -Path 'H:\Ops_Log\bitc.log'
+	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
 	If ($exitCode -eq 0) {
 		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 	}

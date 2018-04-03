@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.7
+# Version  --  v1.0.0.8
 #######################################################################################################
 #
 #######################################################################################################
@@ -54,7 +54,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'C:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
@@ -475,7 +475,7 @@ Finally {
 	}
 	Send-MailMessage @params
 	Get-Job | Remove-Job -Force
-	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: Create-HadoopCsv :: End" -Path 'C:\Ops_Log\bitc.log'
+	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
 }
 Return $exitCode
