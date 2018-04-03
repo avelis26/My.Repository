@@ -1,10 +1,11 @@
-# Version  --  v0.8.0.0
+# Version  --  v0.9.0.0
 #######################################################################################################
 #
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$scale
+	[parameter(Mandatory = $false)][switch]$scale,
+	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
 $databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
@@ -15,7 +16,9 @@ $fromAddr = 'noreply@7-11.com'
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'
 $opsLogRootPath = 'H:\Ops_Log\ETL\AllSpark\'
-$failEmailList = 'graham.pinkston@ansira.com'
+$emailList = 'graham.pinkston@ansira.com'
+$AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
+$AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 #######################################################################################################
 Function New-TimeStamp {
 	[CmdletBinding()]
@@ -53,7 +56,6 @@ Function Set-AzureSqlDatabaseSize {
 	}
 	Set-AzureRmSqlDatabase @params
 }
-
 Try {
 	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
@@ -72,13 +74,11 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
 # Data to SQL - Store
-	$sqlEtlResult = Invoke-Expression -Command "$script1 -startDate $startDate -opsLogFile $opsLogFile" -ErrorAction Stop
+	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
 # Data to SQL - CEO
-
+	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
 # Data to Hadoop
-
-
-
+	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
 	$exitCode = 0
 }
 Catch {
@@ -110,11 +110,14 @@ Catch {
 }
 Finally {
 	Write-Output 'Finally...'
-		If ($scale.IsPresent -eq $true) {
+	If ($scale.IsPresent -eq $true) {
 		$size = 'P1'
 		Write-Output "Scaling database to size $size..."
 		Add-Content -Value "$(Create-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
 		Set-AzureSqlDatabaseSize -size $size
+	}
+	If ($exit.IsPresent -eq $true) {	
+		[Environment]::Exit($exitCode)	
 	}
 }
 		
