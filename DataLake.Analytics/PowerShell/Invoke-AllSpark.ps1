@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.3
+# Version  --  v0.9.0.4
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -166,6 +166,7 @@ Catch {
 }
 Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
+	Add-Content -Value "----------------------------------------------------------------------------------" -Path 'H:\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
 		[Environment]::Exit($exitCode)	
 	}
