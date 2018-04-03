@@ -1,4 +1,4 @@
-add-type @"
+Add-Type -TypeDefinition @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     public class TrustAllCertsPolicy : ICertificatePolicy {
