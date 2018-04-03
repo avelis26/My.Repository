@@ -376,7 +376,7 @@ Function Execute-ShrinkLogFile {
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 # Init
-$global:opsLog = "H:\Ops_Log\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
+$global:opsLog = "H:\Ops_Log\Report\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
