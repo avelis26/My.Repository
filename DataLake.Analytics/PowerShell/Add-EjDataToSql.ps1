@@ -82,7 +82,7 @@ $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction St
 $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
-$extractorExe = "C:\Scripts\C#\Release\Ansira.Sel.BITC.DataExtract.Processor.exe"
+$extractorExe = 'C:\Scripts\C#\Optimus\SQL\Ansira.Sel.BITC.DataExtract.Processor.exe'
 ## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
