@@ -1,9 +1,9 @@
 # Version  --  v3.1.3.0
-######################################################
-## need to imporve multithreading
-## Add logic to check bcp error file for content
+#######################################################################################################
+# need to imporve multithreading
+# Add logic to check bcp error file for content
 # add error text to email from optimus
-######################################################
+#######################################################################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,

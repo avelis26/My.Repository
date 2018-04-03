@@ -41,6 +41,7 @@
     <Compile Include="PowerShell\Initialize-ForStoreReport.ps1" />
     <Compile Include="PowerShell\Insert-BitDataToSql.ps1" />
     <Compile Include="PowerShell\Insert-BitDataToSqlForHadoop.ps1" />
+    <Compile Include="PowerShell\Invoke-AllSpark.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
