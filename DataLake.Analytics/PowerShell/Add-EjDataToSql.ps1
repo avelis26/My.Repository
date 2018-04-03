@@ -64,9 +64,7 @@ Else {
 	'Geri.Shaeffer@Ansira.com', `
 	'megan.morace@ansira.com'
 	[string[]]$failEmailList = `
-	'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
-	'tyler.bailey@ansira.com'
+	'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
