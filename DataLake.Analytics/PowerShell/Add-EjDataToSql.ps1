@@ -934,13 +934,19 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	If ($(Test-Path -Path $($archiveRootPath + 'ERROR')) -eq $false) {
-		$message = "Creating $($archiveRootPath + 'ERROR')..."
+	$path = $($archiveRootPath + 'ERROR')
+	If ($(Test-Path -Path $path) -eq $false) {
+		$message = "Creating $path..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop | Out-Null
+		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop | Out-Null
 	}
-	Move-Item -Path $($destinationRootPath + $processDate) -Destination $($archiveRootPath + 'ERROR') -Force -ErrorAction Stop
+	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
+		$message = "$(New-TimeStamp)  Moving data to $path..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
+	}
 	$exitCode = 1
 }
 Finally {

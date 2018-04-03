@@ -73,7 +73,7 @@ Function Set-AzureSqlDatabaseSize {
 	}
 	Set-AzureRmSqlDatabase @params
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 Try {
 	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 	If ($scale.IsPresent -eq $true) {

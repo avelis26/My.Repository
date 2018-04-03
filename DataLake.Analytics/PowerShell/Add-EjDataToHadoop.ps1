@@ -431,14 +431,17 @@ Catch {
 	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
 	$path = 'C:\Ops_Log\ETL\Error\'
 	If ($(Test-Path -Path $path) -eq $false) {
-		Write-Output "Creating $path..."
-		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
-		Add-Content -Value "$(New-TimeStamp)  Created folder: $path" -Path $opsLog -ErrorAction Stop
+		$message = "Creating $path..."
+		Write-Verbose -Message $message
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop | Out-Null
 	}
-	$message = "$(New-TimeStamp)  Moving data to $path..."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	Move-Item -Path $($destinationRootPath + $processDate + '\') -Destination $path -Force -ErrorAction Stop
+	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
+		$message = "$(New-TimeStamp)  Moving data to $path..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
+	}
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
