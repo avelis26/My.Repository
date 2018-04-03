@@ -29,17 +29,17 @@
   <ItemGroup>
     <Compile Include="PowerShell\Concatinate-AggregateFiles.ps1" />
     <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
-    <Compile Include="PowerShell\Create-BitCeoReport.ps1" />
+    <Compile Include="PowerShell\Invoke-CeoReport.ps1" />
     <Compile Include="PowerShell\Create-BitStoreReportForHadoop.ps1" />
-    <Compile Include="PowerShell\Create-HadoopCsv.ps1" />
+    <Compile Include="PowerShell\Add-EjDataToHadoop.ps1" />
     <Compile Include="PowerShell\Create-TmpHeaderTable.ps1" />
     <Compile Include="PowerShell\Execute-BitAggregateProcedure.ps1" />
     <Compile Include="PowerShell\Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeStructuredFiles.ps1" />
-    <Compile Include="PowerShell\Create-BitStoreReport.ps1" />
+    <Compile Include="PowerShell\Invoke-StoreReport.ps1" />
     <Compile Include="PowerShell\Initialize-ForStoreReport.ps1" />
-    <Compile Include="PowerShell\Insert-BitDataToSql.ps1" />
+    <Compile Include="PowerShell\Add-EjDataToSql.ps1" />
     <Compile Include="PowerShell\Insert-BitDataToSqlForHadoop.ps1" />
     <Compile Include="PowerShell\Invoke-AllSpark.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
