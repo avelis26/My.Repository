@@ -1,10 +1,16 @@
-# Version  --  v1.0.0.6
+# Version  --  v1.0.0.7
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $true)][string]$startDate,
-	[parameter(Mandatory = $true)][string]$endDate
+	[parameter(Mandatory = $false)][switch]$autoDate
 )
+If ($autoDate.IsPresent -eq $true) {
+	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
+}
+Else {
+	$startDate = '1984-08-13'
+	$endDate = '1984-08-13'
+}
 ########################################
 # add error text to email from optimus
 ########################################
