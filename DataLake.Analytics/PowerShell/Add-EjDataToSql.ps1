@@ -1,4 +1,4 @@
-# Version  --  v3.1.3.1
+# Version  --  v3.1.3.2
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -69,11 +69,27 @@ Else {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+		If ($autoDate.IsPresent -eq $false) {
+			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+		}
+		Else {
+			$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
+			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+		}
 	}
 	ElseIf ($report -eq 'c') {
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+		If ($autoDate.IsPresent -eq $false) {
+			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+		}
+		Else {
+			$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
+			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
+		}
 	}
 }
 ## Base name of database tables
