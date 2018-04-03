@@ -79,6 +79,11 @@ Try {
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
 # Data to Hadoop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
+# Remove Old Data
+
+# Rebuild Indexs and stats
+
+# Exit
 	$exitCode = 0
 }
 Catch {
