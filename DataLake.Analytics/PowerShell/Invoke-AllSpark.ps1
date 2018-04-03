@@ -20,6 +20,7 @@ $emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 #######################################################################################################
+# Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($policy -ne 'TrustAllCertsPolicy') {

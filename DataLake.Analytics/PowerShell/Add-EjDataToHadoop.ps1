@@ -57,22 +57,6 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: Create-HadoopCsv :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($policy -ne 'TrustAllCertsPolicy') {
-	Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 $endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 Write-Host '********************************************************************' -ForegroundColor Magenta
