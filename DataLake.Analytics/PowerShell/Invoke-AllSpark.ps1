@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.6
+# Version  --  v0.9.0.7
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -86,7 +86,7 @@ Try {
 	}
 # Data to SQL - Store
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
-	If ($EtlResult -ne 0) {
+	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
 			Message = "$AddEjDataToSqlScript Failed!!!";
 			ErrorId = "01";
@@ -98,7 +98,7 @@ Try {
 # Data to SQL - CEO
 <# Not needed until 4-16-18
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
-	If ($EtlResult -ne 0) {
+	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
 			Message = "$AddEjDataToSqlScript Failed!!!";
 			ErrorId = "02";
@@ -110,7 +110,7 @@ Try {
 #>
 # Data to Hadoop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
-	If ($EtlResult -ne 0) {
+	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
 			Message = "$AddEjDataToHadoopScript Failed!!!";
 			ErrorId = "03";
