@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.1
+# Version  --  v1.0.1.2
 #######################################################################################################
 #
 #######################################################################################################
@@ -47,7 +47,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'C:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -438,7 +438,7 @@ Catch {
 	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
-	$path = 'C:\Ops_Log\ETL\Error\'
+	$path = 'H:\Ops_Log\ETL\Error\'
 	If ($(Test-Path -Path $path) -eq $false) {
 		$message = "Creating $path..."
 		Write-Verbose -Message $message
