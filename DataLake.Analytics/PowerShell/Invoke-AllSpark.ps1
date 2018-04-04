@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.5
+# Version  --  v0.9.0.6
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -96,6 +96,7 @@ Try {
 		Write-Error @errorParams
 	}
 # Data to SQL - CEO
+<# Not needed until 4-16-18
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
 	If ($EtlResult -ne 0) {
 		$errorParams = @{
@@ -106,6 +107,7 @@ Try {
 		}
 		Write-Error @errorParams
 	}
+#>
 # Data to Hadoop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
 	If ($EtlResult -ne 0) {

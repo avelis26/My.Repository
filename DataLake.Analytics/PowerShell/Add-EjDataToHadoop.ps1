@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.0
+# Version  --  v1.0.1.1
 #######################################################################################################
 #
 #######################################################################################################
@@ -19,7 +19,7 @@ $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
-$opsLogRootPath = 'C:\Ops_Log\ETL\Hadoop\'
+$opsLogRootPath = 'H:\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
