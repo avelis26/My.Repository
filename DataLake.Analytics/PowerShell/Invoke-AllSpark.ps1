@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.4
+# Version  --  v0.9.0.5
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -44,10 +44,10 @@ Function New-TimeStamp {
 		[switch]$forFileName
 	)
 	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyymmdd_hhmmss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
 	}
 	Else {
-		$timeStamp = Get-Date -Format 'yyyy/mm/dd_hh:mm:ss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyy/MM/dd_hh:mm:ss' -ErrorAction Stop
 	}
 	Return $timeStamp
 }

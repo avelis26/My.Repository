@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.6
+# Init  --  v1.3.0.7
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -26,10 +26,10 @@ Function New-TimeStamp {
 		[switch]$forFileName
 	)
 	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyymmdd_hhmmss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
 	}
 	Else {
-		$timeStamp = Get-Date -Format 'yyyy/mm/dd_hh:mm:ss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyy/MM/dd_hh:mm:ss' -ErrorAction Stop
 	}
 	Return $timeStamp
 }

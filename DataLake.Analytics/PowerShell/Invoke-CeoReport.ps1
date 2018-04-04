@@ -1,4 +1,4 @@
-# Init  --  v0.9.0.1
+# Init  --  v0.9.0.2
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
@@ -17,10 +17,10 @@ Function New-TimeStamp {
 		[switch]$forFileName
 	)
 	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyymmdd_hhmmss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
 	}
 	Else {
-		$timeStamp = Get-Date -Format 'yyyy/mm/dd_hh:mm:ss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyy/MM/dd_hh:mm:ss' -ErrorAction Stop
 	}
 	Return $timeStamp
 }
