@@ -63,13 +63,13 @@ If ($test.IsPresent -eq $true) {
 	$emailList = 'graham.pinkston@ansira.com'
 	$opsLogRootPath = $opsLogRootPath + 'Test\'
 }
-## Base name of database tables
+##   Base name of database tables
 $stgTable121 = 'stg_121_Headers'
 $stgTable122 = 'stg_122_Details'
 $prodTable121 = 'prod_121_Headers'
 $prodTable122 = 'prod_122_Details'
 #######################################################################################################
-## These parametser probably won't change
+##   These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -83,7 +83,7 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $extractorExe = 'C:\Scripts\C#\Optimus\SQL\Ansira.Sel.BITC.DataExtract.Processor.exe'
-## Here we are nulling out some important variables since PowerISE likes to maintain the runspace
+##   Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
 $emptyFileList = $null
