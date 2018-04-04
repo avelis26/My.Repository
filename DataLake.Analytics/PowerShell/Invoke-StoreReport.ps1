@@ -25,18 +25,11 @@ Function New-TimeStamp {
 	Param(
 		[switch]$forFileName
 	)
-	$now = Get-Date
-	$day = $now.day.ToString("00")
-	$month = $now.month.ToString("00")
-	$year = $now.year.ToString("0000")
-	$hour = $now.hour.ToString("00")
-	$minute = $now.minute.ToString("00")
-	$second = $now.second.ToString("00")
 	If ($forFileName -eq $true) {
-		$timeStamp = $year + $month + $day + '_' + $hour + $minute + $second
+		$timeStamp = Get-Date -Format 'yyyymmdd_hhmmss' -ErrorAction Stop
 	}
 	Else {
-		$timeStamp = $year + '/' + $month + '/' + $day + '-' + $hour + ':' + $minute + ':' + $second
+		$timeStamp = Get-Date -Format 'yyyy/mm/dd_hh:mm:ss' -ErrorAction Stop
 	}
 	Return $timeStamp
 }
