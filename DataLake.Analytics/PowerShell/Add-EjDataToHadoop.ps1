@@ -99,7 +99,7 @@ Try {
 		$opsLog = $opsLogRootPath + $processDate + '_' + $startTimeText + '_BITC.log'
 		If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 			Write-Output "Creating $opsLogRootPath..."
-			New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop | Out-Null
+			New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop > $null
 			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 			Add-Content -Value "$(New-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
 		}
@@ -110,7 +110,7 @@ Try {
 			$message = "Creating $destinationRootPath..."
 			Write-Output $message
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop | Out-Null
+			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 		}
 		$message = "Logging into Azure..."
 		Write-Output $message
@@ -125,7 +125,7 @@ Try {
 			$message = "$(New-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop | Out-Null
+			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop > $null
 		}
 		$message = "$(New-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
 		Write-Output $message
@@ -167,7 +167,7 @@ Try {
 			If ($(Test-Path -Path $dirPath) -eq $false) {
 				$message = "$(New-TimeStamp)  Creating folder:  $dirPath ..."
 				Write-Output $message
-				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop | Out-Null
+				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop > $null
 			}
 			Else {
 				Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
@@ -257,7 +257,7 @@ Try {
 				$message = "$(New-TimeStamp)  Creating folder:  $outputPath ..."
 				Write-Output $message
 				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop | Out-Null
+				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop > $null
 			}
 			$block = {
 				[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
@@ -443,7 +443,7 @@ Catch {
 		$message = "Creating $path..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop | Out-Null
+		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
 	}
 	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
 		$message = "$(New-TimeStamp)  Moving data to $path..."
