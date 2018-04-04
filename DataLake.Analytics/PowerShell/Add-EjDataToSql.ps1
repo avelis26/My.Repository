@@ -54,18 +54,17 @@ If ($test.IsPresent -eq $true) {
 	}
 }
 Else {
-	[string[]]$emailList = `
-	'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
-	'tyler.bailey@ansira.com', `
-	'DIST-SEI_CRM_STATUS@7-11.com', `
-	'catherine.wells@ansira.com', `
-	'britten.morse@ansira.com', `
-	'Geri.Shaeffer@Ansira.com', `
-	'megan.morace@ansira.com'
-	[string[]]$failEmailList = `
-	'graham.pinkston@ansira.com'
 	If ($report -eq 's') {
+		[string[]]$emailList = `
+		'graham.pinkston@ansira.com', `
+		'mayank.minawat@ansira.com', `
+		'tyler.bailey@ansira.com', `
+		'DIST-SEI_CRM_STATUS@7-11.com', `
+		'catherine.wells@ansira.com', `
+		'britten.morse@ansira.com', `
+		'Geri.Shaeffer@Ansira.com', `
+		'megan.morace@ansira.com'
+		$failEmailList = 'graham.pinkston@ansira.com'
 		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
@@ -79,6 +78,8 @@ Else {
 		}
 	}
 	ElseIf ($report -eq 'c') {
+		$emailList = 'graham.pinkston@ansira.com'
+		$failEmailList = 'graham.pinkston@ansira.com'
 		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
 		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
 		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
