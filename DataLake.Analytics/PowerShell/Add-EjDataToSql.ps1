@@ -1,4 +1,4 @@
-# Version  --  v3.1.3.3
+# Version  --  v3.1.3.4
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -22,76 +22,46 @@ $destinationRootPath = 'D:\BIT_CRM\'
 $archiveRootPath = 'H:\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
 $errLogRootPath = 'H:\Err_Log\'
-##   Enter the email address's desired for notifications and path for log:
-If ($test.IsPresent -eq $true) {
-	$emailList = 'graham.pinkston@ansira.com'
-	$failEmailList = 'graham.pinkston@ansira.com'
-	If ($report -eq 's') {
-		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\Test\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
-		If ($autoDate.IsPresent -eq $false) {
-			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
-			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-		}
-		Else {
-			$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
-			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
-		}
-	}
-	ElseIf ($report -eq 'c') {
-		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\Test\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
-		If ($autoDate.IsPresent -eq $false) {
-			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
-			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-		}
-		Else {
-			$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
-			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
-		}
+##   Enter the email address for failures:
+$failEmailList = 'graham.pinkston@ansira.com'
+##   If autoDate switch not used, get dates from variables provided above:
+If ($autoDate.IsPresent -eq $false) {
+	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
+	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
+}
+##   Email, log path, and dates change for store report
+If ($report -eq 's') {
+	$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+	$headersMoveSp = 'usp_Staging_To_Prod_Headers'
+	$detailsMoveSp = 'usp_Staging_To_Prod_Details'
+	[string[]]$emailList = `
+	'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'tyler.bailey@ansira.com', `
+	'DIST-SEI_CRM_STATUS@7-11.com', `
+	'catherine.wells@ansira.com', `
+	'britten.morse@ansira.com', `
+	'Geri.Shaeffer@Ansira.com', `
+	'megan.morace@ansira.com'
+	If ($autoDate.IsPresent -eq $true) {
+		$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
+		$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 	}
 }
-Else {
-	If ($report -eq 's') {
-		[string[]]$emailList = `
-		'graham.pinkston@ansira.com', `
-		'mayank.minawat@ansira.com', `
-		'tyler.bailey@ansira.com', `
-		'DIST-SEI_CRM_STATUS@7-11.com', `
-		'catherine.wells@ansira.com', `
-		'britten.morse@ansira.com', `
-		'Geri.Shaeffer@Ansira.com', `
-		'megan.morace@ansira.com'
-		$failEmailList = 'graham.pinkston@ansira.com'
-		$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details'
-		If ($autoDate.IsPresent -eq $false) {
-			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
-			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-		}
-		Else {
-			$startDateObj = $endDateObj = Get-Date -ErrorAction Stop
-			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
-		}
+##   Email, log path, and dates change for CEO report
+ElseIf ($report -eq 'c') {
+	$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+	$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
+	$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
+	$emailList = 'graham.pinkston@ansira.com'
+	If ($autoDate.IsPresent -eq $true) {
+		$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
+		$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 	}
-	ElseIf ($report -eq 'c') {
-		$emailList = 'graham.pinkston@ansira.com'
-		$failEmailList = 'graham.pinkston@ansira.com'
-		$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
-		$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
-		$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
-		If ($autoDate.IsPresent -eq $false) {
-			$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
-			$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
-		}
-		Else {
-			$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
-			$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
-		}
-	}
+}
+If ($test.IsPresent -eq $true) {
+	$emailList = 'graham.pinkston@ansira.com'
+	$opsLogRootPath = $opsLogRootPath + 'Test\'
 }
 ## Base name of database tables
 $stgTable121 = 'stg_121_Headers'
