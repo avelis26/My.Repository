@@ -28,6 +28,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
+    <Compile Include="PowerShell\Get-DataLakeFileNames.ps1" />
     <Compile Include="PowerShell\Invoke-CeoReport.ps1" />
     <Compile Include="PowerShell\Create-BitStoreReportForHadoop.ps1" />
     <Compile Include="PowerShell\Add-EjDataToHadoop.ps1" />
