@@ -47,7 +47,7 @@ Function New-TimeStamp {
 		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
 	}
 	Else {
-		$timeStamp = Get-Date -Format 'yyyy/MM/dd_hh:mm:ss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
 	}
 	Return $timeStamp
 }
