@@ -2,17 +2,8 @@
 #######################################################################################################
 #
 #######################################################################################################
-[CmdletBinding()]
-Param(
-	[parameter(Mandatory = $false)][switch]$autoDate
-)
-If ($autoDate.IsPresent -eq $true) {
-	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
-}
-Else {
-	$startDate = '1984-08-13'
-	$endDate = '1984-08-13'
-}
+$startDate = '2017-02-07'
+$endDate = '2017-02-11'
 $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
@@ -29,7 +20,7 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $bumblebee = 'C:\Scripts\C#\Bumblebee\Ansira.Sel.Bitc.Bumblebee.exe'
-$optimus = 'C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Processor.exe'
+$optimus = 'C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Optimus.exe'
 $121blobPath = 'bitc/121header/'
 $122blobPath = 'bitc/122detail/'
 $y = 0
@@ -155,22 +146,22 @@ While ($y -lt $range) {
 	}
 	Catch {
 		$continue = 0
-		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog
+		Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog
+		Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog
 		$path = 'C:\Ops_Log\ETL\Error\'
 		If ($(Test-Path -Path $path) -eq $false) {
 			$message = "Creating $path..."
 			Write-Verbose -Message $message
-			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-			New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+			New-Item -ItemType Directory -Path $path -Force > $null
 		}
 		If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
 			$message = "$(New-TimeStamp)  Moving data to $path..."
 			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
+			Add-Content -Value $message -Path $opsLog
+			Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force
 		}
 		$params = @{
 			SmtpServer = $smtpServer;
@@ -192,6 +183,11 @@ While ($y -lt $range) {
 "@
 		}
 		Send-MailMessage @params
+		Set-Content -Value $(New-TimeStamp) -Path $($path + $processDate + '.log')
+		Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $($path + $processDate + '.log')
+		Add-Content -Value $($Error[0].Exception.Message) -Path $($path + $processDate + '.log')
+		Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $($path + $processDate + '.log')
+		Add-Content -Value $($Error[0].RecommendedAction) -Path $($path + $processDate + '.log')
 	}
 # Seperate files into 5 folders and decompress in parallel
 	If ($continue -eq 1) {
@@ -335,6 +331,11 @@ While ($y -lt $range) {
 "@
 			}
 			Send-MailMessage @params
+			Set-Content -Value $(New-TimeStamp) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.Message) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].RecommendedAction) -Path $($path + $processDate + '.log')
 		} # catch
 	} # if
 # Execute C# app as job on raw files to create CSV's
@@ -428,6 +429,11 @@ While ($y -lt $range) {
 "@
 			}
 			Send-MailMessage @params
+			Set-Content -Value $(New-TimeStamp) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.Message) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].RecommendedAction) -Path $($path + $processDate + '.log')
 		} # catch
 	} # if
 # Upload CSV's to blob storage
@@ -511,6 +517,11 @@ While ($y -lt $range) {
 "@
 			}
 			Send-MailMessage @params
+			Set-Content -Value $(New-TimeStamp) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.Message) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $($path + $processDate + '.log')
+			Add-Content -Value $($Error[0].RecommendedAction) -Path $($path + $processDate + '.log')
 		} # catch
 	} # if
 # Delete data from temp drive
@@ -590,18 +601,21 @@ While ($y -lt $range) {
 		Send-MailMessage @params
 		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 	} # if
+	Start-Sleep -Milliseconds 256
 	$y++
 } # while
-$params = @{
-	SmtpServer = $smtpServer;
-	Port = $port;
-	UseSsl = 0;
-	From = $fromAddr;
-	To = 'graham.pinkston@ansira.com';
-	BodyAsHtml = $true;
-	Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate";
-	Body = "Queue up the next range."
+If ($range -gt 1) {
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = 'graham.pinkston@ansira.com';
+		BodyAsHtml = $true;
+		Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate";
+		Body = "Queue up the next range."
+	}
+	Send-MailMessage @params
 }
-Send-MailMessage @params
 Get-Job | Remove-Job -Force
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'C:\Ops_Log\bitc.log'
