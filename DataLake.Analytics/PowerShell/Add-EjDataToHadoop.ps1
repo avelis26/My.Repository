@@ -385,7 +385,7 @@ Try {
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "Allspark: $($processDate): Hadoop ETL Process Finished";
+			Subject = "AllSpark: $($processDate): Hadoop ETL Process Finished";
 			Body = @"
 				Optimus has processed the raw files from<b> $($dataLakeSearchPathRoot + $processDate) </b>and uploaded them to blob storage for hadoop.<br>
 				<br>
@@ -482,7 +482,7 @@ Finally {
 		From = $fromAddr;
 		To = 'graham.pinkston@ansira.com';
 		BodyAsHtml = $true;
-		Subject = "Allspark: Hadoop ETL Process Finished For Range $startDate - $endDate";
+		Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate";
 		Body = "Queue up the next range."
 	}
 	Send-MailMessage @params
@@ -491,3 +491,4 @@ Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
 }
 Return $exitCode
++
