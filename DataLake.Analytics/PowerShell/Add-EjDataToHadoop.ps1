@@ -150,7 +150,7 @@ Try {
 		$message = "$(New-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Seperate files into 5 folders and decompress in paralell
+# Seperate files into 5 folders and decompress in parallel
 		$milestone_1 = Get-Date
 		$fileCount = $null
 		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
@@ -458,7 +458,7 @@ Catch {
 		From = $fromAddr;
 		To = $failEmailList;
 		BodyAsHtml = $true;
-		Subject = "BITC: ::ERROR:: ETL Failed For $processDate!!!";
+		Subject = "AllSpark: ::ERROR:: ETL Failed For $processDate!!!";
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>

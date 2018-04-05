@@ -844,7 +844,7 @@ Try {
 			From = $fromAddr;
 			To = $emailList;
 			BodyAsHtml = $true;
-			Subject = "BITC: $($processDate): ETL Process Finished";
+			Subject = "AllSpark: $($processDate): ETL Process Finished";
 			Body = @"
 				Raw files from the 7-11 data lake have been processed and inserted into the database.<br>
 				<br>
@@ -917,7 +917,7 @@ Catch {
 		From = $fromAddr;
 		To = $failEmailList;
 		BodyAsHtml = $true;
-		Subject = "BITC: ::ERROR:: ETL Failed For $processDate!!!";
+		Subject = "AllSpark: ::ERROR:: ETL Failed For $processDate!!!";
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
