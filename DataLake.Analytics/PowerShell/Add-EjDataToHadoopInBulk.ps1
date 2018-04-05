@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.0
+# Version  --  v0.9.0.0
 #######################################################################################################
 #
 #######################################################################################################
@@ -515,7 +515,7 @@ While ($y -lt $range) {
 	} # if
 # Delete data from temp drive
 	$milestone_4 = Get-Date
-	If (Test-Path -Path $($destinationRootPath + $processDate) -eq $true) {
+	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
 		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -589,103 +589,9 @@ While ($y -lt $range) {
 		} # params
 		Send-MailMessage @params
 		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
-		$y++
-		If ($y -lt $range) {
-			Write-Output "Starting next day in 10..."
-			Start-Sleep -Seconds 1
-			Write-Output "9..."
-			Start-Sleep -Seconds 1
-			Write-Output "8..."
-			Start-Sleep -Seconds 1
-			Write-Output "7..."
-			Start-Sleep -Seconds 1
-			Write-Output "6..."
-			Start-Sleep -Seconds 1
-			Write-Output "5..."
-			Start-Sleep -Seconds 1
-			Write-Output "4..."
-			Start-Sleep -Seconds 1
-			Write-Output "3..."
-			Start-Sleep -Seconds 1
-			Write-Output "2..."
-			Start-Sleep -Seconds 1
-			Write-Output "1..."
-			Start-Sleep -Milliseconds 400
-			Write-Output "Too late :P"
-			Start-Sleep -Milliseconds 256
-		} # if
 	} # if
+	$y++
 } # while
-$exitCode = 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Catch {
-	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
-	$path = 'C:\Ops_Log\ETL\Error\'
-	If ($(Test-Path -Path $path) -eq $false) {
-		$message = "Creating $path..."
-		Write-Verbose -Message $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
-	}
-	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
-		$message = "$(New-TimeStamp)  Moving data to $path..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
-	}
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $failEmailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: ::ERROR:: ETL Failed For $processDate!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($Error[0].CategoryInfo.Activity)<br>
-			$($Error[0].Exception.Message)<br>
-			$($Error[0].Exception.InnerExceptionMessage)<br>
-			$($Error[0].RecommendedAction)<br>
-			$($Error[0].Message)<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$exitCode = 1
-}
-
-	
 $params = @{
 	SmtpServer = $smtpServer;
 	Port = $port;
