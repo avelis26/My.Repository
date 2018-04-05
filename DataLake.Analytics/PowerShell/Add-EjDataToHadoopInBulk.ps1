@@ -19,7 +19,7 @@ $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
-$opsLogRootPath = 'H:\Ops_Log\ETL\Hadoop\'
+$opsLogRootPath = 'C:\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -47,7 +47,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -698,4 +698,4 @@ $params = @{
 }
 Send-MailMessage @params
 Get-Job | Remove-Job -Force
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'C:\Ops_Log\bitc.log'
