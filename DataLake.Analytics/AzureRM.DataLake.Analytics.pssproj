@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="PowerShell\Add-EjDataToHadoopInBulk.ps1" />
     <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeFileNames.ps1" />
     <Compile Include="PowerShell\Invoke-CeoReport.ps1" />
