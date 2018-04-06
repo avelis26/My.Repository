@@ -13,8 +13,7 @@ FOR
 SELECT							table_schema,
 								table_name  
 FROM							information_schema.tables
-WHERE							[TABLE_NAME] LIKE 'tmp%'
-OR								[TABLE_NAME] LIKE 'Agg%'
+WHERE							[TABLE_NAME] LIKE 'Agg%'
 OR								[TABLE_NAME] LIKE 'ext%'
 OR								[TABLE_NAME] LIKE 'prod%'
 OR								[TABLE_NAME] LIKE 'stg%'
