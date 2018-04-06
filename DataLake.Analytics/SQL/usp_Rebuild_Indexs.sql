@@ -10,12 +10,10 @@ FOR
 SELECT							table_schema,
 								table_name
 FROM							information_schema.tables
-WHERE							[TABLE_NAME] LIKE 'tmp%'
-OR								[TABLE_NAME] LIKE 'Agg%'
-OR								[TABLE_NAME] LIKE 'ext%'
-OR								[TABLE_NAME] LIKE 'prod%'
-OR								[TABLE_NAME] LIKE 'stg%'
-OR								[TABLE_NAME] LIKE 'CEO%'
+WHERE							[TABLE_NAME] LIKE 'prod_121_Headers%'
+OR								[TABLE_NAME] LIKE 'prod_122_Details%'
+OR								[TABLE_NAME] LIKE 'ext_productTable%'
+OR								[TABLE_NAME] LIKE 'ext_storeTable%'
 OPEN							rebuildindexes
 DECLARE							@tableSchema							NVARCHAR(128)
 DECLARE							@tableName								NVARCHAR(128)
