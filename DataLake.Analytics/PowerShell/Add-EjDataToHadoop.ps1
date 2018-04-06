@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.2
+# Version  --  v1.0.1.3
 #######################################################################################################
 #
 #######################################################################################################
@@ -17,7 +17,7 @@ $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
-$emailList = 'graham.pinkston@ansira.com', 'Cheong.Sin@Ansira.com', 'Bryan.Ingram@ansira.com'
+$emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
 $opsLogRootPath = 'H:\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
