@@ -1,13 +1,16 @@
-# Version  --  v0.9.0.7
+# Version  --  v0.9.0.9
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
 [CmdletBinding()]
 Param(
 	[parameter(Mandatory = $false)][switch]$scale,
+	[parameter(Mandatory = $false)][switch]$maintenance,
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
+Import-Module SqlServer -ErrorAction Stop
+Import-Module AzureRM -ErrorAction Stop
 $databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $userName = 'gpink003'
 $smtpServer = '10.128.1.125'
@@ -19,6 +22,10 @@ $opsLogRootPath = 'H:\Ops_Log\ETL\AllSpark\'
 $emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
+$sqlServer = 'mstestsqldw.database.windows.net'
+$database = '7ELE'
+$sqlUser = 'sqladmin'
+$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
@@ -107,7 +114,6 @@ Try {
 		}
 		Write-Error @errorParams
 	}
-#>
 # Data to Hadoop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
 	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
@@ -119,10 +125,81 @@ Try {
 		}
 		Write-Error @errorParams
 	}
+#>
 # Remove Old Data
-
-# Rebuild Indexs and stats
-
+	If ($maintenance.IsPresent -eq $true) {
+		$message = "$(Create-TimeStamp)  Removing old data from store database..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
+		$query = "EXECUTE [dbo].[usp_Delete_Old_Data]"
+		$sqlTruncateParams = @{
+			query = $query;
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlTruncateParams
+		$message = "$(Create-TimeStamp)  Removing old data from CEO database..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
+		$query = "EXECUTE [dbo].[usp_Delete_Old_Data_CEO]"
+		$sqlTruncateParams = @{
+			query = $query;
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlTruncateParams
+		$message = "$(Create-TimeStamp)  Old data removed successfully."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	} # if
+# Rebuild SQL Indexs
+	If ($maintenance.IsPresent -eq $true) {
+		$message = "$(Create-TimeStamp)  Rebuilding SQL indexes..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
+		$query = "EXECUTE [dbo].[usp_Rebuild_Indexs]"
+		$sqlTruncateParams = @{
+			query = $query;
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlTruncateParams
+		$message = "$(Create-TimeStamp)  Indexes rebuilt successfully."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	} # if
+# Update SQL Stats
+	If ($maintenance.IsPresent -eq $true) {
+		$message = "$(Create-TimeStamp)  Updating SQL stats..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
+		$query = "EXECUTE [dbo].[usp_Update_Statistics]"
+		$sqlTruncateParams = @{
+			query = $query;
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlTruncateParams
+		$message = "$(Create-TimeStamp)  SQL stats updated successfully."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	} # if
 # Exit
 	If ($scale.IsPresent -eq $true) {
 		$size = 'P1'
