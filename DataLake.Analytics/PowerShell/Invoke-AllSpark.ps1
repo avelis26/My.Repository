@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.9
+# Version  --  v0.9.1.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -83,11 +83,11 @@ Try {
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 		Login-AzureRmAccount -Credential $credential -Subscription $databaseSubId -Force -ErrorAction Stop
 		$size = 'P15'
-		$message = "$(Create-TimeStamp)  Scaling database to $size..."
+		$message = "$(New-TimeStamp)  Scaling database to $size..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 		Set-AzureSqlDatabaseSize -size $size
-		$message = "$(Create-TimeStamp)  Database scaling successful."
+		$message = "$(New-TimeStamp)  Database scaling successful."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
@@ -128,7 +128,7 @@ Try {
 #>
 # Remove Old Data
 	If ($maintenance.IsPresent -eq $true) {
-		$message = "$(Create-TimeStamp)  Removing old data from store database..."
+		$message = "$(New-TimeStamp)  Removing old data from store database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 		$query = "EXECUTE [dbo].[usp_Delete_Old_Data]"
@@ -142,7 +142,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(Create-TimeStamp)  Removing old data from CEO database..."
+		$message = "$(New-TimeStamp)  Removing old data from CEO database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 		$query = "EXECUTE [dbo].[usp_Delete_Old_Data_CEO]"
@@ -156,13 +156,13 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(Create-TimeStamp)  Old data removed successfully."
+		$message = "$(New-TimeStamp)  Old data removed successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	} # if
 # Rebuild SQL Indexs
 	If ($maintenance.IsPresent -eq $true) {
-		$message = "$(Create-TimeStamp)  Rebuilding SQL indexes..."
+		$message = "$(New-TimeStamp)  Rebuilding SQL indexes..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 		$query = "EXECUTE [dbo].[usp_Rebuild_Indexs]"
@@ -176,13 +176,13 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(Create-TimeStamp)  Indexes rebuilt successfully."
+		$message = "$(New-TimeStamp)  Indexes rebuilt successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	} # if
 # Update SQL Stats
 	If ($maintenance.IsPresent -eq $true) {
-		$message = "$(Create-TimeStamp)  Updating SQL stats..."
+		$message = "$(New-TimeStamp)  Updating SQL stats..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
 		$query = "EXECUTE [dbo].[usp_Update_Statistics]"
@@ -196,7 +196,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(Create-TimeStamp)  SQL stats updated successfully."
+		$message = "$(New-TimeStamp)  SQL stats updated successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	} # if
@@ -204,7 +204,7 @@ Try {
 	If ($scale.IsPresent -eq $true) {
 		$size = 'P1'
 		Write-Output "Scaling database to size $size..."
-		Add-Content -Value "$(Create-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
 		Set-AzureSqlDatabaseSize -size $size -ErrorAction Stop
 	}
 	$exitCode = 0
