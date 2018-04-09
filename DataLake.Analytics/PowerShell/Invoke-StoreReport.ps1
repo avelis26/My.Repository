@@ -1,4 +1,4 @@
-# Init  --  v1.3.0.7
+# Init  --  v1.3.0.8
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -291,7 +291,7 @@ Function Execute-AggregateTwo {
 }
 Function Execute-LocalStoreAndProduct {
 	$startTime = Get-Date
-	$message = "Store Report: 0 of 8 For Date Range: $dateStart - $dateEnd"
+	$message = "Store Report: 0 of 8 For Date Range: $start - $end"
 	$query = "EXECUTE [dbo].[usp_Copy_Store_Product_Locally]"
 	Write-Output $message
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
@@ -369,7 +369,7 @@ Function Execute-ShrinkLogFile {
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 # Init
-$global:opsLog = "H:\Ops_Log\Report\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
+$opsLog = "H:\Ops_Log\Report\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
@@ -394,6 +394,9 @@ $global:opsLog = "H:\Ops_Log\Report\BITC_$($end)_" + $(New-TimeStamp -forFileNam
 [string]$weekFiveStart = $($weekFiveStartDate.year.ToString("0000")) + '-' + $($weekFiveStartDate.month.ToString("00")) + '-' + $($weekFiveStartDate.day.ToString("00"))
 [string]$weekFiveEnd = $($weekFiveEndDate.year.ToString("0000")) + '-' + $($weekFiveEndDate.month.ToString("00")) + '-' + $($weekFiveEndDate.day.ToString("00"))
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+$message = "Date Range: $start - $end"
+Write-Output $message
+Add-Content -Path $opsLog -Value $message
 $filter = $($scriptStartTime.year.ToString("0000")) + $($scriptStartTime.month.ToString("00")) + $($scriptStartTime.day.ToString("00"))
 $path = 'H:\Ops_Log\ETL\Store'
 $continue = $null
