@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.0
+# Version  --  v1.1.1.1
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -111,7 +111,7 @@ Try {
 		}
 		Write-Error @errorParams
 	}
-	$message = "$(New-TimeStamp)  EJ data to SQL successfully."
+	$message = "$(New-TimeStamp)  EJ data added to SQL successfully."
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Data to SQL - CEO
