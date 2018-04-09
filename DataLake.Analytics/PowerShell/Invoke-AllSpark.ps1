@@ -1,4 +1,4 @@
-# Version  --  v1.1.0.1
+# Version  --  v1.1.1.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -74,6 +74,10 @@ Function Set-AzureSqlDatabaseSize {
 		ErrorAction = 'Stop';
 	}
 	Set-AzureRmSqlDatabase @params
+}
+If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
+	New-Item -Path 'H:\Ops_Log\' -ItemType Directory -ErrorAction Stop -Force > $null
 }
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 Try {

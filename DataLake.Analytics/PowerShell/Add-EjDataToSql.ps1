@@ -1,4 +1,4 @@
-# Version  --  v3.1.3.6
+# Version  --  v3.1.4.0
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -8,13 +8,12 @@
 Param(
 	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
+	[parameter(Mandatory = $false)][string]$startDate,
+	[parameter(Mandatory = $false)][string]$endDate,
 	[parameter(Mandatory = $false)][switch]$test
 )
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
-##   Enter the range of aggregate files you want to download in yyyy-mm-dd format:
-$startDate = '1984-08-13'
-$endDate   = '1984-08-13'
 ##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
