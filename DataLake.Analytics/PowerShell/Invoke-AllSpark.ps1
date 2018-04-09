@@ -63,6 +63,7 @@ Function Set-AzureSqlDatabaseSize {
 	Param(
 		[string]$size
 	)
+	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
 	$params = @{
 		ResourceGroupName = 'CRM-TEST-RG';
 		ServerName = 'mstestsqldw';
