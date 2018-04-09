@@ -1,10 +1,11 @@
-# Version  --  v1.0.0.0
+# Version  --  v1.1.0.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$scale,
+	[parameter(Mandatory = $false)][switch]$scaleUp,
+	[parameter(Mandatory = $false)][switch]$scaleDown,
 	[parameter(Mandatory = $false)][switch]$maintenance,
 	[parameter(Mandatory = $false)][switch]$exit
 )
@@ -77,7 +78,7 @@ Function Set-AzureSqlDatabaseSize {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 Try {
 	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
-	If ($scale.IsPresent -eq $true) {
+	If ($scaleUp.IsPresent -eq $true) {
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
@@ -202,7 +203,7 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	} # if
 # Exit
-	If ($scale.IsPresent -eq $true) {
+	If ($scaleDown.IsPresent -eq $true) {
 		$size = 'P1'
 		Write-Output "Scaling database to size $size..."
 		Add-Content -Value "$(New-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
