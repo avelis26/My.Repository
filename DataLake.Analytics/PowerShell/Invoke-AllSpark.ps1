@@ -1,4 +1,4 @@
-# Version  --  v1.1.0.0
+# Version  --  v1.1.0.1
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -19,7 +19,7 @@ $port = 25
 $fromAddr = 'noreply@7-11.com'
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'
-$opsLogRootPath = 'H:\Ops_Log\ETL\AllSpark\'
+$opsLogRootPath = 'H:\Ops_Log\AllSpark\'
 $emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
@@ -94,6 +94,9 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
 # Data to SQL - Store
+	$message = "$(New-TimeStamp)  Adding EJ data to SQL..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
 	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
@@ -104,6 +107,9 @@ Try {
 		}
 		Write-Error @errorParams
 	}
+	$message = "$(New-TimeStamp)  EJ data to SQL successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Data to SQL - CEO
 <# Not needed until 4-16-18
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
