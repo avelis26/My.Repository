@@ -361,7 +361,30 @@ Function Execute-ShrinkLogFile {
 		QueryTimeout = 0;
 		ErrorAction = 'Stop';
 	}
-	Invoke-Sqlcmd @sqlShrinkParams
+	$tryAgain = 1
+	While ($tryAgain -ne 'continue') {
+		Try {
+			Invoke-Sqlcmd @sqlShrinkParams
+			$tryAgain = 'continue'
+		}
+		Catch {
+			If ($tryAgain -gt 5) {
+				$errorParams = @{
+					Message = "Azure SQL Database totally sucks!!!";
+					ErrorId = "542";
+					RecommendedAction = "Wait and try again.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+				Break
+			} # if
+			$message = "Shrinking database log file failed!!! Trying again..."
+			Write-Output $message
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
+			Start-Sleep -Seconds 60
+			$tryAgain++
+		} # catch
+	} # while
 	$message = "Database log file shrunk successfully."
 	Write-Output $message
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
