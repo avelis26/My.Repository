@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.0
+# Version  --  v1.1.3.1
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -7,6 +7,7 @@ Param(
 	[parameter(Mandatory = $false)][switch]$scaleUp,
 	[parameter(Mandatory = $false)][switch]$scaleDown,
 	[parameter(Mandatory = $false)][switch]$maintenance,
+	[parameter(Mandatory = $false)][switch]$scheduled,
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
@@ -98,17 +99,19 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
 # Data to SQL - Store
-	$continue = 0
-	$startTime = Get-Date -Hour 5 -Minute 50 -Second 0
-	While ($continue -ne 1) {
-		$now = Get-Date
-		If ($now.TimeOfDay -gt $startTime.TimeOfDay) {
-			$continue = 1
-		}
-		Else {
-			Start-Sleep -Seconds 1
-		}
-	}
+	If ($scheduled.IsPresent -eq $true) {
+		$continue = 0
+		$startTime = Get-Date -Hour 5 -Minute 50 -Second 0
+		While ($continue -ne 1) {
+			$now = Get-Date
+			If ($now.TimeOfDay -gt $startTime.TimeOfDay) {
+				$continue = 1
+			}
+			Else {
+				Start-Sleep -Seconds 1
+			}
+		} # while
+	} # if
 	$start = Get-Date
 	$message = "$(New-TimeStamp)  Adding store EJ data to SQL..."
 	Write-Output $message
