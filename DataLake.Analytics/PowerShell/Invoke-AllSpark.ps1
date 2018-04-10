@@ -158,6 +158,7 @@ Try {
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Data to Hadoop
+<#
 	$start = Get-Date
 	$message = "$(New-TimeStamp)  Adding EJ data to Hadoop..."
 	Write-Output $message
@@ -180,6 +181,7 @@ Try {
 	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+#>
 # Remove Old Data
 	If ($maintenance.IsPresent -eq $true) {
 		$message = "$(New-TimeStamp)  Removing old data from store database..."
