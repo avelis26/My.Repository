@@ -1,4 +1,4 @@
-# Version  --  v0.9.0.1
+# Version  --  v1.0.0.1
 #######################################################################################################
 #
 #######################################################################################################
@@ -10,7 +10,7 @@ $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
-$opsLogRootPath = 'C:\Ops_Log\ETL\Hadoop\'
+$opsLogRootPath = '\\MS-SSW-CRM-BITC\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -612,7 +612,7 @@ If ($range -gt 1) {
 		From = $fromAddr;
 		To = 'graham.pinkston@ansira.com';
 		BodyAsHtml = $true;
-		Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate";
+		Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate With No Error";
 		Body = "Queue up the next range."
 	}
 	Send-MailMessage @params
