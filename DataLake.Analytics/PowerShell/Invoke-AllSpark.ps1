@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.1
+# Version  --  v1.1.2.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -98,7 +98,8 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
 # Data to SQL - Store
-	$message = "$(New-TimeStamp)  Adding EJ data to SQL..."
+	$start = Get-Date
+	$message = "$(New-TimeStamp)  Adding store EJ data to SQL..."
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
@@ -111,11 +112,19 @@ Try {
 		}
 		Write-Error @errorParams
 	}
-	$message = "$(New-TimeStamp)  EJ data added to SQL successfully."
+	$end = Get-Date
+	$run = New-TimeSpan -Start $start -End $end
+	$message = "$(New-TimeStamp)  Store EJ data added to SQL successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Data to SQL - CEO
-<# Not needed until 4-16-18
+	$start = Get-Date
+	$message = "$(New-TimeStamp)  Adding CEO EJ data to SQL..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
 	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
@@ -126,7 +135,19 @@ Try {
 		}
 		Write-Error @errorParams
 	}
+	$end = Get-Date
+	$run = New-TimeSpan -Start $start -End $end
+	$message = "$(New-TimeStamp)  CEO EJ data added to SQL successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Data to Hadoop
+	$start = Get-Date
+	$message = "$(New-TimeStamp)  Adding EJ data to Hadoop..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
 	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 		$errorParams = @{
@@ -137,7 +158,14 @@ Try {
 		}
 		Write-Error @errorParams
 	}
-#>
+	$end = Get-Date
+	$run = New-TimeSpan -Start $start -End $end
+	$message = "$(New-TimeStamp)  EJ data added to Hadoop successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Remove Old Data
 	If ($maintenance.IsPresent -eq $true) {
 		$message = "$(New-TimeStamp)  Removing old data from store database..."
