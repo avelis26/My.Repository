@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.1
+# Version  --  v1.1.2.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -11,8 +11,7 @@ Param(
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
-Import-Module SqlServer -ErrorAction Stop
-Import-Module AzureRM -ErrorAction Stop
+Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_hhmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 $databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $userName = 'gpink003'
 $smtpServer = '10.128.1.125'
@@ -30,6 +29,14 @@ $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
+If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
+}
+$opsLog = $opsLogRootPath + "$(Get-Date -Format 'yyyyMMdd_hhmmss')_AllSpark.log"
+Add-Content -Value "$(New-TimeStamp)  Importing SQL Server module..." -Path $opsLog -ErrorAction Stop
+Import-Module SqlServer -ErrorAction Stop
+Add-Content -Value "$(New-TimeStamp)  Importing Azure module..." -Path $opsLog -ErrorAction Stop
+Import-Module AzureRM -ErrorAction Stop
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -59,12 +66,7 @@ Function Set-AzureSqlDatabaseSize {
 	}
 	Set-AzureRmSqlDatabase @params
 }
-If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
-}
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 Try {
-	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 	Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
