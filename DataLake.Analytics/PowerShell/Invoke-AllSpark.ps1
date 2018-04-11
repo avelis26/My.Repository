@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.1
+# Version  --  v1.1.1.2
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -29,23 +29,6 @@ $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
-[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($policy -ne 'TrustAllCertsPolicy') {
-	Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -77,11 +60,30 @@ Function Set-AzureSqlDatabaseSize {
 }
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
-	New-Item -Path 'H:\Ops_Log\' -ItemType Directory -ErrorAction Stop -Force > $null
 }
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
 Try {
 	$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
+	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
+	If ($policy -ne 'TrustAllCertsPolicy') {
+		Add-Type -TypeDefinition @"
+		using System.Net;
+		using System.Security.Cryptography.X509Certificates;
+		public class TrustAllCertsPolicy : ICertificatePolicy {
+			public bool CheckValidationResult(
+				ServicePoint srvPoint, X509Certificate certificate,
+				WebRequest request, int certificateProblem
+			) {
+				return true;
+			}
+		}
+"@
+		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
+	}
 	If ($scaleUp.IsPresent -eq $true) {
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 		$message = "Logging into Azure..."
