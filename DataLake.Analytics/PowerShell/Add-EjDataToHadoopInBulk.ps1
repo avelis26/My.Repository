@@ -1,4 +1,4 @@
-# Version  --  v1.0.0.1
+# Version  --  v1.1.0.0
 #######################################################################################################
 #
 #######################################################################################################
@@ -10,7 +10,14 @@ $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
-$opsLogRootPath = '\\MS-SSW-CRM-BITC\Hadoop\'
+Switch ($ENV:ComputerName) {
+	'BITC-TMP-1' {$searchComp = 'BITC-TMP-4'}
+	'BITC-TMP-2' {$searchComp = 'BITC-TMP-1'}
+	'BITC-TMP-3' {$searchComp = 'BITC-TMP-2'}
+	'BITC-TMP-4' {$searchComp = 'BITC-TMP-3'}
+}
+$searchPath = "\\MS-SSW-CRM-BITC\Hadoop\$searchComp\"
+$opsLogRootPath = "\\MS-SSW-CRM-BITC\Hadoop\$ENV:ComputerName\"
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -112,6 +119,23 @@ While ($y -lt $range) {
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
 	Try {
+		Add-Content -Value "$(New-TimeStamp)  Waiting for $searchComp to finish downloading raw files..." -Path $opsLog -ErrorAction Stop
+		$found = 0
+		While ($found -ne 1) {
+			$file = Get-ChildItem -Path $searchPath -File | Sort-Object -Property LastWriteTime | Select-Object -Last 1
+			If ($file -ne $null) {
+				$content = Get-Content -Path $file.FullName
+				ForEach ($line in $content) {
+					If ($line -like '*Folder /BIT_CRM/* downloaded successfully.*') {
+						$found = 1
+					} # if
+				} # foreach
+			} # if
+			If ($found -ne 1) {
+				Start-Sleep -Seconds 5
+			} # if
+		} # while
+		Add-Content -Value "$(New-TimeStamp)  $searchComp finished downloading raw files." -Path $opsLog -ErrorAction Stop
 		$milestone_0 = Get-Date -ErrorAction Stop
 		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
 			$message = "$(New-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
