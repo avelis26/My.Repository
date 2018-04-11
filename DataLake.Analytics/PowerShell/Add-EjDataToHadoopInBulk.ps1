@@ -1,4 +1,4 @@
-# Version  --  v1.1.0.0
+# Version  --  v1.1.1.0
 #######################################################################################################
 #
 #######################################################################################################
@@ -132,7 +132,7 @@ While ($y -lt $range) {
 				} # foreach
 			} # if
 			If ($found -ne 1) {
-				Start-Sleep -Seconds 5
+				Start-Sleep -Seconds 8
 			} # if
 		} # while
 		Add-Content -Value "$(New-TimeStamp)  $searchComp finished downloading raw files." -Path $opsLog -ErrorAction Stop
@@ -143,27 +143,20 @@ While ($y -lt $range) {
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop > $null
 		}
-		$message = "$(New-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$getParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeSearchPathRoot + $processDate);
-			ErrorAction = 'Stop';
-		}
-		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
-		$message = "$(New-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
+		$message = "$(New-TimeStamp)  Downloading folder $($dataLakeSearchPathRoot + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$exportParams = @{
 			Account = $dataLakeStoreName;
-			Path = $($dataLakeFolder.Path);
+			Path = $($dataLakeSearchPathRoot + $processDate);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
+			PerFileThreadCount = 8;
+			ConcurrentFileCount = 8;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams
-		$message = "$(New-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
+		$message = "$(New-TimeStamp)  Folder $($dataLakeSearchPathRoot + $processDate) downloaded successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		$continue = 1
