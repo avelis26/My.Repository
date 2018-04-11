@@ -10,7 +10,7 @@
 	)
 	Try {
 		$passFileName = "$userName.cred"
-		$passFileRootPath = "C:\Users\$userName\Documents\Secrets\"
+		$passFileRootPath = "C:\Scripts\Secrets\"
 		If (!(Test-Path -LiteralPath $passFileRootPath)) {
 			Write-Verbose -Message "Creating folder:  $passFileRootPath"
 			New-Item -ItemType Directory -Path $passFileRootPath -Force -ErrorAction Stop

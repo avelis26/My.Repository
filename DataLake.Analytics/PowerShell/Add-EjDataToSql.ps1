@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.0
+# Version  --  v3.1.4.2
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -6,7 +6,7 @@
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $true, HelpMessage = 'Is this for the store report, or the CEO dashboard?')][ValidateSet('s', 'c')][string]$report,
+	[parameter(Mandatory = $true)][ValidateSet('s', 'c')][string]$report,
 	[parameter(Mandatory = $false)][switch]$autoDate,
 	[parameter(Mandatory = $false)][string]$startDate,
 	[parameter(Mandatory = $false)][string]$endDate,
@@ -54,7 +54,7 @@ ElseIf ($report -eq 'c') {
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	$emailList = 'graham.pinkston@ansira.com'
 	If ($autoDate.IsPresent -eq $true) {
-		$startDateObj = $endDateObj = $(Get-Date).AddYears(-1)
+		$startDateObj = $endDateObj = $($(Get-Date).AddYears(-1)).AddDays(1)
 		$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 	}
 }
@@ -65,8 +65,6 @@ If ($test.IsPresent -eq $true) {
 ##   Base name of database tables
 $stgTable121 = 'stg_121_Headers'
 $stgTable122 = 'stg_122_Details'
-$prodTable121 = 'prod_121_Headers'
-$prodTable122 = 'prod_122_Details'
 #######################################################################################################
 ##   These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'

@@ -5,10 +5,10 @@ GO
 CREATE PROCEDURE					[dbo].[usp_Delete_Old_Data_CEO]
 AS
 SET NOCOUNT ON
-DECLARE								@present								date
 DECLARE								@past									date
-SET									@present								=							DATEADD(day, -364, GETDATE()) 
-SET									@past									=							DATEADD(day, -32, @present)
+DECLARE								@present								date
+SET									@past									=							DATEADD(day, -366, GETDATE())
+SET									@present								=							DATEADD(day, 32, @past)
 DELETE								[pdt]
 FROM								[dbo].[prod_122_Details_CEO]			AS							[pdt]
 INNER JOIN							[dbo].[prod_121_Headers_CEO]			AS							[tht]

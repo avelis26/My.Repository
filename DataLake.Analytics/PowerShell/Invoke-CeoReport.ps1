@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.0
+# Init  --  v1.0.0.1
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
@@ -135,6 +135,9 @@ Function Execute-CeoAggregation {
 "@
 	}
 	Send-MailMessage @params
+	Write-Output $message3
+	Add-Content -Value "$(New-TimeStamp)  $message3" -Path $opsLog
+	Add-Content -Value "---------------------------------------------------------------------------------------------------------------------------------------" -Path $opsLog
 }
 # Init
 Import-Module SqlServer -ErrorAction Stop
@@ -344,5 +347,4 @@ Catch {
 }
 Finally {
 	Get-Job | Remove-Job
-	[Environment]::Exit($exitCode)
 }
