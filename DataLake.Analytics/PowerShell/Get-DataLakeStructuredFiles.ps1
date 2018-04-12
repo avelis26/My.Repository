@@ -53,7 +53,9 @@ Function Get-DataLakeStructuredFiles {
 					Account = $dataLakeStoreName;
 					Path = $($file.Path);
 					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name));
-					Force = $true
+					Force = $true;
+					PerFileThreadCount = 8;
+					ConcurrentFileCount = 8;
 				}
 				Export-AzureRmDataLakeStoreItem @exportParams
 			}

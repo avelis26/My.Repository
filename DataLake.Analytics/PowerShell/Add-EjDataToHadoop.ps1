@@ -144,6 +144,8 @@ Try {
 			Path = $($dataLakeFolder.Path);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
+			PerFileThreadCount = 8;
+			ConcurrentFileCount = 8;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams

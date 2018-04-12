@@ -52,7 +52,9 @@ Function Get-DataLakeRawFiles {
 				Account = $dataLakeStoreName;
 				Path = $($dataLakeFolder.Path);
 				Destination = $($destinationRootPath + $processDate + '\');
-				Force = $true
+				Force = $true;
+				PerFileThreadCount = 8;
+				ConcurrentFileCount = 8;
 			}
 				Export-AzureRmDataLakeStoreItem @exportParams
 			$i++
