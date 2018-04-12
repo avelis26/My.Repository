@@ -1,4 +1,4 @@
-# Version  --  v1.1.2.2
+# Version  --  v1.1.2.3
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -29,14 +29,6 @@ $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
-If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
-	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
-}
-$opsLog = $opsLogRootPath + "$(Get-Date -Format 'yyyyMMdd_hhmmss')_AllSpark.log"
-Add-Content -Value "$(Get-Date -Format 'yyyy/MM/dd_HH:mm:ss')  Importing SQL Server module..." -Path $opsLog -ErrorAction Stop
-Import-Module SqlServer -ErrorAction Stop
-Add-Content -Value "$(Get-Date -Format 'yyyy/MM/dd_HH:mm:ss')  Importing Azure module..." -Path $opsLog -ErrorAction Stop
-Import-Module AzureRM -ErrorAction Stop
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -66,6 +58,14 @@ Function Set-AzureSqlDatabaseSize {
 	}
 	Set-AzureRmSqlDatabase @params
 }
+If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
+	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
+}
+$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
+Add-Content -Value "$(New-TimeStamp)  Importing SQL Server module..." -Path $opsLog -ErrorAction Stop
+Import-Module SqlServer -ErrorAction Stop
+Add-Content -Value "$(New-TimeStamp)  Importing Azure module..." -Path $opsLog -ErrorAction Stop
+Import-Module AzureRM -ErrorAction Stop
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()

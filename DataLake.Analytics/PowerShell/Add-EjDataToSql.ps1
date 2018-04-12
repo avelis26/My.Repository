@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.2
+# Version  --  v3.1.4.3
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
