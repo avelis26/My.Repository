@@ -1,4 +1,4 @@
-# Version  --  v1.1.2.3
+# Version  --  v1.1.2.4
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -68,6 +68,8 @@ Add-Content -Value "$(New-TimeStamp)  Importing Azure module..." -Path $opsLog -
 Import-Module AzureRM -ErrorAction Stop
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+	$currentUser = [Environment]::UserName.ToString()
+	Add-Content -Value "$(New-TimeStamp)  Current User: $currentUser" -Path $opsLog -ErrorAction Stop
 	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 	Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
 	If ($policy -ne 'TrustAllCertsPolicy') {
