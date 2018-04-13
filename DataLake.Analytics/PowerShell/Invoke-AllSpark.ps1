@@ -1,4 +1,4 @@
-# Version  --  v1.1.2.4
+# Version  --  v1.1.2.5
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -70,25 +70,7 @@ Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$currentUser = [Environment]::UserName.ToString()
 	Add-Content -Value "$(New-TimeStamp)  Current User: $currentUser" -Path $opsLog -ErrorAction Stop
-	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-	Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
-	If ($policy -ne 'TrustAllCertsPolicy') {
-		Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Add-Content -Value "$(New-TimeStamp)  Cert Policy: $policy" -Path $opsLog -ErrorAction Stop
-	}
+	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
 	If ($scaleUp.IsPresent -eq $true) {
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 		$message = "Logging into Azure..."
