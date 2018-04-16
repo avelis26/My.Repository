@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.1
+# Init  --  v1.0.0.2
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
@@ -44,23 +44,17 @@ Function Execute-ShrinkLogFile {
 			$tryAgain = 'continue'
 		}
 		Catch {
-			If ($tryAgain -gt 5) {
-				$errorParams = @{
-					Message = "Azure SQL Database totally sucks!!!";
-					ErrorId = "542";
-					RecommendedAction = "Wait and try again.";
-					ErrorAction = "Stop";
-				}
-				Write-Error @errorParams
+			If ($tryAgain -gt 4) {
+				Write-Error -Exception $($Error[0].Exception) -ErrorAction Continue
 				Break
-			} # if
+			}
 			$message = "Shrinking database log file failed!!! Trying again..."
 			Write-Output $message
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 			Start-Sleep -Seconds 60
 			$tryAgain++
-		} # catch
-	} # while
+		}
+	}
 	$message = "Database log file shrunk successfully."
 	Write-Output $message
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
