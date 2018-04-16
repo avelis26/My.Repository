@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.3
+# Init  --  v1.0.0.4
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
@@ -43,6 +43,9 @@ Function Execute-ShrinkLogFile {
 		Try {
 			Invoke-Sqlcmd @sqlShrinkParams
 			$tryAgain = 'continue'
+			$message = "Database log file shrunk successfully."
+			Write-Output $message
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 		}
 		Catch {
 			If ($tryAgain -gt 4) {
@@ -56,9 +59,6 @@ Function Execute-ShrinkLogFile {
 			$tryAgain++
 		}
 	}
-	$message = "Database log file shrunk successfully."
-	Write-Output $message
-	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 Function Execute-CeoAggregation {
 	[CmdletBinding()]

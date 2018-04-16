@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.3
+# Init  --  v1.3.2.4
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -369,6 +369,9 @@ Function Execute-ShrinkLogFile {
 		Try {
 			Invoke-Sqlcmd @sqlShrinkParams
 			$tryAgain = 'continue'
+			$message = "Database log file shrunk successfully."
+			Write-Output $message
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 		}
 		Catch {
 			If ($tryAgain -gt 4) {
@@ -382,9 +385,6 @@ Function Execute-ShrinkLogFile {
 			$tryAgain++
 		}
 	}
-	$message = "Database log file shrunk successfully."
-	Write-Output $message
-	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 # Init
 If ($(Test-Path -Path $opsLogRoot) -eq $false) {
