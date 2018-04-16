@@ -1,8 +1,9 @@
-# Init  --  v1.0.0.2
+# Init  --  v1.0.0.3
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
+$opsLogRoot = 'H:\Ops_Log\Report\CEO\'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -153,7 +154,10 @@ $lastYearDate = $comp_yr + '-' + $comp_mo + '-' + $comp_da
 $currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(Get-Date).AddDays(-1).Month.ToString('00')) + '-' + $($(Get-Date).AddDays(-1).Day.ToString('00'))
 $scriptStartTime = Get-Date
 $scriptStartTimeText = $(New-TimeStamp -forFileName)
-$opsLog = "H:\Ops_Log\Report\BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
+If ($(Test-Path -Path $opsLogRoot) -eq $false) {
+	New-Item -Path $opsLogRoot -ItemType Directory -Force
+}
+$opsLog = $opsLogRoot + "BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
 [DateTime]$currentYearDateObj = Get-Date -Date $currentYearDate
 [DateTime]$lastYearDateObj = Get-Date -Date $lastYearDate
 [string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
