@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.1
+# Init  --  v1.3.2.3
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -9,9 +9,10 @@ $year = $($scriptStartTime.AddDays(-1)).year.ToString("0000")
 $end = $year + '-' + $month + '-' + $day
 ##########################################
 ##########################################
-$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
-$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
+$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
+$opsLogRoot = 'H:\Ops_Log\Report\Store\'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -386,7 +387,10 @@ Function Execute-ShrinkLogFile {
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
 }
 # Init
-$opsLog = "H:\Ops_Log\Report\BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
+If ($(Test-Path -Path $opsLogRoot) -eq $false) {
+	New-Item -Path $opsLogRoot -ItemType Directory -Force
+}
+$opsLog = $opsLogRoot + "BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Store_Report.log"
 [DateTime]$endDate = Get-Date -Date $end
 [DateTime]$startDate = $endDate.AddDays(-29)
 [string]$start = $($startDate.year.ToString("0000")) + '-' + $($startDate.month.ToString("00")) + '-' + $($startDate.day.ToString("00"))
@@ -463,32 +467,32 @@ Try {
 	Start-Sleep -Seconds 2
 	# Step 1: Run agg1-1
 	Execute-AggregateOneOne
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 2: Run agg1-2
 	Execute-AggregateOneTwo
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 3: Run agg1-3-1
 	Execute-AggregateOneThree -dateStart $weekOneStart -dateEnd $weekOneEnd -step '3'
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 4: Run agg1-3-2
 	Execute-AggregateOneThree -dateStart $weekTwoStart -dateEnd $weekTwoEnd -step '4'
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 5: Run agg1-3-3
 	Execute-AggregateOneThree -dateStart $weekThreeStart -dateEnd $weekThreeEnd -step '5'
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 6: Run agg1-3-4
 	Execute-AggregateOneThree -dateStart $weekFourStart -dateEnd $weekFourEnd -step '6'
-	Start-Sleep -Seconds 420
+	Start-Sleep -Seconds 64
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2
 	# Step 7: Run agg1-3-5
