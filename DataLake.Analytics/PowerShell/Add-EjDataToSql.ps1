@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.5
+# Version  --  v3.1.4.6
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -875,6 +875,7 @@ Try {
 "@
 		}
 		Send-MailMessage @params
+		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 		$y++
 		If ($y -lt $range) {
 			Write-Output "Starting next day in 10..."
@@ -948,8 +949,5 @@ Finally {
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
-	If ($exitCode -eq 0) {
-		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
-	}
 }
 Return $exitCode
