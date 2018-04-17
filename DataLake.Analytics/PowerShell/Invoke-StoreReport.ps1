@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.4
+# Init  --  v1.3.2.5
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -418,12 +418,11 @@ $opsLog = $opsLogRoot + "BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Stor
 $message = "Date Range: $start - $end"
 Write-Output $message
 Add-Content -Path $opsLog -Value $message
-$filter = $($scriptStartTime.year.ToString("0000")) + $($scriptStartTime.month.ToString("00")) + $($scriptStartTime.day.ToString("00"))
-$path = 'H:\Ops_Log\ETL\Store'
+$searchPath = 'H:\Ops_Log\ETL\Store'
 $continue = $null
 $shouldExit = 0
 While ($continue -ne 1) {
-	$file = Get-ChildItem -Path $path -Filter "$filter*" -File
+	$file = Get-ChildItem -Path $searchPath -File | Sort-Object -Property LastWriteTime | Select-Object -Last 1
 	$content = Get-Content -Path $file.FullName -Tail 1
 	If ($content -eq '::ETL SUCCESSFUL::') {
 		$continue = 1
