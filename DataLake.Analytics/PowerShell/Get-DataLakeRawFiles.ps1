@@ -4,7 +4,7 @@ Function Get-DataLakeRawFiles {
 		#######################################################################################################
 		#######################################################################################################
 		##   Enter the path where you want your aggregate files to be downloaded on your local machine:
-		[string]$destinationRootPath = 'C:\BIT_CRM\',
+		[string]$destinationRootPath = 'D:\BIT_CRM\',
 		##   Enter the range of aggregate files you want to download in mm-dd-yyyy format:
 		[string]$startDate = '10-23-2017',
 		[string]$endDate = '10-23-2017',
@@ -14,6 +14,23 @@ Function Get-DataLakeRawFiles {
 		#######################################################################################################
 	)
 	Try {
+		[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		If ($policy -ne 'TrustAllCertsPolicy') {
+			Add-Type -TypeDefinition @"
+				using System.Net;
+				using System.Security.Cryptography.X509Certificates;
+				public class TrustAllCertsPolicy : ICertificatePolicy {
+					public bool CheckValidationResult(
+						ServicePoint srvPoint, X509Certificate certificate,
+						WebRequest request, int certificateProblem
+					) {
+						return true;
+					}
+				}
+"@
+			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+		}
 		Write-Verbose -Message 'Importing AzureRm module...'
 		Import-Module AzureRM -ErrorAction Stop
 		$user = $userName + '@7-11.com'
@@ -35,28 +52,23 @@ Function Get-DataLakeRawFiles {
 			New-Item -ItemType Directory -Path $destinationRootPath -Force
 		}
 		While ($i -lt $range) {
+			$scriptStartTime = Get-Date
 			[string]$day = $($startDateObj.AddDays($i)).day.ToString("00")
 			[string]$month = $($startDateObj.AddDays($i)).month.ToString("00")
 			[string]$year = $($startDateObj.AddDays($i)).year.ToString("0000")
 			$processDate = $year + $month + $day
-			$dataLakeSearchPath = $dataLakeRootPath + $processDate
-			Write-Verbose -Message "Getting list of files in $dataLakeSearchPath ..."
-			$getParams = @{
-				Account = $dataLakeStoreName;
-				Path = $dataLakeSearchPath;
-				ErrorAction = 'SilentlyContinue';
-			}
-			$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
 			Write-Verbose "Downloading folder $($dataLakeFolder.Path)..."
 			$exportParams = @{
 				Account = $dataLakeStoreName;
-				Path = $($dataLakeFolder.Path);
+				Path = $($dataLakeRootPath + $processDate);
 				Destination = $($destinationRootPath + $processDate + '\');
 				Force = $true;
-				PerFileThreadCount = 8;
-				ConcurrentFileCount = 8;
+				Concurrency = 400;
 			}
-				Export-AzureRmDataLakeStoreItem @exportParams
+			Export-AzureRmDataLakeStoreItem @exportParams
+			$scriptEndTime = Get-Date
+			$runTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime
+			Write-Host "Total Run Time----:  $($runTime.Hours.ToString("00")) h $($runTime.Minutes.ToString("00")) m $($runTime.Seconds.ToString("00")) s"
 			$i++
 		}
 		Write-Output "All files downloaded successfully."
