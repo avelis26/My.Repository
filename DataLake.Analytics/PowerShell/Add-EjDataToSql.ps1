@@ -755,6 +755,7 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Move data from temp drive to archive
 		$milestone_7 = Get-Date
+<#
 		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
 			Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
@@ -762,6 +763,7 @@ Try {
 		}
 		Add-Content -Value "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
+#>
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
