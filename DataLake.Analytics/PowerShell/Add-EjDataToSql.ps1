@@ -215,7 +215,7 @@ Try {
 			Path = $($dataLakeFolder.Path);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
-			Concurrency = 400;
+			Concurrency = 256;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams
