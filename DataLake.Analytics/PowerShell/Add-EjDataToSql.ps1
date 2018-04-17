@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.4
+# Version  --  v3.1.4.5
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -215,8 +215,7 @@ Try {
 			Path = $($dataLakeFolder.Path);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
-			PerFileThreadCount = 8;
-			ConcurrentFileCount = 8;
+			Concurrency = 400;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams
