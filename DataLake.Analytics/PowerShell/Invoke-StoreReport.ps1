@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.6
+# Init  --  v1.3.2.7
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -504,9 +504,9 @@ Try {
 	Start-Sleep -Seconds 2
 	# Report
 	$scriptEndTime = Get-Date
-	$totTime = New-TimeSpan -Start $scriptEndTime -End $scriptEndTime -ErrorAction Stop
-	$message0 = "Start Time-----------:  $($scriptStartTime.DateTime)"
-	$message1 = "End Time-------------:  $($scriptEndTime.DateTime)"
+	$totTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime -ErrorAction Stop
+	$message0 = "Start Time-----------:  $($scriptStartTime.ToString())"
+	$message1 = "End Time-------------:  $($scriptEndTime.ToString())"
 	$message2 = "Total Run Time-------:  $($totTime.Hours.ToString("00")) hours $($totTime.Minutes.ToString("00")) minutes $($totTime.Seconds.ToString("00")) seconds"
 	$params = @{
 		SmtpServer = $smtpServer;
