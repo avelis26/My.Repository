@@ -3,7 +3,7 @@
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com'
 ##########################################
-$opsLogRoot = 'H:\Ops_Log\Report\CEO\'
+$opsLogRoot = '\\MS-SSW-CRM-BITC\Data\Ops_Log\Report\CEO\'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'

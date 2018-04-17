@@ -11,7 +11,7 @@ Param(
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
-Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_hhmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_hhmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 $databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $userName = 'gpink003'
 $smtpServer = '10.128.1.125'
@@ -19,7 +19,7 @@ $port = 25
 $fromAddr = 'noreply@7-11.com'
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'
-$opsLogRootPath = 'H:\Ops_Log\AllSpark\'
+$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\AllSpark\'
 $emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
@@ -281,8 +281,8 @@ Catch {
 	$exitCode = 1
 }
 Finally {
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
-	Add-Content -Value "----------------------------------------------------------------------------------" -Path 'H:\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
 		[Environment]::Exit($exitCode)	
 	}

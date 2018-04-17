@@ -18,9 +18,9 @@ $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 $destinationRootPath = 'D:\BIT_CRM\'
-$archiveRootPath = 'H:\BIT_CRM\'
+$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\'
 ##   Enter the path where you want the error logs to be stored:
-$errLogRootPath = 'H:\Err_Log\'
+$errLogRootPath = '\\MS-SSW-CRM-BITC\Data\Err_Log\'
 ##   Enter the email address for failures:
 $failEmailList = 'graham.pinkston@ansira.com'
 ##   If autoDate switch not used, get dates from variables provided above:
@@ -30,7 +30,7 @@ If ($autoDate.IsPresent -eq $false) {
 }
 ##   Email, log path, and dates change for store report
 If ($report -eq 's') {
-	$opsLogRootPath = 'H:\Ops_Log\ETL\Store\'
+	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Store\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers'
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	[string[]]$emailList = `
@@ -49,7 +49,7 @@ If ($report -eq 's') {
 }
 ##   Email, log path, and dates change for CEO report
 ElseIf ($report -eq 'c') {
-	$opsLogRootPath = 'H:\Ops_Log\ETL\CEO\'
+	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\CEO\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	$emailList = 'graham.pinkston@ansira.com'
@@ -100,7 +100,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'H:\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
@@ -948,7 +948,7 @@ Finally {
 	Write-Output 'Finally...'
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path 'H:\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 	If ($exitCode -eq 0) {
 		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
 	}

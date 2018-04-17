@@ -1,4 +1,7 @@
-$outFilePath = 'H:\Tmp\'
+$outFilePath = '\\MS-SSW-CRM-BITC\Data\Tmp\'
+If ($(Test-Path -Path $outFilePath) -eq $false) {
+	New-Item -Path $outFilePath -ItemType Directory -Force -ErrorAction Stop
+}
 $userName = 'gpink003'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop

@@ -31,7 +31,6 @@
     <Compile Include="PowerShell\Convert-BitDataFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeFileNames.ps1" />
     <Compile Include="PowerShell\Invoke-CeoReport.ps1" />
-    <Compile Include="PowerShell\Create-BitStoreReportForHadoop.ps1" />
     <Compile Include="PowerShell\Add-EjDataToHadoop.ps1" />
     <Compile Include="PowerShell\Get-DataLakeAggregateFiles.ps1" />
     <Compile Include="PowerShell\Get-DataLakeRawFiles.ps1" />
@@ -39,7 +38,6 @@
     <Compile Include="PowerShell\Invoke-StoreReport.ps1" />
     <Compile Include="PowerShell\Initialize-ForStoreReport.ps1" />
     <Compile Include="PowerShell\Add-EjDataToSql.ps1" />
-    <Compile Include="PowerShell\Insert-BitDataToSqlForHadoop.ps1" />
     <Compile Include="PowerShell\Invoke-AllSpark.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
@@ -56,7 +54,6 @@
     <Content Include="SQL\usp_StoreReport_2_4.sql" />
     <Content Include="SQL\usp_StoreReport_3_4.sql" />
     <Content Include="SQL\usp_StoreReport_4_4.sql" />
-    <Content Include="SQL\usp_CEO_Report.sql" />
     <Content Include="SQL\usp_Copy_Store_Product_Locally.sql" />
     <Content Include="SQL\Create_Tables.sql" />
     <Content Include="SQL\usp_Delete_Old_Data.sql" />
