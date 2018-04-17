@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.6
+# Version  --  v1.0.1.7
 #######################################################################################################
 #
 #######################################################################################################
@@ -144,8 +144,7 @@ Try {
 			Path = $($dataLakeFolder.Path);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
-			PerFileThreadCount = 8;
-			ConcurrentFileCount = 8;
+			Concurrency = 256;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams

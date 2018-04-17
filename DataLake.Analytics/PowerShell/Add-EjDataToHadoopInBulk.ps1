@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.1
+# Version  --  v1.1.1.2
 #######################################################################################################
 #
 #######################################################################################################
@@ -151,8 +151,7 @@ While ($y -lt $range) {
 			Path = $($dataLakeSearchPathRoot + $processDate);
 			Destination = $($destinationRootPath + $processDate + '\');
 			Force = $true;
-			PerFileThreadCount = 8;
-			ConcurrentFileCount = 8;
+			Concurrency = 256;
 			ErrorAction = 'Stop';
 		}
 		Export-AzureRmDataLakeStoreItem @exportParams

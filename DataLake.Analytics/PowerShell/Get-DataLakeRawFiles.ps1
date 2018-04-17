@@ -63,7 +63,7 @@ Function Get-DataLakeRawFiles {
 				Path = $($dataLakeRootPath + $processDate);
 				Destination = $($destinationRootPath + $processDate + '\');
 				Force = $true;
-				Concurrency = 400;
+				Concurrency = 256;
 			}
 			Export-AzureRmDataLakeStoreItem @exportParams
 			$scriptEndTime = Get-Date

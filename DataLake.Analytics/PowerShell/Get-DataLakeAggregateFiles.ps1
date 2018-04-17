@@ -54,8 +54,7 @@ Function Get-DataLakeAggregateFiles {
 					Path = $($file.Path);
 					Destination = $($destinationRootPath + $processDate + '\' + $($file.Name));
 					Force = $true;
-					PerFileThreadCount = 8;
-					ConcurrentFileCount = 8;
+					Concurrency = 256;
 				}
 				Export-AzureRmDataLakeStoreItem @exportParams
 			}
