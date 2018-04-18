@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.0
+# Version  --  v3.1.5.1
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -103,23 +103,6 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
-$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($policy -ne 'TrustAllCertsPolicy') {
-	Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Start Date    ::  $startDate"
 Write-Host "End Date      ::  $endDate"
@@ -183,6 +166,25 @@ Try {
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop > $null
 		}
+		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+		If ($policy -ne 'TrustAllCertsPolicy') {
+			Add-Type -TypeDefinition @"
+				using System.Net;
+				using System.Security.Cryptography.X509Certificates;
+				public class TrustAllCertsPolicy : ICertificatePolicy {
+					public bool CheckValidationResult(
+						ServicePoint srvPoint, X509Certificate certificate,
+						WebRequest request, int certificateProblem
+					) {
+						return true;
+					}
+				}
+"@
+			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+		}
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop

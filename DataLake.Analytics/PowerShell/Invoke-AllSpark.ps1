@@ -1,4 +1,4 @@
-# Version  --  v1.1.2.8
+# Version  --  v1.1.2.9
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -73,10 +73,29 @@ Try {
 	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
 	If ($scaleUp.IsPresent -eq $true) {
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
+		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+		If ($policy -ne 'TrustAllCertsPolicy') {
+			Add-Type -TypeDefinition @"
+				using System.Net;
+				using System.Security.Cryptography.X509Certificates;
+				public class TrustAllCertsPolicy : ICertificatePolicy {
+					public bool CheckValidationResult(
+						ServicePoint srvPoint, X509Certificate certificate,
+						WebRequest request, int certificateProblem
+					) {
+						return true;
+					}
+				}
+"@
+			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+		}
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		Login-AzureRmAccount -Credential $credential -Subscription $databaseSubId -Force -ErrorAction Stop
+		Connect-AzureRmAccount -Credential $credential -Subscription $databaseSubId -Force -ErrorAction Stop
 		$size = 'P15'
 		$message = "$(New-TimeStamp)  Scaling database to $size..."
 		Write-Output $message
