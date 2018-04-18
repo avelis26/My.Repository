@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.9
+# Version  --  v1.0.2.0
 #######################################################################################################
 #
 #######################################################################################################
@@ -50,23 +50,6 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
-$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($policy -ne 'TrustAllCertsPolicy') {
-	Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 $endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -113,6 +96,26 @@ Try {
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 		}
+		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+		If ($policy -ne 'TrustAllCertsPolicy') {
+			Add-Type -TypeDefinition @"
+				using System.Net;
+				using System.Security.Cryptography.X509Certificates;
+				public class TrustAllCertsPolicy : ICertificatePolicy {
+					public bool CheckValidationResult(
+						ServicePoint srvPoint, X509Certificate certificate,
+						WebRequest request, int certificateProblem
+					) {
+						return true;
+					}
+				}
+"@
+			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+		}
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Output $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop

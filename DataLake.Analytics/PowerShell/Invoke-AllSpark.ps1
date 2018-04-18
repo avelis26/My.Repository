@@ -1,4 +1,4 @@
-# Version  --  v1.1.2.9
+# Version  --  v1.1.3.0
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -91,6 +91,7 @@ Try {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message

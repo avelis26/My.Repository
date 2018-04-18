@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.1
+# Version  --  v3.1.5.2
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -184,6 +184,7 @@ Try {
 "@
 			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 		}
+		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
 		Write-Verbose -Message $message
