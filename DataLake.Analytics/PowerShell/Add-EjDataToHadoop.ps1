@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.7
+# Version  --  v1.0.1.8
 #######################################################################################################
 #
 #######################################################################################################
@@ -435,10 +435,12 @@ Try {
 	$exitCode = 0
 } # try
 Catch {
-	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
 	$path = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Error\'
 	If ($(Test-Path -Path $path) -eq $false) {
 		$message = "Creating $path..."
@@ -463,11 +465,12 @@ Catch {
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
-			$($Error[0].CategoryInfo.Activity)<br>
-			$($Error[0].Exception.Message)<br>
-			$($Error[0].Exception.InnerExceptionMessage)<br>
-			$($Error[0].RecommendedAction)<br>
-			$($Error[0].Message)<br>
+			$($_.Exception.Message)<br>
+			$($_.Exception.InnerException.Message)<br>
+			$($_.Exception.InnerException.InnerException.Message)<br>
+			$($_.CategoryInfo.Activity)<br>
+			$($_.CategoryInfo.Reason)<br>
+			$($_.InvocationInfo.Line)<br>
 			</font>
 "@
 	}
