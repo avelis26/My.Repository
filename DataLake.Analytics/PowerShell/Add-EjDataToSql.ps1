@@ -907,7 +907,6 @@ Try {
 	$exitCode = 0
 } # try
 Catch {
-
 	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
