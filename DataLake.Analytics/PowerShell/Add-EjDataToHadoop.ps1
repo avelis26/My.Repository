@@ -1,4 +1,4 @@
-# Version  --  v1.0.1.8
+# Version  --  v1.0.1.9
 #######################################################################################################
 #
 #######################################################################################################
@@ -50,6 +50,7 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
 $policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 If ($policy -ne 'TrustAllCertsPolicy') {
 	Add-Type -TypeDefinition @"
