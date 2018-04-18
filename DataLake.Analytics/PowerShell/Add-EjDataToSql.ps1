@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.6
+# Version  --  v3.1.4.7
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -907,10 +907,13 @@ Try {
 	$exitCode = 0
 } # try
 Catch {
-	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].Exception.InnerExceptionMessage) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($Error[0].RecommendedAction) -Path $opsLog -ErrorAction Stop
+
+	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -922,11 +925,12 @@ Catch {
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
-			$($Error[0].CategoryInfo.Activity)<br>
-			$($Error[0].Exception.Message)<br>
-			$($Error[0].Exception.InnerExceptionMessage)<br>
-			$($Error[0].RecommendedAction)<br>
-			$($Error[0].Message)<br>
+			$($_.Exception.Message)<br>
+			$($_.Exception.InnerException.Message)<br>
+			$($_.Exception.InnerException.InnerException.Message)<br>
+			$($_.CategoryInfo.Activity)<br>
+			$($_.CategoryInfo.Reason)<br>
+			$($_.InvocationInfo.Line)<br>
 			</font>
 "@
 	}
