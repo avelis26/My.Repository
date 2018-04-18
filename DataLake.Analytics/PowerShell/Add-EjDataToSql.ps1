@@ -1,4 +1,4 @@
-# Version  --  v3.1.4.9
+# Version  --  v3.1.5.0
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -756,6 +756,13 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Move data from temp drive to archive
 		$milestone_7 = Get-Date
+		$message = "$(New-TimeStamp)  Removing $destinationRootPath..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
+		$message = "$(New-TimeStamp)  $destinationRootPath removed successfully."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 <#
 		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
 			Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
