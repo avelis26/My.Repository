@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.0
+# Version  --  v1.1.3.1
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -11,7 +11,7 @@ Param(
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
-Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_hhmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
 $databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
 $userName = 'gpink003'
 $smtpServer = '10.128.1.125'
@@ -35,7 +35,7 @@ Function New-TimeStamp {
 		[switch]$forFileName
 	)
 	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
 	}
 	Else {
 		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop

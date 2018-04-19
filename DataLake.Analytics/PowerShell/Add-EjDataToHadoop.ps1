@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.1
+# Version  --  v1.0.2.2
 #######################################################################################################
 #
 #######################################################################################################
@@ -40,7 +40,7 @@ Function New-TimeStamp {
 		[switch]$forFileName
 	)
 	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_hhmmss' -ErrorAction Stop
+		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
 	}
 	Else {
 		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
