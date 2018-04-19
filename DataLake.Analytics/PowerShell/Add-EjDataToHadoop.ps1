@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.0
+# Version  --  v1.0.2.1
 #######################################################################################################
 #
 #######################################################################################################
@@ -29,7 +29,7 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $bumblebee = 'C:\Scripts\C#\Bumblebee\Ansira.Sel.Bitc.Bumblebee.exe'
-$optimus = 'C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Processor.exe'
+$optimus = 'C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Optimus.exe'
 $121blobPath = 'bitc/121header/'
 $122blobPath = 'bitc/122detail/'
 $y = 0
