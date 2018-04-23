@@ -1,0 +1,20 @@
+# Version 0.9.0
+Function Set-SslCertPolicy {
+	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	If ($policy -ne 'TrustAllCertsPolicy') {
+		Add-Type -TypeDefinition @"
+			using System.Net;
+			using System.Security.Cryptography.X509Certificates;
+			public class TrustAllCertsPolicy : ICertificatePolicy {
+				public bool CheckValidationResult(
+					ServicePoint srvPoint, X509Certificate certificate,
+					WebRequest request, int certificateProblem
+				) {
+					return true;
+				}
+			}
+"@
+		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+	}
+}

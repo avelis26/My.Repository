@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.3
+# Version  --  v3.1.5.4
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -71,9 +71,9 @@ $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
-$sqlServer = 'mstestsqldw.database.windows.net'
+$sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
-$sqlUser = 'sqladmin'
+$sqlUser = 'localadmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'

@@ -40,6 +40,7 @@
     <Compile Include="PowerShell\Add-EjDataToSql.ps1" />
     <Compile Include="PowerShell\Invoke-AllSpark.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
+    <Compile Include="PowerShell\Set-SslCertPolicy.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
   </ItemGroup>
   <ItemGroup>
