@@ -42,6 +42,7 @@
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Set-SslCertPolicy.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
+    <Compile Include="PowerShell\Temp-SqlStuff.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\usp_CeoReport_1_5.sql" />
