@@ -116,3 +116,7 @@ $code = @"
     Add-Content -Value $code -Path $outFile
     $i++
 }
+
+
+# https://www.cathrinewilhelmsen.net/2015/04/12/table-partitioning-in-sql-server/
+# https://docs.microsoft.com/en-us/sql/relational-databases/partitions/create-partitioned-tables-and-indexes?view=sql-server-2017
