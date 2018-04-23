@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.2
+# Version  --  v1.0.2.3
 #######################################################################################################
 #
 #######################################################################################################
@@ -483,17 +483,6 @@ Catch {
 }
 Finally {
 	Write-Output 'Finally...'
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = 'graham.pinkston@ansira.com';
-		BodyAsHtml = $true;
-		Subject = "AllSpark: Hadoop ETL Process Finished For Range $startDate - $endDate";
-		Body = "Queue up the next range."
-	}
-	Send-MailMessage @params
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
