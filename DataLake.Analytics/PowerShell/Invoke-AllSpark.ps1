@@ -65,7 +65,7 @@ $opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 Add-Content -Value "$(New-TimeStamp)  Importing AzureRM and SQL Server modules as well as custom functions..." -Path $opsLog -ErrorAction Stop
 Import-Module SqlServer -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
-. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$currentUser = [Environment]::UserName.ToString()

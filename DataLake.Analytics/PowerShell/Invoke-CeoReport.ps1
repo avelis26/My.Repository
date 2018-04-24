@@ -142,7 +142,7 @@ Function Execute-CeoAggregation {
 # Init
 Add-Content -Value "$(New-TimeStamp)  Importing SQL module and custom functions..." -Path $opsLog
 Import-Module SqlServer -ErrorAction Stop
-. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 Add-Content -Value "$(New-TimeStamp)  Getting comp date..." -Path $opsLog
 $query = 'SELECT [comp_dt] FROM [dbo].[RPTS_Calendar] WHERE [calendar_dt] = DATEADD(day, -1, CAST(GETDATE() AS DATE))'
 $sqlParams = @{

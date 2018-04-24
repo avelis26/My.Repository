@@ -69,7 +69,7 @@ Start-Sleep -Seconds 1
 Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules as well as custom fuctions..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module $7zipMod -ErrorAction Stop
-. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 $range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 While ($y -lt $range) {

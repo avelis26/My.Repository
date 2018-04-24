@@ -127,7 +127,7 @@ Try {
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip4powershell -ErrorAction Stop
-	. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	Write-Debug -Message $credential.UserName

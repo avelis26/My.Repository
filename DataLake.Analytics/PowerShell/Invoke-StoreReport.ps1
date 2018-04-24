@@ -443,7 +443,7 @@ Try {
 		throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
 	}
 	Import-Module SqlServer -ErrorAction Stop
-	. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 	Set-SslCertPolicy
