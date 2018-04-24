@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.3
+# Version  --  v1.1.1.4
 #######################################################################################################
 #
 #######################################################################################################
@@ -8,6 +8,7 @@ $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
+$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
 Switch ($ENV:ComputerName) {
@@ -48,22 +49,6 @@ Function New-TimeStamp {
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path 'C:\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-If ($policy -ne 'TrustAllCertsPolicy') {
-	Add-Type -TypeDefinition @"
-		using System.Net;
-		using System.Security.Cryptography.X509Certificates;
-		public class TrustAllCertsPolicy : ICertificatePolicy {
-			public bool CheckValidationResult(
-				ServicePoint srvPoint, X509Certificate certificate,
-				WebRequest request, int certificateProblem
-			) {
-				return true;
-			}
-		}
-"@
-	[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-}
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 $endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -81,9 +66,10 @@ Write-Host "2..."
 Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
-Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules..."
+Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules as well as custom fuctions..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module $7zipMod -ErrorAction Stop
+. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
 $range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 While ($y -lt $range) {
@@ -110,6 +96,17 @@ While ($y -lt $range) {
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 		New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 	}
+	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+		$message = "Creating $archiveRootPath..."
+		Write-Output $message
+		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
+	}
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+	Set-SslCertPolicy
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 	$message = "Logging into Azure..."
 	Write-Output $message
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
@@ -542,12 +539,19 @@ While ($y -lt $range) {
 	} # if
 # Delete data from temp drive
 	$milestone_4 = Get-Date
-	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
-		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-	} # if
+<#
+	$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
+#>
+	If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
+		Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+		Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
+	}
+	Add-Content -Value "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+	Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 	If ($continue -eq 1) {
 		$endTime = Get-Date

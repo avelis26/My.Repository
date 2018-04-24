@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.7
+# Init  --  v1.0.0.8
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
@@ -12,6 +12,11 @@ $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'mstestsqldw.database.windows.net'
 ##########################################
+$currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(Get-Date).AddDays(-1).Month.ToString('00')) + '-' + $($(Get-Date).AddDays(-1).Day.ToString('00'))
+If ($(Test-Path -Path $opsLogRoot) -eq $false) {
+	New-Item -Path $opsLogRoot -ItemType Directory -Force
+}
+$opsLog = $opsLogRoot + "BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -135,7 +140,10 @@ Function Execute-CeoAggregation {
 	Add-Content -Value "---------------------------------------------------------------------------------------------------------------------------------------" -Path $opsLog
 }
 # Init
+Add-Content -Value "$(New-TimeStamp)  Importing SQL module and custom functions..." -Path $opsLog
 Import-Module SqlServer -ErrorAction Stop
+. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+Add-Content -Value "$(New-TimeStamp)  Getting comp date..." -Path $opsLog
 $query = 'SELECT [comp_dt] FROM [dbo].[RPTS_Calendar] WHERE [calendar_dt] = DATEADD(day, -1, CAST(GETDATE() AS DATE))'
 $sqlParams = @{
 	query = $query;
@@ -151,16 +159,10 @@ $comp_yr = $comp_dt.comp_dt.Year.ToString('0000')
 $comp_mo = $comp_dt.comp_dt.Month.ToString('00')
 $comp_da = $comp_dt.comp_dt.Day.ToString('00')
 $lastYearDate = $comp_yr + '-' + $comp_mo + '-' + $comp_da
-$currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(Get-Date).AddDays(-1).Month.ToString('00')) + '-' + $($(Get-Date).AddDays(-1).Day.ToString('00'))
 $scriptStartTime = Get-Date
 $scriptStartTimeText = $(New-TimeStamp -forFileName)
-If ($(Test-Path -Path $opsLogRoot) -eq $false) {
-	New-Item -Path $opsLogRoot -ItemType Directory -Force
-}
-$opsLog = $opsLogRoot + "BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
-[DateTime]$currentYearDateObj = Get-Date -Date $currentYearDate
-[DateTime]$lastYearDateObj = Get-Date -Date $lastYearDate
-[string]$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+$currentYearDateObj = Get-Date -Date $currentYearDate
+$lastYearDateObj = Get-Date -Date $lastYearDate
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Current Year    ::  $currentYearDate"
 Write-Host "Last Year       ::  $lastYearDate"
@@ -179,21 +181,11 @@ Try {
 	If ($lastYearDateObj.Year -eq $(Get-Date).Year) {
 		throw [System.ArgumentOutOfRangeException] "Years should not be the same!!!"
 	}
-	If ($policy -ne 'TrustAllCertsPolicy') {
-		Add-Type -TypeDefinition @"
-			using System.Net;
-			using System.Security.Cryptography.X509Certificates;
-			public class TrustAllCertsPolicy : ICertificatePolicy {
-				public bool CheckValidationResult(
-					ServicePoint srvPoint, X509Certificate certificate,
-					WebRequest request, int certificateProblem
-				) {
-					return true;
-				}
-			}
-"@
-		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-	}
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+	Set-SslCertPolicy
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 # Step 0 of 5: Update local store and product tables
 	$startTime = Get-Date
 	$startTimeText = $(New-TimeStamp -forFileName)

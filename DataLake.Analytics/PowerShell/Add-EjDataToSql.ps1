@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.4
+# Version  --  v3.1.5.5
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -18,7 +18,7 @@ $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 $destinationRootPath = 'D:\BIT_CRM\'
-$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\'
+$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\SQL\'
 ##   Enter the path where you want the error logs to be stored:
 $errLogRootPath = '\\MS-SSW-CRM-BITC\Data\Err_Log\'
 ##   Enter the email address for failures:
@@ -71,9 +71,9 @@ $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
-$sqlServer = 'MS-SSW-CRM-SQL'
+$sqlServer = 'MsTestSqlDw.Database.Windows.Net'
 $database = '7ELE'
-$sqlUser = 'localadmin'
+$sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 $azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
 $user = $userName + '@7-11.com'
@@ -123,10 +123,11 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(New-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules..."
+	Write-Output "$(New-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules as well as custom fuctions..."
 	Import-Module SqlServer -ErrorAction Stop
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip4powershell -ErrorAction Stop
+	. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	Write-Debug -Message $credential.UserName
@@ -166,24 +167,9 @@ Try {
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop > $null
 		}
-		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		If ($policy -ne 'TrustAllCertsPolicy') {
-			Add-Type -TypeDefinition @"
-				using System.Net;
-				using System.Security.Cryptography.X509Certificates;
-				public class TrustAllCertsPolicy : ICertificatePolicy {
-					public bool CheckValidationResult(
-						ServicePoint srvPoint, X509Certificate certificate,
-						WebRequest request, int certificateProblem
-					) {
-						return true;
-					}
-				}
-"@
-			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-		}
+		Set-SslCertPolicy
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
@@ -759,6 +745,7 @@ Try {
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Move data from temp drive to archive
 		$milestone_7 = Get-Date
+<#
 		$message = "$(New-TimeStamp)  Removing $destinationRootPath..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -766,7 +753,7 @@ Try {
 		$message = "$(New-TimeStamp)  $destinationRootPath removed successfully."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-<#
+#>
 		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
 			Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
@@ -774,7 +761,6 @@ Try {
 		}
 		Add-Content -Value "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
 		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
-#>
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)

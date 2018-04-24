@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.3
+# Version  --  v1.0.2.4
 #######################################################################################################
 #
 #######################################################################################################
@@ -17,6 +17,7 @@ $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
+$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
 $opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\'
@@ -68,9 +69,10 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules..."
+	Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules as well as custom fuctions..."
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module $7zipMod -ErrorAction Stop
+	. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	While ($y -lt $range) {
@@ -96,24 +98,15 @@ Try {
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 		}
-		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+		If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+			$message = "Creating $archiveRootPath..."
+			Write-Output $message
+			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+			New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
+		}
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		If ($policy -ne 'TrustAllCertsPolicy') {
-			Add-Type -TypeDefinition @"
-				using System.Net;
-				using System.Security.Cryptography.X509Certificates;
-				public class TrustAllCertsPolicy : ICertificatePolicy {
-					public bool CheckValidationResult(
-						ServicePoint srvPoint, X509Certificate certificate,
-						WebRequest request, int certificateProblem
-					) {
-						return true;
-					}
-				}
-"@
-			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-		}
+		Set-SslCertPolicy
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
@@ -339,10 +332,19 @@ Try {
 		}
 # Delete data from temp drive
 		$milestone_4 = Get-Date
+<#
 		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
+#>
+		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
+			Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
+		}
+		Add-Content -Value "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
+		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)

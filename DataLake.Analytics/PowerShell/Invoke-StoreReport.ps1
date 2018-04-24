@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.8
+# Init  --  v1.3.2.9
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -7,7 +7,6 @@ $day = $($scriptStartTime.AddDays(-1)).day.ToString("00")
 $month = $($scriptStartTime.AddDays(-1)).month.ToString("00")
 $year = $($scriptStartTime.AddDays(-1)).year.ToString("0000")
 $end = $year + '-' + $month + '-' + $day
-##########################################
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
@@ -444,21 +443,12 @@ Try {
 		throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
 	}
 	Import-Module SqlServer -ErrorAction Stop
-	If ($policy -ne 'TrustAllCertsPolicy') {
-		Add-Type -TypeDefinition @"
-			using System.Net;
-			using System.Security.Cryptography.X509Certificates;
-			public class TrustAllCertsPolicy : ICertificatePolicy {
-				public bool CheckValidationResult(
-					ServicePoint srvPoint, X509Certificate certificate,
-					WebRequest request, int certificateProblem
-				) {
-					return true;
-				}
-			}
-"@
-		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-	}
+	. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+	Set-SslCertPolicy
+	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
+	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 	# Step 0: Update local store and product tables
 	Execute-ShrinkLogFile
 	Start-Sleep -Seconds 2

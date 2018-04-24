@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.1
+# Version  --  v1.1.3.2
 #######################################################################################################
 # Add database maintance feature
 #######################################################################################################
@@ -62,10 +62,10 @@ If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
 $opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
-Add-Content -Value "$(New-TimeStamp)  Importing SQL Server module..." -Path $opsLog -ErrorAction Stop
+Add-Content -Value "$(New-TimeStamp)  Importing AzureRM and SQL Server modules as well as custom functions..." -Path $opsLog -ErrorAction Stop
 Import-Module SqlServer -ErrorAction Stop
-Add-Content -Value "$(New-TimeStamp)  Importing Azure module..." -Path $opsLog -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
+. $($PSScriptRoot + 'Set-SslCertPolicy.ps1')
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	$currentUser = [Environment]::UserName.ToString()
@@ -73,24 +73,9 @@ Try {
 	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
 	If ($scaleUp.IsPresent -eq $true) {
 		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
-		[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		If ($policy -ne 'TrustAllCertsPolicy') {
-			Add-Type -TypeDefinition @"
-				using System.Net;
-				using System.Security.Cryptography.X509Certificates;
-				public class TrustAllCertsPolicy : ICertificatePolicy {
-					public bool CheckValidationResult(
-						ServicePoint srvPoint, X509Certificate certificate,
-						WebRequest request, int certificateProblem
-					) {
-						return true;
-					}
-				}
-"@
-			[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-		}
+		Set-SslCertPolicy
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 		$message = "Logging into Azure..."
