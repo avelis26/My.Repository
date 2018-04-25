@@ -44,8 +44,8 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
 									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
-WITH								(IGNORE_DUP_KEY = ON)
-)
+WITH								(IGNORE_DUP_KEY = ON)					)
+ON [Ps_Stores_Headers] ([EndDate])
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Headers]
 ON									[dbo].[prod_121_Headers]
@@ -365,9 +365,10 @@ CREATE TABLE						[dbo].[prod_122_Details]				(
 																			),
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
+									[EndDate]								[date]																NOT NULL,
 									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
-WITH								(IGNORE_DUP_KEY = ON)
-)
+WITH								(IGNORE_DUP_KEY = ON)					)
+ON [Ps_Stores_Details] ([EndDate])
 GO
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Details]
 ON									[dbo].[prod_122_Details]
@@ -479,6 +480,7 @@ CREATE TABLE						[dbo].[stg_122_Details_1]				(
 									[ProdInsertStamp]						[DATETIME]															NULL,
 									[CsvFile]								[varchar](512)														NULL,
 									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NULL
 )
 GO
@@ -529,6 +531,7 @@ CREATE TABLE						[dbo].[stg_122_Details_2]				(
 									[ProdInsertStamp]						[DATETIME]															NULL,
 									[CsvFile]								[varchar](512)														NULL,
 									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NULL
 )
 GO
@@ -579,6 +582,7 @@ CREATE TABLE						[dbo].[stg_122_Details_3]				(
 									[ProdInsertStamp]						[DATETIME]															NULL,
 									[CsvFile]								[varchar](512)														NULL,
 									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NULL
 )
 GO
@@ -629,6 +633,7 @@ CREATE TABLE						[dbo].[stg_122_Details_4]				(
 									[ProdInsertStamp]						[DATETIME]															NULL,
 									[CsvFile]								[varchar](512)														NULL,
 									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NULL
 )
 GO
@@ -679,6 +684,7 @@ CREATE TABLE						[dbo].[stg_122_Details_5]				(
 									[ProdInsertStamp]						[DATETIME]															NULL,
 									[CsvFile]								[varchar](512)														NULL,
 									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NULL
 )
 GO
