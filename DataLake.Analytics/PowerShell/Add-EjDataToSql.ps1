@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.5
+# Version  --  v3.1.5.6
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -29,6 +29,9 @@ If ($autoDate.IsPresent -eq $false) {
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 }
 ##   Email, log path, and dates change for store report
+$headersMovePreProdSp = 'usp_Staging_To_PreProd_Headers'
+$detailsMovePreProdSp = 'usp_Staging_To_PreProd_Details'
+$detailsEndDateSp = 'usp_Create_Details_EndDate'
 If ($report -eq 's') {
 	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Store\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers'
@@ -71,7 +74,7 @@ $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
-$sqlServer = 'MsTestSqlDw.Database.Windows.Net'
+$sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
@@ -709,12 +712,51 @@ Try {
 		$message = "$(New-TimeStamp)  Finished creating PK's on data in staging tables!"
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Move data in DB from stg to prod
+# Move data in DB from stg to preprod, add enddate to details, then move to prod
 		$milestone_6 = Get-Date
-		$message = "$(New-TimeStamp)  Moving data from staging tables to production tables..."
+		$message = "$(New-TimeStamp)  Moving headers from staging to preProd..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$sqlStgToProdParams = @{
+		$sqlHeadersFromStgToPreProdParams = @{
+			query = "EXECUTE [dbo].[$headersMovePreProdSp]";
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlHeadersFromStgToPreProdParams
+		$message = "$(New-TimeStamp)  Moving details from staging to preProd..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$sqlDetailsFromStgToPreProdParams = @{
+			query = "EXECUTE [dbo].[$detailsMovePreProdSp]";
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlDetailsFromStgToPreProdParams
+		$message = "$(New-TimeStamp)  Adding EndDate to details in preProd..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$sqlCreateDetailsEndDateParams = @{
+			query = "EXECUTE [dbo].[$detailsEndDateSp]";
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlCreateDetailsEndDateParams
+		$message = "$(New-TimeStamp)  Moving headers to prod..."
+		Write-Verbose -Message $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$sqlHeadersFromPreProdToProdParams = @{
 			query = "EXECUTE [dbo].[$headersMoveSp]";
 			ServerInstance = $sqlServer;
 			Database = $database;
@@ -723,11 +765,11 @@ Try {
 			QueryTimeout = 0;
 			ErrorAction = 'Stop';
 		}
-		$message = "$(New-TimeStamp)  Moving headers to prod..."
+		Invoke-Sqlcmd @sqlHeadersFromPreProdToProdParams
+		$message = "$(New-TimeStamp)  Moving details to prod..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Invoke-Sqlcmd @sqlStgToProdParams
-		$sqlStgToProdParams = @{
+		$sqlDetailsFromPreProdToProdParams = @{
 			query = "EXECUTE [dbo].[$detailsMoveSp]";
 			ServerInstance = $sqlServer;
 			Database = $database;
@@ -736,10 +778,7 @@ Try {
 			QueryTimeout = 0;
 			ErrorAction = 'Stop';
 		}
-		$message = "$(New-TimeStamp)  Moving details to prod..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Invoke-Sqlcmd @sqlStgToProdParams
+		Invoke-Sqlcmd @sqlDetailsFromPreProdToProdParams
 		$message = "$(New-TimeStamp)  Move complete!"
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop

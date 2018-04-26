@@ -49,12 +49,14 @@ ON									[Ps_Stores_Headers] ([EndDate])
 GO
 ALTER TABLE							[dbo].[prod_121_Headers]
 ADD CONSTRAINT						[UC_Headers_PK]
-UNIQUE								([Pk], [EndDate])
+PRIMARY KEY NONCLUSTERED			([Pk] ASC)
 WITH								(IGNORE_DUP_KEY = ON)
+ON									[PRIMARY]
 DROP INDEX IF EXISTS				[CCI_Prod_Headers]
 ON									[dbo].[prod_121_Headers]
-CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Headers]
-ON									[dbo].[prod_121_Headers]
+CREATE CLUSTERED INDEX				[CCI_Prod_Headers]
+ON									[dbo].[prod_121_Headers] ([EndDate])
+WITH								(DROP_EXISTING = OFF)
 ON									[Ps_Stores_Headers] ([EndDate])
 GO
 -------------------------------------------------------------------------- PROD HEADERS CEO
@@ -407,12 +409,14 @@ ON									[Ps_Stores_Details] ([EndDate])
 GO
 ALTER TABLE							[dbo].[prod_122_Details]
 ADD CONSTRAINT						[UC_Details_PK]
-UNIQUE								([Pk], [EndDate])
+PRIMARY KEY NONCLUSTERED			([Pk] ASC)
 WITH								(IGNORE_DUP_KEY = ON)
+ON									[PRIMARY]
 DROP INDEX IF EXISTS				[CCI_Prod_Details]
 ON									[dbo].[prod_122_Details]
-CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Details]
-ON									[dbo].[prod_122_Details]
+CREATE CLUSTERED INDEX				[CCI_Prod_Details]
+ON									[dbo].[prod_122_Details] ([EndDate])
+WITH								(DROP_EXISTING = OFF)
 ON									[Ps_Stores_Details] ([EndDate])
 GO
 -------------------------------------------------------------------------- PROD DETAILS CEO
