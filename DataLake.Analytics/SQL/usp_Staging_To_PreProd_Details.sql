@@ -5,6 +5,7 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Staging_To_PreProd_Details]
 AS
 SET NOCOUNT ON
+TRUNCATE TABLE					[dbo].[preProd_122_Details]
 INSERT INTO						[dbo].[preProd_122_Details]
 (
 								[RecordID],

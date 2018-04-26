@@ -5,6 +5,7 @@ GO
 CREATE PROCEDURE				[dbo].[usp_Staging_To_PreProd_Headers]
 AS
 SET NOCOUNT ON
+TRUNCATE TABLE					[dbo].[preProd_121_Headers]
 INSERT INTO						[dbo].[preProd_121_Headers]
 (
 								[RecordId],
