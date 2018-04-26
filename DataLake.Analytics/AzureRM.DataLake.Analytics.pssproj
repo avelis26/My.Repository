@@ -49,8 +49,11 @@
     <Content Include="SQL\usp_CeoReport_3_5.sql" />
     <Content Include="SQL\usp_CeoReport_4_5.sql" />
     <Content Include="SQL\usp_CeoReport_5_5.sql" />
+    <Content Include="SQL\usp_Create_Details_EndDate.sql" />
     <Content Include="SQL\usp_Delete_Old_Data_CEO.sql" />
     <Content Include="SQL\usp_Rebuild_Indexs.sql" />
+    <Content Include="SQL\usp_Staging_To_PreProd_Details.sql" />
+    <Content Include="SQL\usp_Staging_To_PreProd_Headers.sql" />
     <Content Include="SQL\usp_StoreReport_1_4.sql" />
     <Content Include="SQL\usp_StoreReport_2_4.sql" />
     <Content Include="SQL\usp_StoreReport_3_4.sql" />

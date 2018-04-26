@@ -43,15 +43,19 @@ CREATE TABLE						[dbo].[prod_121_Headers]				(
 																			),
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
-									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
-WITH								(IGNORE_DUP_KEY = ON)					)
-ON [Ps_Stores_Headers] ([EndDate])
+									[Pk]									[varchar](64)														NOT NULL
+)
+ON									[Ps_Stores_Headers] ([EndDate])
 GO
+ALTER TABLE							[dbo].[prod_121_Headers]
+ADD CONSTRAINT						[UC_Headers_PK]
+UNIQUE								([Pk], [EndDate])
+WITH								(IGNORE_DUP_KEY = ON)
+DROP INDEX IF EXISTS				[CCI_Prod_Headers]
+ON									[dbo].[prod_121_Headers]
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Headers]
 ON									[dbo].[prod_121_Headers]
-WITH								(DROP_EXISTING = OFF,
-									COMPRESSION_DELAY = 0)
-ON									[PRIMARY]
+ON									[Ps_Stores_Headers] ([EndDate])
 GO
 -------------------------------------------------------------------------- PROD HEADERS CEO
 DROP TABLE IF EXISTS				[dbo].[prod_121_Headers_CEO]
@@ -102,6 +106,37 @@ ON									[dbo].[prod_121_Headers_CEO]
 WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
+GO
+-------------------------------------------------------------------------- PreProd HEADERS
+DROP TABLE IF EXISTS				[dbo].[preProd_121_Headers]
+CREATE TABLE						[dbo].[preProd_121_Headers]				(
+									[RecordId]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[Aborted]								[bit]																NULL,
+									[DeviceNumber]							[int]																NULL,
+									[DeviceType]							[int]																NULL,
+									[EmployeeNumber]						[int]																NULL,
+									[EndDate]								[date]																NULL,
+									[EndTime]								[time](7)															NULL,
+									[StartDate]								[date]																NULL,
+									[StartTime]								[time](7)															NULL,
+									[Status]								[tinyint]															NULL,
+									[TotalAmount]							[money]																NULL,
+									[TransactionCode]						[int]																NULL,
+									[TransactionSequence]					[int]																NULL,
+									[RewardMemberID]						[varchar](20)														NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL,
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[Pk]									[varchar](64)														NULL
+)
 GO
 -------------------------------------------------------------------------- STG HEADERS 1
 DROP TABLE IF EXISTS				[dbo].[stg_121_Headers_1]
@@ -366,15 +401,19 @@ CREATE TABLE						[dbo].[prod_122_Details]				(
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
 									[EndDate]								[date]																NOT NULL,
-									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
-WITH								(IGNORE_DUP_KEY = ON)					)
-ON [Ps_Stores_Details] ([EndDate])
+									[Pk]									[varchar](64)														NOT NULL
+)
+ON									[Ps_Stores_Details] ([EndDate])
 GO
+ALTER TABLE							[dbo].[prod_122_Details]
+ADD CONSTRAINT						[UC_Details_PK]
+UNIQUE								([Pk], [EndDate])
+WITH								(IGNORE_DUP_KEY = ON)
+DROP INDEX IF EXISTS				[CCI_Prod_Details]
+ON									[dbo].[prod_122_Details]
 CREATE CLUSTERED COLUMNSTORE INDEX	[CCI_Prod_Details]
 ON									[dbo].[prod_122_Details]
-WITH								(DROP_EXISTING = OFF,
-									COMPRESSION_DELAY = 0)
-ON									[PRIMARY]
+ON									[Ps_Stores_Details] ([EndDate])
 GO
 -------------------------------------------------------------------------- PROD DETAILS CEO
 DROP TABLE IF EXISTS				[dbo].[prod_122_Details_CEO]
@@ -432,6 +471,45 @@ ON									[dbo].[prod_122_Details_CEO]
 WITH								(DROP_EXISTING = OFF,
 									COMPRESSION_DELAY = 0)
 ON									[PRIMARY]
+GO
+-------------------------------------------------------------------------- PreProd DETAILS
+DROP TABLE IF EXISTS				[dbo].[preProd_122_Details]
+CREATE TABLE						[dbo].[preProd_122_Details]				(
+									[RecordID]								[varchar](2)														NULL,
+									[StoreNumber]							[int]																NOT NULL,
+									[TransactionType]						[int]																NULL,
+									[DayNumber]								[int]																NOT NULL,
+									[ShiftNumber]							[int]																NOT NULL,
+									[TransactionUID]						[int]																NOT NULL,
+									[SequenceNumber]						[int]																NOT NULL,
+									[ProductNumber]							[int]																NULL,
+									[PLUNumber]								[varchar](14)														NULL,
+									[RecordAmount]							[money]																NULL,
+									[RecordCount]							[int]																NULL,
+									[RecordType]							[int]																NULL,
+									[SizeIndx]								[int]																NULL,
+									[ErrorCorrectionFlag]					[bit]																NULL,
+									[PriceOverideFlag]						[bit]																NULL,
+									[TaxableFlag]							[bit]																NULL,
+									[VoidFlag]								[bit]																NULL,
+									[RecommendedFlag]						[bit]																NULL,
+									[PriceMultiple]							[int]																NULL,
+									[CarryStatus]							[int]																NULL,
+									[TaxOverideFlag]						[bit]																NULL,
+									[PromotionCount]						[int]																NULL,
+									[SalesPrice]							[money]																NULL,	
+									[MUBasePrice]							[money]																NULL,
+									[HostItemId]							[varchar](20)														NULL,
+									[CouponCount]							[int]																NULL,
+									[RawFileName]							[varchar](512)														NULL,
+									[LineNo]								[varchar](32)														NULL,
+									[StageInsertStamp]						[DATETIME]															NOT NULL,
+									[ProdInsertStamp]						[DATETIME]															NULL,
+									[CsvFile]								[varchar](512)														NULL,
+									[DataLakeFolder]						[varchar](128)														NULL,
+									[EndDate]								[date]																NULL,
+									[Pk]									[varchar](64)														NULL
+)
 GO
 -------------------------------------------------------------------------- STG DETAILS 1
 DROP TABLE IF EXISTS				[dbo].[stg_122_Details_1]
