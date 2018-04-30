@@ -1,10 +1,11 @@
-# Version  --  v1.0.2.4
+# Version  --  v1.0.2.5
 #######################################################################################################
 #
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$autoDate
+	[switch]$autoDate,
+	[switch]$test
 )
 If ($autoDate.IsPresent -eq $true) {
 	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
@@ -13,14 +14,22 @@ Else {
 	$startDate = '1984-08-13'
 	$endDate = '1984-08-13'
 }
+If ($test.IsPresent -eq $true) {
+	$emailList = 'graham.pinkston@ansira.com'
+	$failEmailList = 'graham.pinkston@ansira.com'
+	$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\Test\'
+	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\Test\'
+}
+Else {
+	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'mayank.minawat@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com'
+	[string[]]$failEmailList = $emailList
+	$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
+	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\'
+}
 $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
-$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
-$emailList = 'graham.pinkston@ansira.com'
-$failEmailList = 'graham.pinkston@ansira.com'
-$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
