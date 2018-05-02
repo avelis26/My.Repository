@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.6
+# Version  --  v3.1.5.7
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -57,7 +57,7 @@ ElseIf ($report -eq 'c') {
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	$emailList = 'graham.pinkston@ansira.com'
 	If ($autoDate.IsPresent -eq $true) {
-		$startDateObj = $endDateObj = $($(Get-Date).AddYears(-1)).AddDays(1)
+		$startDateObj = $endDateObj = $($(Get-Date).AddYears(-1)).AddDays(7)
 		$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 	}
 }
