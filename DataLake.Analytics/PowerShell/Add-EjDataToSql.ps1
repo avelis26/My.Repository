@@ -67,6 +67,7 @@ ElseIf ($report -eq 'c') {
 }
 If ($test.IsPresent -eq $true) {
 	$emailList = 'graham.pinkston@ansira.com'
+	$failEmailList = 'graham.pinkston@ansira.com'
 	$opsLogRootPath = $opsLogRootPath + 'Test\'
 }
 ##   Base name of database tables
