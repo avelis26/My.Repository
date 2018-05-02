@@ -64,7 +64,7 @@
     <Content Include="SQL\usp_Update_Statistics.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Details_CEO.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Headers.sql" />
-    <Content Include="SQL\shrink-log.sql" />
+    <Content Include="SQL\usp_Shrink_Log.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Details.sql" />
     <Content Include="SQL\usp_Staging_To_Prod_Headers_CEO.sql" />
     <Content Include="XML\format121.xml" />

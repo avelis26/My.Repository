@@ -1,0 +1,15 @@
+USE									[7ELE]
+GO
+DROP PROCEDURE IF EXISTS			[dbo].[usp_Shrink_Log]
+GO
+SET ANSI_NULLS ON
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE					[dbo].[usp_Shrink_Log]
+AS
+SET NOCOUNT ON
+DBCC SHRINKFILE						(
+									'7ELE_log',
+									0
+									)
+WITH NO_INFOMSGS
