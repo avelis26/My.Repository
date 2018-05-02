@@ -1,4 +1,4 @@
-# Version  --  v3.1.5.7
+# Version  --  v3.1.5.9
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -22,7 +22,12 @@ $archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\SQL\'
 ##   Enter the path where you want the error logs to be stored:
 $errLogRootPath = '\\MS-SSW-CRM-BITC\Data\Err_Log\'
 ##   Enter the email address for failures:
-$failEmailList = 'graham.pinkston@ansira.com'
+$failEmailList = 'graham.pinkston@ansira.com', `
+	'mayank.minawat@ansira.com', `
+	'catherine.wells@ansira.com', `
+	'britten.morse@ansira.com', `
+	'Geri.Shaeffer@Ansira.com', `
+	'megan.morace@ansira.com'
 ##   If autoDate switch not used, get dates from variables provided above:
 If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
@@ -39,7 +44,6 @@ If ($report -eq 's') {
 	[string[]]$emailList = `
 	'graham.pinkston@ansira.com', `
 	'mayank.minawat@ansira.com', `
-	'tyler.bailey@ansira.com', `
 	'DIST-SEI_CRM_STATUS@7-11.com', `
 	'catherine.wells@ansira.com', `
 	'britten.morse@ansira.com', `

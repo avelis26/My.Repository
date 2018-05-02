@@ -1,4 +1,4 @@
-# Init  --  v1.3.3.0
+# Init  --  v1.3.3.1
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -8,8 +8,8 @@ $month = $($scriptStartTime.AddDays(-1)).month.ToString("00")
 $year = $($scriptStartTime.AddDays(-1)).year.ToString("0000")
 $end = $year + '-' + $month + '-' + $day
 ##########################################
-$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
-$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
+$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
 $opsLogRoot = '\\MS-SSW-CRM-BITC\Data\Ops_Log\Report\Store\'
 $smtpServer = '10.128.1.125'

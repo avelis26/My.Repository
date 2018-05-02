@@ -1,7 +1,7 @@
-# Init  --  v1.0.0.9
+# Init  --  v1.0.1.0
 ##########################################
-$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
-$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
+$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
 $opsLogRoot = '\\MS-SSW-CRM-BITC\Data\Ops_Log\Report\CEO\'
 $smtpServer = '10.128.1.125'
