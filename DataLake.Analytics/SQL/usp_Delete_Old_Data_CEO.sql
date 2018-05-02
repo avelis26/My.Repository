@@ -8,7 +8,7 @@ SET NOCOUNT ON
 DECLARE								@past									date
 DECLARE								@present								date
 SET									@past									=							DATEADD(day, -368, GETDATE())
-SET									@present								=							DATEADD(day, 10, @past)
+SET									@present								=							DATEADD(day, 14, @past)
 DELETE								[pdt]
 FROM								[dbo].[prod_122_Details_CEO]			AS							[pdt]
 INNER JOIN							[dbo].[prod_121_Headers_CEO]			AS							[tht]
