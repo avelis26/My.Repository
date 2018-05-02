@@ -1,4 +1,4 @@
-# Init  --  v1.0.1.0
+# Init  --  v1.0.1.1
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
@@ -16,7 +16,6 @@ $currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(
 If ($(Test-Path -Path $opsLogRoot) -eq $false) {
 	New-Item -Path $opsLogRoot -ItemType Directory -Force
 }
-$opsLog = $opsLogRoot + "BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -30,6 +29,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
+$opsLog = $opsLogRoot + "BITC_$($currentYearDate)_" + $(New-TimeStamp -forFileName) + "_CEO_Report.log"
 Function Execute-ShrinkLogFile {
 	$message = "Shrinking database log file..."
 	Write-Output $message
