@@ -1,29 +1,23 @@
-# Version  --  v1.1.3.2
+# Version  --  v1.1.3.3
 #######################################################################################################
-# Add database maintance feature
+#
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$scaleUp,
-	[parameter(Mandatory = $false)][switch]$scaleDown,
 	[parameter(Mandatory = $false)][switch]$maintenance,
 	[parameter(Mandatory = $false)][switch]$scheduled,
 	[parameter(Mandatory = $false)][switch]$exit
 )
 #######################################################################################################
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
-$databaseSubId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
-$userName = 'gpink003'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
-$azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred" -ErrorAction Stop
-$user = $userName + '@7-11.com'
 $opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\AllSpark\'
 $emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
-$sqlServer = 'mstestsqldw.database.windows.net'
+$sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
@@ -42,22 +36,6 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Function Set-AzureSqlDatabaseSize {
-	[CmdletBinding()]
-	Param(
-		[string]$size
-	)
-	Set-AzureRmContext -Subscription $databaseSubId -ErrorAction Stop
-	$params = @{
-		ResourceGroupName = 'CRM-TEST-RG';
-		ServerName = 'mstestsqldw';
-		DatabaseName = '7ELE';
-		Edition = 'Premium';
-		RequestedServiceObjectiveName = $size;
-		ErrorAction = 'Stop';
-	}
-	Set-AzureRmSqlDatabase @params
-}
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
@@ -66,91 +44,10 @@ Add-Content -Value "$(New-TimeStamp)  Importing AzureRM and SQL Server modules a
 Import-Module SqlServer -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+# Data to Hadoop
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-	$currentUser = [Environment]::UserName.ToString()
-	Add-Content -Value "$(New-TimeStamp)  Current User: $currentUser" -Path $opsLog -ErrorAction Stop
-	[System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
-	If ($scaleUp.IsPresent -eq $true) {
-		$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		Set-SslCertPolicy
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		$message = "Logging into Azure..."
-		Write-Verbose -Message $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		Connect-AzureRmAccount -Credential $credential -Subscription $databaseSubId -Force -ErrorAction Stop
-		$size = 'P15'
-		$message = "$(New-TimeStamp)  Scaling database to $size..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-		Set-AzureSqlDatabaseSize -size $size
-		$message = "$(New-TimeStamp)  Database scaling successful."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	}
-# Data to SQL - Store
-	If ($scheduled.IsPresent -eq $true) {
-		$continue = 0
-		$startTime = Get-Date -Hour 5 -Minute 50 -Second 0
-		While ($continue -ne 1) {
-			$now = Get-Date
-			If ($now.TimeOfDay -gt $startTime.TimeOfDay) {
-				$continue = 1
-			}
-			Else {
-				Start-Sleep -Seconds 1
-			}
-		} # while
-	} # if
-	$start = Get-Date
-	$message = "$(New-TimeStamp)  Adding store EJ data to SQL..."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
-	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
-		$errorParams = @{
-			Message = "$AddEjDataToSqlScript Failed!!!";
-			ErrorId = "01";
-			RecommendedAction = "Fix it.";
-			ErrorAction = "Stop";
-		}
-		Write-Error @errorParams
-	}
-	$end = Get-Date
-	$run = New-TimeSpan -Start $start -End $end
-	$message = "$(New-TimeStamp)  Store EJ data added to SQL successfully."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Data to SQL - CEO
-	$start = Get-Date
-	$message = "$(New-TimeStamp)  Adding CEO EJ data to SQL..."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
-	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
-		$errorParams = @{
-			Message = "$AddEjDataToSqlScript Failed!!!";
-			ErrorId = "02";
-			RecommendedAction = "Fix it.";
-			ErrorAction = "Stop";
-		}
-		Write-Error @errorParams
-	}
-	$end = Get-Date
-	$run = New-TimeSpan -Start $start -End $end
-	$message = "$(New-TimeStamp)  CEO EJ data added to SQL successfully."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Data to Hadoop
+	Add-Content -Value "$(New-TimeStamp)  Current User: $([Environment]::UserName.ToString())" -Path $opsLog -ErrorAction Stop
 	$start = Get-Date
 	$message = "$(New-TimeStamp)  Adding EJ data to Hadoop..."
 	Write-Output $message
@@ -173,7 +70,162 @@ Try {
 	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
 	Write-Output $message
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-# Remove Old Data
+}
+Catch {
+	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		BodyAsHtml = $true;
+		Subject = "AllSpark: Add-EjDataToHadoop Failed!!!";
+		Body = @"
+			<font face='consolas'>
+			Something bad happened!!!<br><br>
+			$($_.Exception.Message)<br>
+			$($_.Exception.InnerException.Message)<br>
+			$($_.Exception.InnerException.InnerException.Message)<br>
+			$($_.CategoryInfo.Activity)<br>
+			$($_.CategoryInfo.Reason)<br>
+			$($_.InvocationInfo.Line)<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
+	$exitCode = 1
+}
+# Data to SQL - Store
+Try {
+	If ($scheduled.IsPresent -eq $true) {
+		$continue = 0
+		$startTime = Get-Date -Hour 5 -Minute 50 -Second 0
+		While ($continue -ne 1) {
+			$now = Get-Date
+			If ($now.TimeOfDay -gt $startTime.TimeOfDay) {
+				$continue = 1
+			}
+			Else {
+				Start-Sleep -Seconds 1
+			}
+		}
+	}
+	$start = Get-Date
+	$message = "$(New-TimeStamp)  Adding store EJ data to SQL..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 's' -autoDate" -ErrorAction Stop
+	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
+		$errorParams = @{
+			Message = "$AddEjDataToSqlScript Failed!!!";
+			ErrorId = "01";
+			RecommendedAction = "Fix it.";
+			ErrorAction = "Stop";
+		}
+		Write-Error @errorParams
+	}
+	$end = Get-Date
+	$run = New-TimeSpan -Start $start -End $end
+	$message = "$(New-TimeStamp)  Store EJ data added to SQL successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+}
+Catch {
+	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		BodyAsHtml = $true;
+		Subject = "AllSpark: Add-EjDataToSql - Store Failed!!!";
+		Body = @"
+			<font face='consolas'>
+			Something bad happened!!!<br><br>
+			$($_.Exception.Message)<br>
+			$($_.Exception.InnerException.Message)<br>
+			$($_.Exception.InnerException.InnerException.Message)<br>
+			$($_.CategoryInfo.Activity)<br>
+			$($_.CategoryInfo.Reason)<br>
+			$($_.InvocationInfo.Line)<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
+	$exitCode = 1
+}
+# Data to SQL - CEO
+Try {
+	$start = Get-Date
+	$message = "$(New-TimeStamp)  Adding CEO EJ data to SQL..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$EtlResult = Invoke-Expression -Command "$AddEjDataToSqlScript -report 'c' -autoDate" -ErrorAction Stop
+	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
+		$errorParams = @{
+			Message = "$AddEjDataToSqlScript Failed!!!";
+			ErrorId = "02";
+			RecommendedAction = "Fix it.";
+			ErrorAction = "Stop";
+		}
+		Write-Error @errorParams
+	}
+	$end = Get-Date
+	$run = New-TimeSpan -Start $start -End $end
+	$message = "$(New-TimeStamp)  CEO EJ data added to SQL successfully."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+}
+Catch {
+	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
+	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
+	$params = @{
+		SmtpServer = $smtpServer;
+		Port = $port;
+		UseSsl = 0;
+		From = $fromAddr;
+		To = $emailList;
+		BodyAsHtml = $true;
+		Subject = "AllSpark: Add-EjDataToSql - CEO Failed!!!";
+		Body = @"
+			<font face='consolas'>
+			Something bad happened!!!<br><br>
+			$($_.Exception.Message)<br>
+			$($_.Exception.InnerException.Message)<br>
+			$($_.Exception.InnerException.InnerException.Message)<br>
+			$($_.CategoryInfo.Activity)<br>
+			$($_.CategoryInfo.Reason)<br>
+			$($_.InvocationInfo.Line)<br>
+			</font>
+"@
+	}
+	Send-MailMessage @params
+	$exitCode = 1
+}
+# Perform SQL Maintenance 
+Try {
 	If ($maintenance.IsPresent -eq $true) {
 		$message = "$(New-TimeStamp)  Removing old data from store database..."
 		Write-Output $message
@@ -206,9 +258,7 @@ Try {
 		$message = "$(New-TimeStamp)  Old data removed successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	} # if
 # Rebuild SQL Indexs
-	If ($maintenance.IsPresent -eq $true) {
 		$message = "$(New-TimeStamp)  Rebuilding SQL indexes..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
@@ -226,9 +276,7 @@ Try {
 		$message = "$(New-TimeStamp)  Indexes rebuilt successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	} # if
 # Update SQL Stats
-	If ($maintenance.IsPresent -eq $true) {
 		$message = "$(New-TimeStamp)  Updating SQL stats..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
@@ -246,14 +294,8 @@ Try {
 		$message = "$(New-TimeStamp)  SQL stats updated successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	} # if
-# Exit
-	If ($scaleDown.IsPresent -eq $true) {
-		$size = 'P1'
-		Write-Output "Scaling database to size $size..."
-		Add-Content -Value "$(New-TimeStamp)  Scaling database to size $size..." -Path $opsLog -ErrorAction Stop
-		Set-AzureSqlDatabaseSize -size $size -ErrorAction Stop
 	}
+# Exit
 	$exitCode = 0
 }
 Catch {
@@ -270,7 +312,7 @@ Catch {
 		From = $fromAddr;
 		To = $emailList;
 		BodyAsHtml = $true;
-		Subject = "AllSpark: Failed!!!";
+		Subject = "AllSpark: SQL Maintenance Failed!!!";
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>

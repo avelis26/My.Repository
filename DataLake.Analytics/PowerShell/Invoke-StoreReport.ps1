@@ -1,4 +1,4 @@
-# Init  --  v1.3.2.9
+# Init  --  v1.3.3.0
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -18,7 +18,7 @@ $fromAddr = 'noreply@7-11.com'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
-$sqlServer = 'mstestsqldw.database.windows.net'
+$sqlServer = 'MS-SSW-CRM-SQL'
 ##########################################
 Function New-TimeStamp {
 	[CmdletBinding()]

@@ -1,4 +1,4 @@
-# Init  --  v1.0.0.8
+# Init  --  v1.0.0.9
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'tyler.bailey@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
@@ -9,8 +9,8 @@ $port = 25
 $fromAddr = 'noreply@7-11.com'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
-$sqlPass = 'Password20!7!'
-$sqlServer = 'mstestsqldw.database.windows.net'
+$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
+$sqlServer = 'MS-SSW-CRM-SQL'
 ##########################################
 $currentYearDate = $($(Get-Date).AddDays(-1).Year.ToString('0000')) + '-' + $($(Get-Date).AddDays(-1).Month.ToString('00')) + '-' + $($(Get-Date).AddDays(-1).Day.ToString('00'))
 If ($(Test-Path -Path $opsLogRoot) -eq $false) {

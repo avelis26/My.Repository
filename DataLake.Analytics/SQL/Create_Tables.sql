@@ -402,7 +402,7 @@ CREATE TABLE						[dbo].[prod_122_Details]				(
 																			),
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
-									[EndDate]								[date]																NOT NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														NOT NULL
 )
 ON									[Ps_Stores_Details] ([EndDate])
@@ -466,6 +466,7 @@ CREATE TABLE						[dbo].[prod_122_Details_CEO]			(
 																			),
 									[CsvFile]								[varchar](512)														NOT NULL,
 									[DataLakeFolder]						[varchar](128)														NOT NULL,
+									[EndDate]								[date]																NULL,
 									[Pk]									[varchar](64)														PRIMARY KEY NONCLUSTERED
 WITH								(IGNORE_DUP_KEY = ON)
 )
