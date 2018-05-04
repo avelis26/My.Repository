@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.3
+# Version  --  v1.1.3.4
 #######################################################################################################
 #
 #######################################################################################################
@@ -10,11 +10,7 @@ Param(
 )
 #######################################################################################################
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
-$smtpServer = '10.128.1.125'
-$port = 25
-$fromAddr = 'noreply@7-11.com'
 $opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\AllSpark\'
-$emailList = 'graham.pinkston@ansira.com'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 $sqlServer = 'MS-SSW-CRM-SQL'
@@ -23,6 +19,7 @@ $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
+$opsLog = $opsLogRootPath + "$(Get-Date -Format 'yyyyMMdd_HHmmss')_AllSpark.log"
 Function New-TimeStamp {
 	[CmdletBinding()]
 	Param(
@@ -36,10 +33,26 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
+Function Invoke-ErrorReport {
+	[CmdletBinding()]
+	Param(
+		[string]$subject
+	)
+	Add-Content -Value $subject -Path $opsLog -ErrorAction Stop
+	$errorInfo = $($Error[0].Exception.Message), `
+		$($Error[0].Exception.InnerException.Message), `
+		$($Error[0].Exception.InnerException.InnerException.Message), `
+		$($Error[0].CategoryInfo.Activity), `
+		$($Error[0].CategoryInfo.Reason), `
+		$($Error[0].InvocationInfo.Line)
+	ForEach ($line in $errorInfo) {
+		Add-Content -Value $line -Path $opsLog -ErrorAction Stop
+	}
+	$exitCode = 1
+}
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
-$opsLog = $opsLogRootPath + "$(New-TimeStamp -forFileName)_AllSpark.log"
 Add-Content -Value "$(New-TimeStamp)  Importing AzureRM and SQL Server modules as well as custom functions..." -Path $opsLog -ErrorAction Stop
 Import-Module SqlServer -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
@@ -72,34 +85,7 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $emailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: Add-EjDataToHadoop Failed!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($_.Exception.Message)<br>
-			$($_.Exception.InnerException.Message)<br>
-			$($_.Exception.InnerException.InnerException.Message)<br>
-			$($_.CategoryInfo.Activity)<br>
-			$($_.CategoryInfo.Reason)<br>
-			$($_.InvocationInfo.Line)<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$exitCode = 1
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!'
 }
 # Data to SQL - Store
 Try {
@@ -140,34 +126,7 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $emailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: Add-EjDataToSql - Store Failed!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($_.Exception.Message)<br>
-			$($_.Exception.InnerException.Message)<br>
-			$($_.Exception.InnerException.InnerException.Message)<br>
-			$($_.CategoryInfo.Activity)<br>
-			$($_.CategoryInfo.Reason)<br>
-			$($_.InvocationInfo.Line)<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$exitCode = 1
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - Store Failed!!!'
 }
 # Data to SQL - CEO
 Try {
@@ -195,44 +154,30 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $emailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: Add-EjDataToSql - CEO Failed!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($_.Exception.Message)<br>
-			$($_.Exception.InnerException.Message)<br>
-			$($_.Exception.InnerException.InnerException.Message)<br>
-			$($_.CategoryInfo.Activity)<br>
-			$($_.CategoryInfo.Reason)<br>
-			$($_.InvocationInfo.Line)<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$exitCode = 1
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - CEO Failed!!!'
 }
 # Perform SQL Maintenance 
 Try {
 	If ($maintenance.IsPresent -eq $true) {
+		$message = "$(New-TimeStamp)  Shrinking database log..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
+		$sqlTruncateParams = @{
+			query = 'EXECUTE [dbo].[usp_Shrink_Log]';
+			ServerInstance = $sqlServer;
+			Database = $database;
+			Username = $sqlUser;
+			Password = $sqlPass;
+			QueryTimeout = 0;
+			ErrorAction = 'Stop';
+		}
+		Invoke-Sqlcmd @sqlTruncateParams
+# Delete Old Data From Store
 		$message = "$(New-TimeStamp)  Removing old data from store database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-		$query = "EXECUTE [dbo].[usp_Delete_Old_Data]"
 		$sqlTruncateParams = @{
-			query = $query;
+			query = 'EXECUTE [dbo].[usp_Delete_Old_Data]';
 			ServerInstance = $sqlServer;
 			Database = $database;
 			Username = $sqlUser;
@@ -241,12 +186,12 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
+# Delete Old Data From CEO
 		$message = "$(New-TimeStamp)  Removing old data from CEO database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-		$query = "EXECUTE [dbo].[usp_Delete_Old_Data_CEO]"
 		$sqlTruncateParams = @{
-			query = $query;
+			query = 'EXECUTE [dbo].[usp_Delete_Old_Data_CEO]';
 			ServerInstance = $sqlServer;
 			Database = $database;
 			Username = $sqlUser;
@@ -255,16 +200,12 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(New-TimeStamp)  Old data removed successfully."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Rebuild SQL Indexs
 		$message = "$(New-TimeStamp)  Rebuilding SQL indexes..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-		$query = "EXECUTE [dbo].[usp_Rebuild_Indexs]"
 		$sqlTruncateParams = @{
-			query = $query;
+			query = 'EXECUTE [dbo].[usp_Rebuild_Indexs]';
 			ServerInstance = $sqlServer;
 			Database = $database;
 			Username = $sqlUser;
@@ -273,16 +214,12 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(New-TimeStamp)  Indexes rebuilt successfully."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 # Update SQL Stats
 		$message = "$(New-TimeStamp)  Updating SQL stats..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
-		$query = "EXECUTE [dbo].[usp_Update_Statistics]"
 		$sqlTruncateParams = @{
-			query = $query;
+			query = 'EXECUTE [dbo].[usp_Update_Statistics]';
 			ServerInstance = $sqlServer;
 			Database = $database;
 			Username = $sqlUser;
@@ -291,7 +228,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-		$message = "$(New-TimeStamp)  SQL stats updated successfully."
+		$message = "$(New-TimeStamp)  SQL maintenance completed successfully."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
@@ -299,34 +236,7 @@ Try {
 	$exitCode = 0
 }
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $emailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: SQL Maintenance Failed!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($_.Exception.Message)<br>
-			$($_.Exception.InnerException.Message)<br>
-			$($_.Exception.InnerException.InnerException.Message)<br>
-			$($_.CategoryInfo.Activity)<br>
-			$($_.CategoryInfo.Reason)<br>
-			$($_.InvocationInfo.Line)<br>
-			</font>
-"@
-	}
-	Send-MailMessage @params
-	$exitCode = 1
+	Invoke-ErrorReport -Subject 'AllSpark: SQL Maintenance Failed!!!'
 }
 Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
