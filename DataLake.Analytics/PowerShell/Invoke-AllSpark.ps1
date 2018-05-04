@@ -4,9 +4,11 @@
 #######################################################################################################
 [CmdletBinding()]
 Param(
-	[parameter(Mandatory = $false)][switch]$maintenance,
-	[parameter(Mandatory = $false)][switch]$scheduled,
-	[parameter(Mandatory = $false)][switch]$exit
+	[switch]$maintenance,
+	[switch]$scheduled,
+	[switch]$store,
+	[switch]$ceo,
+	[switch]$exit
 )
 #######################################################################################################
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
