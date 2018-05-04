@@ -1,4 +1,4 @@
-# Init  --  v1.3.3.1
+# Init  --  v1.3.3.2
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -517,6 +517,7 @@ Try {
 "@
 	}
 	Send-MailMessage @params
+	$exitCode = 0
 }
 Catch {
 	Add-Content -Value $($Error[0].CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
@@ -543,4 +544,6 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
+	$exitCode = 1
 }
+Return $exitCode

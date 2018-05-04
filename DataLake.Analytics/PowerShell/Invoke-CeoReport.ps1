@@ -1,4 +1,4 @@
-# Init  --  v1.0.1.1
+# Init  --  v1.0.1.2
 ##########################################
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
@@ -341,3 +341,4 @@ Catch {
 Finally {
 	Get-Job | Remove-Job
 }
+Return $exitCode

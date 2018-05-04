@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.4
+# Version  --  v1.1.3.5
 #######################################################################################################
 #
 #######################################################################################################
@@ -13,6 +13,8 @@ Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyC
 $opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\AllSpark\'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
+$InvokeStoreReportScript = 'C:\Scripts\PowerShell\Invoke-StoreReport.ps1'
+$InvokeCeoReportScript = 'C:\Scripts\PowerShell\Invoke-CeoReport.ps1'
 $sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
@@ -237,6 +239,66 @@ Try {
 }
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: SQL Maintenance Failed!!!'
+}
+# Execute Store Report
+Try {
+	If ($store.IsPresent -eq $true) {
+		$start = Get-Date
+		$message = "$(New-TimeStamp)  Executing SQL store report..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$EtlResult = Invoke-Expression -Command "$InvokeStoreReportScript" -ErrorAction Stop
+		If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
+			$errorParams = @{
+				Message = "$InvokeStoreReportScript Failed!!!";
+				ErrorId = "01";
+				RecommendedAction = "Fix it.";
+				ErrorAction = "Stop";
+			}
+			Write-Error @errorParams
+		}
+		$end = Get-Date
+		$run = New-TimeSpan -Start $start -End $end
+		$message = "$(New-TimeStamp)  SQL store report executed successfully."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	}
+}
+Catch {
+	Invoke-ErrorReport -Subject 'AllSpark: Store Report Failed!!!'
+}
+# Execute CEO Report
+Try {
+	If ($ceo.IsPresent -eq $true) {
+		$start = Get-Date
+		$message = "$(New-TimeStamp)  Executing SQL CEO report..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$EtlResult = Invoke-Expression -Command "$InvokeStoreReportScript" -ErrorAction Stop
+		If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
+			$errorParams = @{
+				Message = "$InvokeCeoReportScript Failed!!!";
+				ErrorId = "01";
+				RecommendedAction = "Fix it.";
+				ErrorAction = "Stop";
+			}
+			Write-Error @errorParams
+		}
+		$end = Get-Date
+		$run = New-TimeSpan -Start $start -End $end
+		$message = "$(New-TimeStamp)  SQL CEO report executed successfully."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	}
+}
+Catch {
+	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!'
 }
 Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
