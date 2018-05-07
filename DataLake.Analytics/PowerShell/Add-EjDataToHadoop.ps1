@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.5
+# Version  --  v1.0.2.6
 #######################################################################################################
 #
 #######################################################################################################
@@ -21,7 +21,7 @@ If ($test.IsPresent -eq $true) {
 	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\Test\'
 }
 Else {
-	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'mayank.minawat@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com'
+	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'mayank.minawat@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com', 'Geri.Shaeffer@Ansira.com'
 	[string[]]$failEmailList = $emailList
 	$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
 	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\'
