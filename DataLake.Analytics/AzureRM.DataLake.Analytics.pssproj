@@ -38,9 +38,11 @@
     <Compile Include="PowerShell\Invoke-StoreReport.ps1" />
     <Compile Include="PowerShell\Add-EjDataToSql.ps1" />
     <Compile Include="PowerShell\Invoke-AllSpark.ps1" />
+    <Compile Include="PowerShell\New-TimeStamp.ps1" />
     <Compile Include="PowerShell\Scale-AzureDB.ps1" />
     <Compile Include="PowerShell\Set-SslCertPolicy.ps1" />
     <Compile Include="PowerShell\Start-AzureRmAdlaJobs.ps1" />
+    <Compile Include="PowerShell\Stop-AzureRmVm.ps1" />
     <Compile Include="PowerShell\Temp-SqlStuff.ps1" />
   </ItemGroup>
   <ItemGroup>
