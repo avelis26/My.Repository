@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.5
+# Version  --  v1.1.3.6
 #######################################################################################################
 #
 #######################################################################################################
@@ -279,7 +279,7 @@ Try {
 		$message = "$(New-TimeStamp)  Executing SQL CEO report..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$EtlResult = Invoke-Expression -Command "$InvokeStoreReportScript" -ErrorAction Stop
+		$EtlResult = Invoke-Expression -Command "$InvokeCeoReportScript" -ErrorAction Stop
 		If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
 			$errorParams = @{
 				Message = "$InvokeCeoReportScript Failed!!!";
