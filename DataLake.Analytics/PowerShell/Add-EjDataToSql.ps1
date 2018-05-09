@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.2
+# Version  --  v3.1.6.3
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -136,6 +136,7 @@ Try {
 	Import-Module AzureRM -ErrorAction Stop
 	Import-Module 7Zip4powershell -ErrorAction Stop
 	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+	. $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	Write-Debug -Message $credential.UserName
@@ -174,28 +175,7 @@ Try {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Login successful."
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
-		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
-			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop > $null
-		}
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
-		$getParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeSearchPathRoot + $processDate);
-			ErrorAction = 'Stop';
-		}
-		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
-		$exportParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeFolder.Path);
-			Destination = $($destinationRootPath + $processDate + '\');
-			Force = $true;
-			Concurrency = 256;
-			ErrorAction = 'Stop';
-		}
-		Export-AzureRmDataLakeStoreItem @exportParams
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
+		Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
 # Seperate files into 5 seperate folders for paralell processing
 		$milestone_1 = Get-Date
 		$fileCount = $null
@@ -247,6 +227,7 @@ Try {
 			Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
 			$i++
 		}
+# Decompress files in parallel
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		$jobI = 0
 		$jobBaseName = 'unzip_job_'

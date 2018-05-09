@@ -1,15 +1,9 @@
 ﻿Import-Module AzureRM
-$password = Get-Content "C:\Users\graham.pinkston\Documents\Secrets\op1.txt" | ConvertTo-SecureString
+$password = Get-Content "C:\Scripts\Secrets\gpink003.cred" | ConvertTo-SecureString
 $user = "gpink003@7-11.com"
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $password
 Try {
-	Login-AzureRmAccount -Credential $credential -ErrorAction Stop
-}
-Catch {
-	throw $_
-}
-Try {
-	Set-AzureRmContext -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop
+	Login-AzureRmAccount -Subscription 'da908b26-f6f8-4d61-bf60-b774ff3087ec' -ErrorAction Stop #-Credential $credential
 }
 Catch {
 	throw $_
@@ -29,14 +23,14 @@ ForEach ($vm in $vmList) {
 			TargetResourceId = $vm.Id;
 			MetricName = '\Processor Information(_Total)\% Processor Time';
 			Operator = 'GreaterThan';
-			Threshold = 90;
-			WindowSize = New-TimeSpan -Minutes 5;
+			Threshold = 95;
+			WindowSize = New-TimeSpan -Minutes 30;
 			TimeAggregationOperator = 'Average';
 			Description = 'Alert when CPU utilization is over 90% for 5 minutes';
 			Actions = $actionEmail
 		}
 		#Add-AzureRmMetricAlertRule @params
-		Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
-		#Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
+		#Get-AzureRmAlertRule -Name $params.Name -ResourceGroup $vm.ResourceGroupName
+		Remove-AzureRmAlertRule -ResourceGroup $vm.ResourceGroupName -Name $params.Name
 	}
 }
