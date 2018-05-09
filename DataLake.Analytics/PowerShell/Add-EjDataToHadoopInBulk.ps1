@@ -1,4 +1,4 @@
-# Version  --  v1.1.1.4
+# Version  --  v1.1.1.5
 #######################################################################################################
 #
 #######################################################################################################
@@ -8,7 +8,7 @@ $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
-$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
+$archiveRootPath = '\\MS-SSW-CRM-MGMT\Data\BIT_CRM\Hadoop\'
 $emailList = 'graham.pinkston@ansira.com'
 $failEmailList = 'graham.pinkston@ansira.com'
 Switch ($ENV:ComputerName) {
@@ -17,8 +17,8 @@ Switch ($ENV:ComputerName) {
 	'BITC-TMP-3' {$searchComp = 'BITC-TMP-2'}
 	'BITC-TMP-4' {$searchComp = 'BITC-TMP-3'}
 }
-$searchPath = "\\MS-SSW-CRM-BITC\Hadoop\$searchComp\"
-$opsLogRootPath = "\\MS-SSW-CRM-BITC\Hadoop\$ENV:ComputerName\"
+$searchPath = "\\MS-SSW-CRM-MGMT\Hadoop\$searchComp\"
+$opsLogRootPath = "\\MS-SSW-CRM-MGMT\Hadoop\$ENV:ComputerName\"
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25

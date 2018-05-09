@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.6
+# Version  --  v1.0.2.7
 #######################################################################################################
 #
 #######################################################################################################
@@ -17,14 +17,12 @@ Else {
 If ($test.IsPresent -eq $true) {
 	$emailList = 'graham.pinkston@ansira.com'
 	$failEmailList = 'graham.pinkston@ansira.com'
-	$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\Test\'
-	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\Test\'
+	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\Test\'
 }
 Else {
 	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'mayank.minawat@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com', 'Geri.Shaeffer@Ansira.com'
 	[string[]]$failEmailList = $emailList
-	$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\Hadoop\'
-	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Hadoop\'
+	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\'
 }
 $7zipMod = '7zip4powershell'
 $userName = 'gpink003'
@@ -57,7 +55,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
@@ -106,12 +104,6 @@ Try {
 			Write-Output $message
 			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
-		}
-		If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-			$message = "Creating $archiveRootPath..."
-			Write-Output $message
-			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-			New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
 		}
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
@@ -341,19 +333,10 @@ Try {
 		}
 # Delete data from temp drive
 		$milestone_4 = Get-Date
-<#
 		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-#>
-		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-			Add-Content -Value "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
-			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-			Add-Content -Value "$(New-TimeStamp)  Folder removed successfully." -Path $opsLog -ErrorAction Stop
-		}
-		Add-Content -Value "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..." -Path $opsLog -ErrorAction Stop
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
@@ -456,7 +439,7 @@ Catch {
 	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
 	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$path = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Error\'
+	$path = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Error\'
 	If ($(Test-Path -Path $path) -eq $false) {
 		$message = "Creating $path..."
 		Write-Verbose -Message $message
@@ -496,6 +479,6 @@ Finally {
 	Write-Output 'Finally...'
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 }
 Return $exitCode

@@ -1,4 +1,4 @@
-$outFilePath = '\\MS-SSW-CRM-BITC\Data\Tmp\'
+$outFilePath = '\\MS-SSW-CRM-MGMT\Data\Tmp\'
 If ($(Test-Path -Path $outFilePath) -eq $false) {
 	New-Item -Path $outFilePath -ItemType Directory -Force -ErrorAction Stop
 }

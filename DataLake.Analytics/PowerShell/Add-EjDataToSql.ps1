@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.1
+# Version  --  v3.1.6.2
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -18,9 +18,9 @@ $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 ##   Enter the path where you want the raw files to be downloaded on your local machine:
 $destinationRootPath = 'D:\BIT_CRM\'
-$archiveRootPath = '\\MS-SSW-CRM-BITC\Data\BIT_CRM\SQL\'
+$archiveRootPath = '\\MS-SSW-CRM-MGMT\Data\BIT_CRM\SQL\Error\'
 ##   Enter the path where you want the error logs to be stored:
-$errLogRootPath = '\\MS-SSW-CRM-BITC\Data\Err_Log\'
+$errLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Err_Log\'
 ##   Enter the email address for failures:
 $failEmailList = 'graham.pinkston@ansira.com', `
 	'mayank.minawat@ansira.com', `
@@ -38,7 +38,7 @@ $headersMovePreProdSp = 'usp_Staging_To_PreProd_Headers'
 $detailsMovePreProdSp = 'usp_Staging_To_PreProd_Details'
 $detailsEndDateSp = 'usp_Create_Details_EndDate'
 If ($report -eq 's') {
-	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Store\'
+	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Store\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers'
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	[string[]]$emailList = `
@@ -56,7 +56,7 @@ If ($report -eq 's') {
 }
 ##   Email, log path, and dates change for CEO report
 ElseIf ($report -eq 'c') {
-	$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\CEO\'
+	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\CEO\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details_CEO'
 	$emailList = 'graham.pinkston@ansira.com'
@@ -108,7 +108,7 @@ Function New-TimeStamp {
 	}
 	Return $timeStamp
 }
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 Write-Host '********************************************************************' -ForegroundColor Magenta
@@ -159,10 +159,6 @@ Try {
 		If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $destinationRootPath..."
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
-		}
-		If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $archiveRootPath..."
-			New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
 		}
 		If ($(Test-Path -Path $errLogRootPath) -eq $false) {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $errLogRootPath..."
@@ -728,9 +724,8 @@ Try {
 		}
 		Invoke-Sqlcmd @sqlDetailsFromPreProdToProdParams
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Move complete!"
-# Move data from temp drive to archive
+# Remove data from temp drive to archive
 		$milestone_7 = Get-Date
-<#
 		$message = "$(New-TimeStamp)  Removing $destinationRootPath..."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
@@ -738,14 +733,6 @@ Try {
 		$message = "$(New-TimeStamp)  $destinationRootPath removed successfully."
 		Write-Verbose -Message $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-#>
-		If ($(Test-Path -Path $($archiveRootPath + $processDate)) -eq $true) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Removing folder: $($archiveRootPath + $processDate)..."
-			Remove-Item -Path $($archiveRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Folder removed successfully."
-		}
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Moving $($destinationRootPath + $processDate) to archive: $($archiveRootPath + $processDate)..."
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
@@ -897,18 +884,13 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	$path = $($archiveRootPath + 'ERROR')
-	If ($(Test-Path -Path $path) -eq $false) {
-		$message = "Creating $path..."
-		Write-Verbose -Message $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
+	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $archiveRootPath..."
+		New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
 	}
 	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
-		$message = "$(New-TimeStamp)  Moving data to $path..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Moving data to $archiveRootPath..."
+		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
 	}
 	$exitCode = 1
 }
@@ -916,6 +898,6 @@ Finally {
 	Write-Output 'Finally...'
 	Get-Job | Remove-Job -Force
 	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 }
 Return $exitCode

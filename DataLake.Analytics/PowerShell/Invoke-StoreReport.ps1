@@ -1,4 +1,4 @@
-# Init  --  v1.3.3.2
+# Init  --  v1.3.3.3
 ##########################################
 # Fix error hanlding
 ##########################################
@@ -11,7 +11,7 @@ $end = $year + '-' + $month + '-' + $day
 $opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
 $finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
-$opsLogRoot = '\\MS-SSW-CRM-BITC\Data\Ops_Log\Report\Store\'
+$opsLogRoot = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\Report\Store\'
 $smtpServer = '10.128.1.125'
 $port = 25
 $fromAddr = 'noreply@7-11.com'
@@ -417,7 +417,7 @@ $opsLog = $opsLogRoot + "BITC_$($end)_" + $(New-TimeStamp -forFileName) + "_Stor
 $message = "Date Range: $start - $end"
 Write-Output $message
 Add-Content -Path $opsLog -Value $message
-$searchPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\ETL\Store'
+$searchPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Store'
 $continue = $null
 $shouldExit = 0
 While ($continue -ne 1) {

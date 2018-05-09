@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.6
+# Version  --  v1.1.3.7
 #######################################################################################################
 #
 #######################################################################################################
@@ -11,8 +11,8 @@ Param(
 	[switch]$exit
 )
 #######################################################################################################
-Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
-$opsLogRootPath = '\\MS-SSW-CRM-BITC\Data\Ops_Log\AllSpark\'
+Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
+$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\AllSpark\'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
 $AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 $InvokeStoreReportScript = 'C:\Scripts\PowerShell\Invoke-StoreReport.ps1'
@@ -303,8 +303,8 @@ Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!'
 }
 Finally {
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
-	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-BITC\Data\Ops_Log\bitc.log'
+	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
+	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
 		[Environment]::Exit($exitCode)	
 	}

@@ -4,7 +4,7 @@ Function Get-DataLakeRawFiles {
 		[string]$dataLakeStoreName, # 711adla
 		[string]$destination, # D:\BIT_CRM\20150501\
 		[string]$source, # /BIT_CRM/20180502
-		[string]$log # \\MS-SSW-CRM-BITC\Data\opslog.log
+		[string]$log # \\MS-SSW-CRM-MGMT\Data\opslog.log
 	)
 	If ($(Test-Path -Path $destination) -eq $true) {
 		Tee-Object -FilePath $log -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Removing folder $destination ..."
