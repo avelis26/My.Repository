@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.7
+# Version  --  v1.0.2.8
 #######################################################################################################
 #
 #######################################################################################################
@@ -7,6 +7,10 @@ Param(
 	[switch]$autoDate,
 	[switch]$test
 )
+Write-Output "Importing AzureRm and 7Zip modules as well as custom fuctions..."
+Import-Module AzureRM -ErrorAction Stop
+Import-Module 7Zip4powershell -ErrorAction Stop
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 If ($autoDate.IsPresent -eq $true) {
 	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
 }
@@ -24,7 +28,6 @@ Else {
 	[string[]]$failEmailList = $emailList
 	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\'
 }
-$7zipMod = '7zip4powershell'
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\Hadoop\'
@@ -76,10 +79,6 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(New-TimeStamp)  Importing AzureRm, and 7Zip modules as well as custom fuctions..."
-	Import-Module AzureRM -ErrorAction Stop
-	Import-Module $7zipMod -ErrorAction Stop
-	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	While ($y -lt $range) {
@@ -119,36 +118,7 @@ Try {
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
 		$milestone_0 = Get-Date -ErrorAction Stop
-		If ($(Test-Path -Path $($destinationRootPath + $processDate + '\')) -eq $true) {
-			$message = "$(New-TimeStamp)  Removing folder $($destinationRootPath + $processDate + '\') ..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Remove-Item -Path $($destinationRootPath + $processDate + '\') -Force -Recurse -ErrorAction Stop > $null
-		}
-		$message = "$(New-TimeStamp)  Validating $($dataLakeSearchPathRoot + $processDate) exists in data lake..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$getParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeSearchPathRoot + $processDate);
-			ErrorAction = 'Stop';
-		}
-		$dataLakeFolder = Get-AzureRmDataLakeStoreItem @getParams
-		$message = "$(New-TimeStamp)  Downloading folder $($dataLakeFolder.Path)..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$exportParams = @{
-			Account = $dataLakeStoreName;
-			Path = $($dataLakeFolder.Path);
-			Destination = $($destinationRootPath + $processDate + '\');
-			Force = $true;
-			Concurrency = 256;
-			ErrorAction = 'Stop';
-		}
-		Export-AzureRmDataLakeStoreItem @exportParams
-		$message = "$(New-TimeStamp)  Folder $($dataLakeFolder.Path) downloaded successfully."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
 # Seperate files into 5 folders and decompress in parallel
 		$milestone_1 = Get-Date
 		$fileCount = $null
@@ -197,6 +167,7 @@ Try {
 			Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
 			$i++
 		}
+# Decompress files in parallel
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		$jobI = 0
 		$jobBaseName = 'unzip_job_'
@@ -205,7 +176,7 @@ Try {
 				Try {
 					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 					$ProgressPreference = 'SilentlyContinue'
-					Import-Module $args[1] -ErrorAction Stop
+					Import-Module 7Zip4powershell -ErrorAction Stop
 					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
 					ForEach ($file in $files) {
 						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
@@ -220,7 +191,7 @@ Try {
 			$message = "$(New-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
 			Write-Output $message
 			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName), $7zipMod -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
+			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 			$jobI++
 		}
 		Write-Output "$(New-TimeStamp)  Spliting and decompressing..."

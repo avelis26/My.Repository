@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.3
+# Version  --  v3.1.6.4
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -12,6 +12,12 @@ Param(
 	[parameter(Mandatory = $false)][string]$endDate,
 	[parameter(Mandatory = $false)][switch]$test
 )
+Write-Output "Importing AzureRm, 7Zip, and SqlServer modules as well as custom fuctions..."
+Import-Module SqlServer -ErrorAction Stop
+Import-Module AzureRM -ErrorAction Stop
+Import-Module 7Zip4powershell -ErrorAction Stop
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the transactions you would like to filter for:
@@ -131,12 +137,6 @@ Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
 Try {
-	Write-Output "$(New-TimeStamp)  Importing AzureRm, 7Zip, and SqlServer modules as well as custom fuctions..."
-	Import-Module SqlServer -ErrorAction Stop
-	Import-Module AzureRM -ErrorAction Stop
-	Import-Module 7Zip4powershell -ErrorAction Stop
-	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
-	. $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
 	Write-Debug -Message $credential.UserName
@@ -228,6 +228,29 @@ Try {
 			$i++
 		}
 # Decompress files in parallel
+<#
+Clear-Host
+Try {
+    $retry = 0
+    While ($retry -lt 3) {
+        Try {
+            Get-Content -Path 'c:\fake_file.txt' -ErrorAction Stop
+            $retry = 100
+        }
+        Catch {
+            Write-Output "Retry: $retry"
+            If ($retry -eq 2) {
+                throw 'error 1'
+            }
+        }
+        $retry++
+    }
+}
+Catch {
+    Write-Output 'last catch'
+    Write-Output "$($Error[0].Exception.Message)"
+}
+#>
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		$jobI = 0
 		$jobBaseName = 'unzip_job_'
