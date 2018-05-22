@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.8
+# Version  --  v1.0.2.9
 #######################################################################################################
 #
 #######################################################################################################
@@ -11,6 +11,9 @@ Write-Output "Importing AzureRm and 7Zip modules as well as custom fuctions..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip4powershell -ErrorAction Stop
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
+. $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
+. $($PSScriptRoot + '\Split-FilesAmongFolders.ps1')
 If ($autoDate.IsPresent -eq $true) {
 	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
 }
@@ -117,106 +120,30 @@ Try {
 		Write-Output $message
 		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
 # Get raw files
-		$milestone_0 = Get-Date -ErrorAction Stop
-		Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
-# Seperate files into 5 folders and decompress in parallel
-		$milestone_1 = Get-Date
-		$fileCount = $null
-		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
-		$fileCount = $files.Count.ToString()
-		$message = "$(New-TimeStamp)  Found $fileCount total files..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		$i = 1
-		$count = 5
-		$folderPreFix = 'bucket_'
-		While ($i -lt $($count + 1)) {
-			$dirName = $folderPreFix + $i
-			$dirPath = $($destinationRootPath + $processDate + '\') + $dirName
-			If ($(Test-Path -Path $dirPath) -eq $false) {
-				$message = "$(New-TimeStamp)  Creating folder:  $dirPath ..."
-				Write-Output $message
-				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop > $null
-			}
-			Else {
-				Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
-			}
-			$i++
-		}
-		[int]$divider = $($files.Count / $count) - 0.5
-		$i = 0
-		$message = "$(New-TimeStamp)  Separating files into bucket folders..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		While ($i -lt $($files.Count)) {
-			If ($i -lt $divider) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '1'
-			}
-			ElseIf ($i -ge $divider -and $i -lt $($divider * 2)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '2'
-			}
-			ElseIf ($i -ge $($divider * 2) -and $i -lt $($divider * 3)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '3'
-			}
-			ElseIf ($i -ge $($divider * 3) -and $i -lt $($divider * 4)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '4'
-			}
-			Else {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '5'
-			}
-			Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
-			$i++
-		}
+		$retry = 0
+		While ($retry -lt 3) {
+			Try {
+				$milestone_0 = Get-Date -ErrorAction Stop
+				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
+# Seperate files into 5 seperate folders for paralell processing
+				$milestone_1 = Get-Date
+				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
 # Decompress files in parallel
-		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
-		$jobI = 0
-		$jobBaseName = 'unzip_job_'
-		ForEach ($folder in $folders) {
-			$block = {
-				Try {
-					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-					$ProgressPreference = 'SilentlyContinue'
-					Import-Module 7Zip4powershell -ErrorAction Stop
-					$files = Get-ChildItem -Path $args[0] -Filter '*.gz' -File -ErrorAction Stop
-					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $args[0] -ErrorAction Stop > $null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
+				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
+				$retry = 3
+			}
+			Catch {
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)."
+				$retry++
+				If ($retry -eq 3) {
+					$errorParams = @{
+						Message = "$($Error[0].Exception.Message)";
+						ErrorId = "69";
+						ErrorAction = "Stop";
 					}
-					Return 'pass'
-				}
-				Catch {
-					Return 'fail'
+					Write-Error @errorParams
 				}
 			}
-			$message = "$(New-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
-			$jobI++
-		}
-		Write-Output "$(New-TimeStamp)  Spliting and decompressing..."
-		$r = 0
-		While ($r -lt $($folders.Count)) {
-			$message = "$(New-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
-			$message = "$(New-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-			$dJobResult = $null
-			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
-			If ($dJobResult -ne 'pass') {
-				$errorParams = @{
-					Message = "Decompression Failed!!!";
-					ErrorId = "44";
-					RecommendedAction = "Check ops log and GZ files.";
-					ErrorAction = "Stop";
-				}
-				Write-Error @errorParams
-			}
-			Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
-			$r++
 		}
 # Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date

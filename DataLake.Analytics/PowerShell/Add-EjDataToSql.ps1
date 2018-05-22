@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.4
+# Version  --  v3.1.6.5
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -13,11 +13,13 @@ Param(
 	[parameter(Mandatory = $false)][switch]$test
 )
 Write-Output "Importing AzureRm, 7Zip, and SqlServer modules as well as custom fuctions..."
-Import-Module SqlServer -ErrorAction Stop
 Import-Module AzureRM -ErrorAction Stop
+Import-Module SqlServer -ErrorAction Stop
 Import-Module 7Zip4powershell -ErrorAction Stop
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
+. $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
+. $($PSScriptRoot + '\Split-FilesAmongFolders.ps1')
 ##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
 ##   Enter the transactions you would like to filter for:
@@ -97,7 +99,6 @@ $extractorExe = 'C:\Scripts\C#\Optimus\SQL\Ansira.Sel.BITC.DataExtract.Processor
 ##   Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
-$emptyFileList = $null
 $storeCountResults = $null
 $y = 0
 #######################################################################################################
@@ -174,128 +175,30 @@ Try {
 		Connect-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Login successful."
 # Get raw files
-		$milestone_0 = Get-Date -ErrorAction Stop
-		Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
+		$retry = 0
+		While ($retry -lt 3) {
+			Try {
+				$milestone_0 = Get-Date -ErrorAction Stop
+				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
 # Seperate files into 5 seperate folders for paralell processing
-		$milestone_1 = Get-Date
-		$fileCount = $null
-		$emptyFileCount = $null
-		$emptyFileList = @()
-		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop
-		$emptyFiles = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File -ErrorAction Stop | Where-Object -FilterScript {$_.Length -lt 92}
-		$fileCount = $files.Count.ToString()
-		$emptyFileCount = $emptyFiles.Count.ToString()
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Found $fileCount total files..."
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Found $emptyFileCount EMPTY files..."
-		ForEach ($emptyFile in $emptyFiles) {
-			$emptyFileList += $emptyFile.Name
-		}
-		$i = 1
-		$count = 5
-		$folderPreFix = 'bucket_'
-		While ($i -lt $($count + 1)) {
-			$dirName = $folderPreFix + $i
-			$dirPath = $($destinationRootPath + $processDate + '\') + $dirName
-			If ($(Test-Path -Path $dirPath) -eq $false) {
-				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating folder:  $dirPath ..."
-				New-Item -ItemType Directory -Path $dirPath -Force -ErrorAction Stop > $null
-			}
-			Else {
-				Get-ChildItem -Path $dirPath -Recurse -ErrorAction Stop | Remove-Item -Force -ErrorAction Stop
-			}
-			$i++
-		}
-		[int]$divider = $($files.Count / $count) - 0.5
-		$i = 0
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Separating files into bucket folders..."
-		While ($i -lt $($files.Count)) {
-			If ($i -lt $divider) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '1'
-			}
-			ElseIf ($i -ge $divider -and $i -lt $($divider * 2)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '2'
-			}
-			ElseIf ($i -ge $($divider * 2) -and $i -lt $($divider * 3)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '3'
-			}
-			ElseIf ($i -ge $($divider * 3) -and $i -lt $($divider * 4)) {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '4'
-			}
-			Else {
-				$movePath = $($destinationRootPath + $processDate + '\') + $folderPreFix + '5'
-			}
-			Move-Item -Path $files[$i].FullName -Destination $movePath -Force -ErrorAction Stop
-			$i++
-		}
+				$milestone_1 = Get-Date
+				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
 # Decompress files in parallel
-<#
-Clear-Host
-Try {
-    $retry = 0
-    While ($retry -lt 3) {
-        Try {
-            Get-Content -Path 'c:\fake_file.txt' -ErrorAction Stop
-            $retry = 100
-        }
-        Catch {
-            Write-Output "Retry: $retry"
-            If ($retry -eq 2) {
-                throw 'error 1'
-            }
-        }
-        $retry++
-    }
-}
-Catch {
-    Write-Output 'last catch'
-    Write-Output "$($Error[0].Exception.Message)"
-}
-#>
-		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
-		$jobI = 0
-		$jobBaseName = 'unzip_job_'
-		ForEach ($folder in $folders) {
-			$block = {
-				Try {
-					[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-					$ProgressPreference = 'SilentlyContinue'
-					Import-Module 7Zip4powershell -ErrorAction Stop
-					$path = $args[0]
-					$files = Get-ChildItem -Path $path -Filter '*.gz' -File -ErrorAction Stop
-					ForEach ($file in $files) {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $path -ErrorAction Stop > $null
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
+				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
+				$retry = 3
+			}
+			Catch {
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)."
+				$retry++
+				If ($retry -eq 3) {
+					$errorParams = @{
+						Message = "$($Error[0].Exception.Message)";
+						ErrorId = "69";
+						ErrorAction = "Stop";
 					}
-					Return 'pass'
-				}
-				Catch {
-					Return 'fail'
+					Write-Error @errorParams
 				}
 			}
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Starting decompress job:  $($folder.FullName)..."
-			Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
-			$jobI++
-			Start-Sleep -Milliseconds 128
-		}
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Spliting and decompressing..."
-		$r = 0
-		While ($r -lt $($folders.Count)) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
-			Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Receiving job $($jobBaseName + $r.ToString())..."
-			$dJobResult = $null
-			$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
-			If ($dJobResult -ne 'pass') {
-				$errorParams = @{
-					Message = "Decompression Failed!!!";
-					ErrorId = "44";
-					RecommendedAction = "Check ops log and GZ files.";
-					ErrorAction = "Stop";
-				}
-				Write-Error @errorParams
-			}
-			Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
-			$r++
 		}
 # Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
@@ -740,10 +643,6 @@ Catch {
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
-		$htmlEmptyFileList = @()
-		ForEach ($item in $emptyFileList) {
-			$htmlEmptyFileList += $item + '<br>'
-		}
 		$iniTime = New-TimeSpan -Start $startTime -End $milestone_0
 		$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
@@ -790,7 +689,6 @@ Catch {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message16
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message17
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message18
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $emptyFileList
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -825,9 +723,6 @@ Catch {
 				<br>
 				Store Count By Day In Folder $processDate :<br>
 				$storeCountHtml
-				<br>
-				Empty File List:<br>
-				$htmlEmptyFileList<br>
 "@
 		}
 		Send-MailMessage @params
