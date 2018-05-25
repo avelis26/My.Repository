@@ -1,4 +1,4 @@
-# Version  --  v1.0.2.9
+# Version  --  v1.0.3.0
 #######################################################################################################
 #
 #######################################################################################################
@@ -133,11 +133,11 @@ Try {
 				$retry = 3
 			}
 			Catch {
-				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)."
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Message)."
 				$retry++
 				If ($retry -eq 3) {
 					$errorParams = @{
-						Message = "$($Error[0].Exception.Message)";
+						Message = "$($Error[0].Message)";
 						ErrorId = "69";
 						ErrorAction = "Stop";
 					}
@@ -331,25 +331,13 @@ Try {
 	$exitCode = 0
 } # try
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
-	$path = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Error\'
-	If ($(Test-Path -Path $path) -eq $false) {
-		$message = "Creating $path..."
-		Write-Verbose -Message $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-		New-Item -ItemType Directory -Path $path -Force -ErrorAction Stop > $null
-	}
-	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
-		$message = "$(New-TimeStamp)  Moving data to $path..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $path -Force -ErrorAction Stop
-	}
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Activity)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Reason)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.InvocationInfo.Line)
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -361,6 +349,7 @@ Catch {
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
+			$($Error[0].Message)<br>
 			$($_.Exception.Message)<br>
 			$($_.Exception.InnerException.Message)<br>
 			$($_.Exception.InnerException.InnerException.Message)<br>
