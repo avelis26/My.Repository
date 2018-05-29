@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.0
+# Version  --  v1.0.3.1
 #######################################################################################################
 #
 #######################################################################################################
@@ -246,36 +246,26 @@ Try {
 		$uplTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
 		$cleTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
-		$message02 = "Start Time--------:  $startTimeText"
-		$message03 = "End Time----------:  $endTimeText"
-		$message04 = "Initialization----:  $($iniTime.Hours.ToString("00")) h $($iniTime.Minutes.ToString("00")) m $($iniTime.Seconds.ToString("00")) s"
-		$message05 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
-		$message06 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
-		$message07 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-		$message08 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
-		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
-		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-		$message11 = "Total File Count--:  $fileCount"
-		Write-Output $message02
-		Write-Output $message03
-		Write-Output $message04
-		Write-Output $message05
-		Write-Output $message06
-		Write-Output $message07
-		Write-Output $message08
-		Write-Output $message09
-		Write-Output $message10
-		Write-Output $message11
-		Add-Content -Value $message02 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message03 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message04 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message05 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message06 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message07 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message08 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message09 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message10 -Path $opsLog -ErrorAction Stop
-		Add-Content -Value $message11 -Path $opsLog -ErrorAction Stop
+		$message01 = "Start Time--------:  $startTimeText"
+		$message02 = "End Time----------:  $endTimeText"
+		$message03 = "Initialization----:  $($iniTime.Hours.ToString("00")) h $($iniTime.Minutes.ToString("00")) m $($iniTime.Seconds.ToString("00")) s"
+		$message04 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
+		$message05 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
+		$message06 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
+		$message07 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
+		$message08 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
+		$message09 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+		$message10 = "Total File Count--:  $fileCount"
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message04
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message05
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message06
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message07
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message08
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message09
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message10
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -288,6 +278,7 @@ Try {
 				Optimus has processed the raw files from<b> $($dataLakeSearchPathRoot + $processDate) </b>and uploaded them to blob storage for hadoop.<br>
 				<br>
 				<font face='courier'>
+				$message01<br>
 				$message02<br>
 				$message03<br>
 				$message04<br>
@@ -297,7 +288,6 @@ Try {
 				$message08<br>
 				$message09<br>
 				$message10<br>
-				$message11<br>
 				</font>
 "@
 		}
