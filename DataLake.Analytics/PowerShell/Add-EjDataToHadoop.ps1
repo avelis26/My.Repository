@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.1
+# Version  --  v1.0.3.2
 #######################################################################################################
 #
 #######################################################################################################
@@ -10,6 +10,7 @@ Param(
 Write-Output "Importing AzureRm and 7Zip modules as well as custom fuctions..."
 Import-Module AzureRM -ErrorAction Stop
 Import-Module 7Zip4powershell -ErrorAction Stop
+. $($PSScriptRoot + '\New-TimeStamp.ps1')
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 . $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
@@ -48,19 +49,6 @@ $121blobPath = 'bitc/121header/'
 $122blobPath = 'bitc/122detail/'
 $y = 0
 #######################################################################################################
-Function New-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
-	}
-	Else {
-		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
-	}
-	Return $timeStamp
-}
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'

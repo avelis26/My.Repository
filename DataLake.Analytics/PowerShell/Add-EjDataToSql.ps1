@@ -1,8 +1,9 @@
-# Version  --  v3.1.6.7
+# Version  --  v3.1.6.8
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
 # add error text to email from optimus
+# fix error details in report email
 #######################################################################################################
 [CmdletBinding()]
 Param(
@@ -16,6 +17,7 @@ Write-Output "Importing AzureRm, 7Zip, and SqlServer modules as well as custom f
 Import-Module AzureRM -ErrorAction Stop
 Import-Module SqlServer -ErrorAction Stop
 Import-Module 7Zip4powershell -ErrorAction Stop
+. $($PSScriptRoot + '\New-TimeStamp.ps1')
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 . $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
@@ -89,19 +91,6 @@ $file = $null
 $storeCountResults = $null
 $y = 0
 #######################################################################################################
-Function New-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
-	}
-	Else {
-		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
-	}
-	Return $timeStamp
-}
 Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'

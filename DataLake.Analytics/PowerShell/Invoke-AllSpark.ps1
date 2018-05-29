@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.7
+# Version  --  v1.1.3.8
 #######################################################################################################
 #
 #######################################################################################################
@@ -10,6 +10,12 @@ Param(
 	[switch]$ceo,
 	[switch]$exit
 )
+Write-Output "Importing AzureRM and SQL Server modules as well as custom functions..."
+Import-Module SqlServer -ErrorAction Stop
+Import-Module AzureRM -ErrorAction Stop
+. $($PSScriptRoot + '\New-TimeStamp.ps1')
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Invoke-ErrorReport.ps1')
 #######################################################################################################
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 $opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\AllSpark\'
@@ -23,44 +29,29 @@ $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
 #######################################################################################################
 # Init
+If ($([System.Diagnostics.EventLog]::SourceExists('AllSpark')) -eq $false) {
+	[System.Diagnostics.EventLog]::CreateEventSource('AllSpark', 'Application')
+}
+$eventMessage = @"
+AllSpark has started with the following configuration:
+maintenance = $($maintenance.IsPresent.ToString())
+scheduled = $($scheduled.IsPresent.ToString())
+store = $($store.IsPresent.ToString())
+ceo = $($ceo.IsPresent.ToString())
+exit = $($exit.IsPresent.ToString())
+"@
+$params = @{
+	LogName = 'Application';
+	Source = 'AllSpark';
+	EventID = 6969;
+	EntryType = 'Information';
+	Message = $eventMessage;
+}
+Write-EventLog @params
 $opsLog = $opsLogRootPath + "$(Get-Date -Format 'yyyyMMdd_HHmmss')_AllSpark.log"
-Function New-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
-	}
-	Else {
-		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
-	}
-	Return $timeStamp
-}
-Function Invoke-ErrorReport {
-	[CmdletBinding()]
-	Param(
-		[string]$subject
-	)
-	Add-Content -Value $subject -Path $opsLog -ErrorAction Stop
-	$errorInfo = $($Error[0].Exception.Message), `
-		$($Error[0].Exception.InnerException.Message), `
-		$($Error[0].Exception.InnerException.InnerException.Message), `
-		$($Error[0].CategoryInfo.Activity), `
-		$($Error[0].CategoryInfo.Reason), `
-		$($Error[0].InvocationInfo.Line)
-	ForEach ($line in $errorInfo) {
-		Add-Content -Value $line -Path $opsLog -ErrorAction Stop
-	}
-	$exitCode = 1
-}
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
-Add-Content -Value "$(New-TimeStamp)  Importing AzureRM and SQL Server modules as well as custom functions..." -Path $opsLog -ErrorAction Stop
-Import-Module SqlServer -ErrorAction Stop
-Import-Module AzureRM -ErrorAction Stop
-. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 # Data to Hadoop
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
@@ -89,7 +80,7 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!' -log $opsLog
 }
 # Data to SQL - Store
 Try {
@@ -130,7 +121,7 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - Store Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - Store Failed!!!' -log $opsLog
 }
 # Data to SQL - CEO
 Try {
@@ -158,7 +149,7 @@ Try {
 	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - CEO Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - CEO Failed!!!' -log $opsLog
 }
 # Perform SQL Maintenance 
 Try {
@@ -240,7 +231,7 @@ Try {
 	$exitCode = 0
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: SQL Maintenance Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: SQL Maintenance Failed!!!' -log $opsLog
 }
 # Execute Store Report
 Try {
@@ -270,7 +261,7 @@ Try {
 	}
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: Store Report Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: Store Report Failed!!!' -log $opsLog
 }
 # Execute CEO Report
 Try {
@@ -300,7 +291,7 @@ Try {
 	}
 }
 Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!'
+	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!' -log $opsLog
 }
 Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
