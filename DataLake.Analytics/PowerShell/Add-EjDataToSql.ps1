@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.7
+# Version  --  v3.1.6.6
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -20,28 +20,20 @@ Import-Module 7Zip4powershell -ErrorAction Stop
 . $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
 . $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
 . $($PSScriptRoot + '\Split-FilesAmongFolders.ps1')
-##   Enter your 7-11 user name without domain:
 $userName = 'gpink003'
-##   Enter the transactions you would like to filter for:
 $transTypes = 'D1121,D1122'
-##   Enter the path where you want the raw files to be downloaded on your local machine:
 $destinationRootPath = 'D:\BIT_CRM\'
-$archiveRootPath = '\\MS-SSW-CRM-MGMT\Data\BIT_CRM\SQL\Error\'
-##   Enter the path where you want the error logs to be stored:
 $errLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Err_Log\'
-##   Enter the email address for failures:
 $failEmailList = 'graham.pinkston@ansira.com', `
 	'mayank.minawat@ansira.com', `
 	'catherine.wells@ansira.com', `
 	'britten.morse@ansira.com', `
 	'Geri.Shaeffer@Ansira.com', `
 	'megan.morace@ansira.com'
-##   If autoDate switch not used, get dates from variables provided above:
 If ($autoDate.IsPresent -eq $false) {
 	$startDateObj = Get-Date -Date $startDate -ErrorAction Stop
 	$endDateObj = Get-Date -Date $endDate -ErrorAction Stop
 }
-##   Email, log path, and dates change for store report
 $headersMovePreProdSp = 'usp_Staging_To_PreProd_Headers'
 $detailsMovePreProdSp = 'usp_Staging_To_PreProd_Details'
 $detailsEndDateSp = 'usp_Create_Details_EndDate'
@@ -62,7 +54,6 @@ If ($report -eq 's') {
 		$startDate = $endDate = $startDateObj.Year.ToString('0000') + '-' + $startDateObj.Month.ToString('00') + '-' + $startDateObj.Day.ToString('00')
 	}
 }
-##   Email, log path, and dates change for CEO report
 ElseIf ($report -eq 'c') {
 	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\CEO\'
 	$headersMoveSp = 'usp_Staging_To_Prod_Headers_CEO'
@@ -78,11 +69,8 @@ If ($test.IsPresent -eq $true) {
 	$failEmailList = 'graham.pinkston@ansira.com'
 	$opsLogRootPath = $opsLogRootPath + 'Test\'
 }
-##   Base name of database tables
 $stgTable121 = 'stg_121_Headers'
 $stgTable122 = 'stg_122_Details'
-#######################################################################################################
-##   These parametser probably won't change
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -96,7 +84,6 @@ $user = $userName + '@7-11.com'
 $dataLakeSearchPathRoot = '/BIT_CRM/'
 $dataLakeStoreName = '711dlprodcons01'
 $extractorExe = 'C:\Scripts\C#\Optimus\SQL\Ansira.Sel.BITC.DataExtract.Processor.exe'
-##   Here we are nulling out some important variables since PowerISE likes to maintain the runspace
 $table = $null
 $file = $null
 $storeCountResults = $null
@@ -180,7 +167,6 @@ Try {
 			Try {
 				$milestone_0 = Get-Date -ErrorAction Stop
 				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
-				$fileCount = $(Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File).Count
 # Seperate files into 5 seperate folders for paralell processing
 				$milestone_1 = Get-Date
 				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
@@ -189,11 +175,11 @@ Try {
 				$retry = 3
 			}
 			Catch {
-				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)."
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Message)."
 				$retry++
 				If ($retry -eq 3) {
 					$errorParams = @{
-						Message = "$($Error[0].Exception.Message)";
+						Message = "$($Error[0].Message)";
 						ErrorId = "69";
 						ErrorAction = "Stop";
 					}
@@ -668,9 +654,10 @@ Try {
 		$message12 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
 		$message13 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
 		$message14 = "Total File Count--:  $fileCount"
-		$message15 = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
-		$message16 = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
-		$message17 = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
+		$message15 = "Empty File Count--:  $emptyFileCount"
+		$message16 = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
+		$message17 = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
+		$message18 = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
@@ -688,6 +675,7 @@ Try {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message15
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message16
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message17
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message18
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -717,6 +705,7 @@ Try {
 				$message15<br>
 				$message16<br>
 				$message17<br>
+				$message18<br>
 				</font>
 				<br>
 				Store Count By Day In Folder $processDate :<br>
@@ -754,12 +743,13 @@ Try {
 	$exitCode = 0
 } # try
 Catch {
-	Add-Content -Value $($_.Exception.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.Exception.InnerException.InnerException.Message) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Activity) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.CategoryInfo.Reason) -Path $opsLog -ErrorAction Stop
-	Add-Content -Value $($_.InvocationInfo.Line) -Path $opsLog -ErrorAction Stop
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Activity)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Reason)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.InvocationInfo.Line)
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -771,6 +761,7 @@ Catch {
 		Body = @"
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
+			$($Error[0].Message)<br>
 			$($_.Exception.Message)<br>
 			$($_.Exception.InnerException.Message)<br>
 			$($_.Exception.InnerException.InnerException.Message)<br>
@@ -781,14 +772,6 @@ Catch {
 "@
 	}
 	Send-MailMessage @params
-	If ($(Test-Path -Path $archiveRootPath) -eq $false) {
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $archiveRootPath..."
-		New-Item -ItemType Directory -Path $archiveRootPath -Force -ErrorAction Stop > $null
-	}
-	If ($(Test-Path -Path $($destinationRootPath + $processDate)) -eq $true) {
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Moving data to $archiveRootPath..."
-		Move-Item -Path $($destinationRootPath + $processDate) -Destination $archiveRootPath -Force -ErrorAction Stop
-	}
 	$exitCode = 1
 }
 Finally {
