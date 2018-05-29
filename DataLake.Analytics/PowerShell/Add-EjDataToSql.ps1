@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.5
+# Version  --  v3.1.6.7
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -180,6 +180,7 @@ Try {
 			Try {
 				$milestone_0 = Get-Date -ErrorAction Stop
 				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
+				$fileCount = $(Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File).Count
 # Seperate files into 5 seperate folders for paralell processing
 				$milestone_1 = Get-Date
 				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
@@ -667,10 +668,9 @@ Try {
 		$message12 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
 		$message13 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
 		$message14 = "Total File Count--:  $fileCount"
-		$message15 = "Empty File Count--:  $emptyFileCount"
-		$message16 = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
-		$message17 = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
-		$message18 = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
+		$message15 = "Total Row Count---:  $($totalFileRowCount.ToString('N0'))"
+		$message16 = "Total Headers-----:  $($sqlHeadersCountResults.Count.ToString('N0'))"
+		$message17 = "Total Details-----:  $($sqlDetailsCountResults.Count.ToString('N0'))"
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
@@ -688,7 +688,6 @@ Try {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message15
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message16
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message17
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message18
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -718,7 +717,6 @@ Try {
 				$message15<br>
 				$message16<br>
 				$message17<br>
-				$message18<br>
 				</font>
 				<br>
 				Store Count By Day In Folder $processDate :<br>
