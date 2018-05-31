@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.8
+# Version  --  v3.1.6.9
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -161,19 +161,14 @@ Try {
 				$milestone_1 = Get-Date
 				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
 # Decompress files in parallel
-				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
+				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog -processDate $processDate -dataLakeRoot $dataLakeSearchPathRoot
 				$retry = 3
 			}
 			Catch {
-				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Message)."
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)"
 				$retry++
 				If ($retry -eq 3) {
-					$errorParams = @{
-						Message = "$($Error[0].Message)";
-						ErrorId = "69";
-						ErrorAction = "Stop";
-					}
-					Write-Error @errorParams
+					throw $($Error[0].Exception.Message)
 				}
 			}
 		}
@@ -731,12 +726,12 @@ Try {
 } # try
 Catch {
 	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.Exception.InnerException.InnerException.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Activity)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.CategoryInfo.Reason)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($_.InvocationInfo.Line)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.InnerException.Message)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Activity)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Reason)
+	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].InvocationInfo.Line)
 	$params = @{
 		SmtpServer = $smtpServer;
 		Port = $port;
@@ -749,12 +744,12 @@ Catch {
 			<font face='consolas'>
 			Something bad happened!!!<br><br>
 			$($Error[0].Message)<br>
-			$($_.Exception.Message)<br>
-			$($_.Exception.InnerException.Message)<br>
-			$($_.Exception.InnerException.InnerException.Message)<br>
-			$($_.CategoryInfo.Activity)<br>
-			$($_.CategoryInfo.Reason)<br>
-			$($_.InvocationInfo.Line)<br>
+			$($Error[0].Exception.Message)<br>
+			$($Error[0].Exception.InnerException.Message)<br>
+			$($Error[0].Exception.InnerException.InnerException.Message)<br>
+			$($Error[0].CategoryInfo.Activity)<br>
+			$($Error[0].CategoryInfo.Reason)<br>
+			$($Error[0].InvocationInfo.Line)<br>
 			</font>
 "@
 	}
