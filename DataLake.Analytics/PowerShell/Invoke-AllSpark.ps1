@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.8
+# Version  --  v1.1.3.9
 #######################################################################################################
 #
 #######################################################################################################
@@ -53,6 +53,7 @@ If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
 # Data to Hadoop
+<#
 Try {
 	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 	Add-Content -Value "$(New-TimeStamp)  Current User: $([Environment]::UserName.ToString())" -Path $opsLog -ErrorAction Stop
@@ -82,6 +83,7 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!' -log $opsLog
 }
+#>
 # Data to SQL - Store
 Try {
 	If ($scheduled.IsPresent -eq $true) {

@@ -38,6 +38,8 @@ Function Expand-FilesInParallel {
 	}
 	Tee-Object -FilePath $log -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Spliting and decompressing..."
 	$r = 0
+	[string]$badFiles = $null
+	[int]$failed = 0
 	While ($r -lt $($folders.Count)) {
 		Tee-Object -FilePath $log -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Waiting for decompress job: $($jobBaseName + $r.ToString())..."
 		Get-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop | Wait-Job -ErrorAction Stop
@@ -45,13 +47,15 @@ Function Expand-FilesInParallel {
 		$dJobResult = $null
 		$dJobResult = Receive-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 		If ($dJobResult[0] -ne 'pass') {
-			[string]$badFiles = $null
 			ForEach ($line in $dJobResult[2..$($dJobResult.Count)]) {
 				[string]$badFiles += "$dataLakeRoot$processDate/$line`r`n"
 			}
-			throw "Decompression Failed!!!`r`nThe following files failed to decompress:`r`n$badFiles"
+			$failed = 1
 		}
 		Remove-Job -Name $($jobBaseName + $r.ToString()) -ErrorAction Stop
 		$r++
+	}
+	If ($failed -eq 1) {
+		throw "Decompression Failed!!!`r`nThe following files failed to decompress:`r`n$badFiles"
 	}
 }

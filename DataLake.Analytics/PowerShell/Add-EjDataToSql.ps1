@@ -1,4 +1,4 @@
-# Version  --  v3.1.6.9
+# Version  --  v3.1.7.0
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -166,6 +166,7 @@ Try {
 			}
 			Catch {
 				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  $($Error[0].Exception.Message)"
+				Get-Job | Remove-Job -Force
 				$retry++
 				If ($retry -eq 3) {
 					throw $($Error[0].Exception.Message)
