@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.4
+# Version  --  v1.0.3.5
 #######################################################################################################
 #
 #######################################################################################################
@@ -28,7 +28,7 @@ If ($test.IsPresent -eq $true) {
 	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\Test\'
 }
 Else {
-	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'mayank.minawat@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com', 'Geri.Shaeffer@Ansira.com'
+	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com', 'Geri.Shaeffer@Ansira.com'
 	[string[]]$failEmailList = $emailList
 	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\'
 }

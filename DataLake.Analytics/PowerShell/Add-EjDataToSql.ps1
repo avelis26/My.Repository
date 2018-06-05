@@ -1,4 +1,4 @@
-# Version  --  v3.1.7.0
+# Version  --  v3.1.7.1
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -27,7 +27,6 @@ $transTypes = 'D1121,D1122'
 $destinationRootPath = 'D:\BIT_CRM\'
 $errLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Err_Log\'
 $failEmailList = 'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
 	'catherine.wells@ansira.com', `
 	'britten.morse@ansira.com', `
 	'Geri.Shaeffer@Ansira.com', `
@@ -45,7 +44,6 @@ If ($report -eq 's') {
 	$detailsMoveSp = 'usp_Staging_To_Prod_Details'
 	[string[]]$emailList = `
 	'graham.pinkston@ansira.com', `
-	'mayank.minawat@ansira.com', `
 	'DIST-SEI_CRM_STATUS@7-11.com', `
 	'catherine.wells@ansira.com', `
 	'britten.morse@ansira.com', `
