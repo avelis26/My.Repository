@@ -543,7 +543,7 @@ Try {
 			}
 			$i++
 		}
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Finished creating PK's on data in staging tables!"
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Finished creating PK's on data in staging tables."
 # Move data in DB from stg to preprod, add enddate to details, then move to prod
 		$milestone_6 = Get-Date
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Moving headers from staging to preProd..."
