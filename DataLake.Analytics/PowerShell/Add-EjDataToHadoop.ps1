@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.5
+# Version  --  v1.0.3.6
 #######################################################################################################
 #
 #######################################################################################################
@@ -49,7 +49,6 @@ $121blobPath = 'bitc/121header/'
 $122blobPath = 'bitc/122detail/'
 $y = 0
 #######################################################################################################
-Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 # Init
 [System.Threading.Thread]::CurrentThread.Priority = 'Highest'
 $startDateObj = Get-Date -Date $startDate -ErrorAction Stop
@@ -69,10 +68,11 @@ Write-Host "2..."
 Start-Sleep -Seconds 1
 Write-Host "1..."
 Start-Sleep -Seconds 1
-Try {
-	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
-	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
-	While ($y -lt $range) {
+$exitCode = 0
+$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
+$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
+While ($y -lt $range) {
+	Try {
 		$startTime = Get-Date -ErrorAction Stop
 		$startTimeText = $(New-TimeStamp -forFileName)
 		$day = $($startDateObj.AddDays($y)).day.ToString("00")
@@ -83,41 +83,35 @@ Try {
 		If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 			Write-Output "Creating $opsLogRootPath..."
 			New-Item -ItemType Directory -Path $opsLogRootPath -Force -ErrorAction Stop > $null
-			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "$(New-TimeStamp)  Created folder: $opsLogRootPath" -Path $opsLog -ErrorAction Stop
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Process Date: $processDate"
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Created folder: $opsLogRootPath"
 		}
 		Else {
 			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
 		}
 		If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-			$message = "Creating $destinationRootPath..."
-			Write-Output $message
-			Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Creating $destinationRootPath..."
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 		}
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
 		Set-SslCertPolicy
 		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
-		$message = "Logging into Azure..."
-		Write-Output $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Logging into Azure..."
 		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
-		$message = "Login successful."
-		Write-Output $message
-		Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog -ErrorAction Stop
-# Get raw files
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Login successful."
+	# Get raw files
 		$retry = 0
 		While ($retry -lt 3) {
 			Try {
 				$milestone_0 = Get-Date -ErrorAction Stop
 				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
 				$fileCount = $(Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File).Count
-# Seperate files into 5 seperate folders for paralell processing
+	# Seperate files into 5 seperate folders for paralell processing
 				$milestone_1 = Get-Date
 				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
-# Decompress files in parallel
+	# Decompress files in parallel
 				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog -processDate $processDate -dataLakeRoot $dataLakeSearchPathRoot
 				$retry = 3
 			}
@@ -130,15 +124,13 @@ Try {
 				}
 			}
 		}
-# Execute C# app as job on raw files to create CSV's
+	# Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
 		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
 		ForEach ($folder in $folders) {
 			$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
 			If ($(Test-Path -Path $outputPath) -eq $false) {
-				$message = "$(New-TimeStamp)  Creating folder:  $outputPath ..."
-				Write-Output $message
-				Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating folder:  $outputPath ..."
 				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop > $null
 			}
 			$block = {
@@ -146,13 +138,11 @@ Try {
 				& $args[0] $args[1..4];
 				Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
 			}
-			$message = "$(New-TimeStamp)  Starting convert job:  $($folder.FullName)..."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Starting convert job:  $($folder.FullName)..."
 			Start-Job -ScriptBlock $block -ArgumentList "$optimus", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
 			Start-Sleep -Milliseconds 128
 		}
-		Write-Output "$(New-TimeStamp)  Converting..."
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Converting..."
 		Get-Job | Wait-Job
 		Get-Job | Remove-Job -ErrorAction Stop
 		Add-Content -Value "$(New-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
@@ -177,9 +167,25 @@ Try {
 				Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
 			}
 		}
-# Upload CSV's to blob storage
+	# Concatinate CSV's to one file
 		$milestone_3 = Get-Date
-		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Recurse -Filter "*Structured*" -File -ErrorAction Stop
+		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_121*" -Recurse -File -ErrorAction Stop
+		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_122*" -Recurse -File -ErrorAction Stop
+		$121output = @()
+		$122output = @()
+		$121output += Get-Content -Path $121files[0].FullName -TotalCount 1
+		$122output += Get-Content -Path $122files[0].FullName -TotalCount 1
+		ForEach ($121file in $121files) {
+			$121output += Get-Content -Path $121file.FullName | Select-Object -Skip 1
+		}
+		ForEach ($122file in $122files) {
+			$122output += Get-Content -Path $122file.FullName | Select-Object -Skip 1
+		}
+		Set-Content -Value $121output -Path $($destinationRootPath + $processDate + '\' + $processDate + 'D1_121_Headers.csv') -Force -ErrorAction Stop
+		Set-Content -Value $122output -Path $($destinationRootPath + $processDate + '\' + $processDate + 'D1_121_Details.csv') -Force -ErrorAction Stop
+	# Upload CSV's to blob storage
+		$milestone_4 = Get-Date
+		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1*" -File -ErrorAction Stop
 		ForEach ($file in $files) {
 			If ($file.Name -like "*D1_121*") {
 				$destination = $121blobPath
@@ -197,9 +203,7 @@ Try {
 				Write-Error @errorParams
 			}
 			$command = "& $bumblebee $($file.FullName) $destination"
-			$message = "$(New-TimeStamp)  Sending To Blob:  $command"
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Sending To Blob:  $command"
 			$result = Invoke-Expression -Command $command -ErrorAction Stop
 			If ($result[$result.Count - 1] -notLike "*Successfully*") {
 				$errorParams = @{
@@ -210,25 +214,22 @@ Try {
 				}
 				Write-Error @errorParams
 			}
-			$message = "$(New-TimeStamp)  File uploaded successfully."
-			Write-Output $message
-			Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  File uploaded successfully."
 		}
-# Delete data from temp drive
-		$milestone_4 = Get-Date
-		$message = "$(New-TimeStamp)  Deleting $($destinationRootPath + $processDate)..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Remove-Item -Path $($destinationRootPath + $processDate) -Recurse -Force -ErrorAction Stop
-# Send report
+	# Delete data from temp drive
+		$milestone_5 = Get-Date
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Deleting $destinationRootPath..."
+		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
+	# Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
 		$iniTime = New-TimeSpan -Start $startTime -End $milestone_0
 		$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 		$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-		$uplTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-		$cleTime = New-TimeSpan -Start $milestone_4 -End $endTime
+		$catTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+		$uplTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
+		$cleTime = New-TimeSpan -Start $milestone_5 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
 		$message01 = "Start Time--------:  $startTimeText"
 		$message02 = "End Time----------:  $endTimeText"
@@ -236,10 +237,11 @@ Try {
 		$message04 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
 		$message05 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
 		$message06 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-		$message07 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
-		$message08 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
-		$message09 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-		$message10 = "Total File Count--:  $fileCount"
+		$message07 = "Concat CSV Files--:  $($catTime.Hours.ToString("00")) h $($catTime.Minutes.ToString("00")) m $($catTime.Seconds.ToString("00")) s"
+		$message08 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
+		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
+		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+		$message11 = "Total File Count--:  $fileCount"
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
@@ -250,6 +252,7 @@ Try {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message08
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message09
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message10
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message11
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -272,6 +275,7 @@ Try {
 				$message08<br>
 				$message09<br>
 				$message10<br>
+				$message11<br>
 				</font>
 "@
 		}
@@ -302,45 +306,42 @@ Try {
 			Write-Output "Too late :P"
 			Start-Sleep -Milliseconds 256
 		}
-	} # while
-	$exitCode = 0
-} # try
-Catch {
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.InnerException.Message)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Activity)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Reason)
-	Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].InvocationInfo.Line)
-	$params = @{
-		SmtpServer = $smtpServer;
-		Port = $port;
-		UseSsl = 0;
-		From = $fromAddr;
-		To = $failEmailList;
-		BodyAsHtml = $true;
-		Subject = "AllSpark: ::ERROR:: ETL Failed For $processDate!!!";
-		Body = @"
-			<font face='consolas'>
-			Something bad happened!!!<br><br>
-			$($Error[0].Message)<br>
-			$($Error[0].Exception.Message)<br>
-			$($Error[0].Exception.InnerException.Message)<br>
-			$($Error[0].Exception.InnerException.InnerException.Message)<br>
-			$($Error[0].CategoryInfo.Activity)<br>
-			$($Error[0].CategoryInfo.Reason)<br>
-			$($Error[0].InvocationInfo.Line)<br>
-			</font>
-"@
 	}
-	Send-MailMessage @params
-	$exitCode = 1
-}
-Finally {
-	Write-Output 'Finally...'
-	Get-Job | Remove-Job -Force
-	Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
-	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
+	Catch {
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Message)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.Message)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.Message)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].Exception.InnerException.InnerException.Message)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Activity)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].CategoryInfo.Reason)
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $($Error[0].InvocationInfo.Line)
+		$params = @{
+			SmtpServer = $smtpServer;
+			Port = $port;
+			UseSsl = 0;
+			From = $fromAddr;
+			To = $failEmailList;
+			BodyAsHtml = $true;
+			Subject = "AllSpark: ::ERROR:: ETL Failed For $processDate!!!";
+			Body = @"
+				<font face='consolas'>
+				Something bad happened!!!<br><br>
+				$($Error[0].Message)<br>
+				$($Error[0].Exception.Message)<br>
+				$($Error[0].Exception.InnerException.Message)<br>
+				$($Error[0].Exception.InnerException.InnerException.Message)<br>
+				$($Error[0].CategoryInfo.Activity)<br>
+				$($Error[0].CategoryInfo.Reason)<br>
+				$($Error[0].InvocationInfo.Line)<br>
+				</font>
+"@
+		}
+		Send-MailMessage @params
+		$exitCode = 1
+	}
+	Finally {
+		Write-Output 'Finally...'
+		Get-Job | Remove-Job -Force
+	}
 }
 Return $exitCode
