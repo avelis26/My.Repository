@@ -606,11 +606,11 @@ Try {
 		$milestone_7 = Get-Date
 		$message = "$(New-TimeStamp)  Removing $destinationRootPath..."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop -Encoding Unicode
 		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction SilentlyContinue
 		$message = "$(New-TimeStamp)  $destinationRootPath removed successfully."
 		Write-Verbose -Message $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop -Encoding Unicode
 # Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)

@@ -1,10 +1,11 @@
-# Version  --  v1.0.3.6
+# Version  --  v1.0.3.7
 #######################################################################################################
 #
 #######################################################################################################
 [CmdletBinding()]
 Param(
 	[switch]$autoDate,
+	[switch]$noDupeCheck,
 	[switch]$test
 )
 Write-Output "Importing AzureRm and 7Zip modules as well as custom fuctions..."
@@ -13,7 +14,7 @@ Import-Module 7Zip4powershell -ErrorAction Stop
 . $($PSScriptRoot + '\New-TimeStamp.ps1')
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Get-DataLakeRawFiles.ps1')
-#. $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
+. $($PSScriptRoot + '\Expand-FilesInParallel.ps1')
 . $($PSScriptRoot + '\Split-FilesAmongFolders.ps1')
 If ($autoDate.IsPresent -eq $true) {
 	$startDate = $endDate = $(Get-Date).Year.ToString('0000') + '-' + $(Get-Date).Month.ToString('00') + '-' + $(Get-Date).Day.ToString('00')
@@ -31,6 +32,13 @@ Else {
 	[string[]]$emailList = 'Catherine.Wells@Ansira.com', 'Britten.Morse@Ansira.com', 'megan.morace@ansira.com', 'Cheong.Sin@Ansira.com', 'Graham.Pinkston@Ansira.com', 'Geri.Shaeffer@Ansira.com'
 	[string[]]$failEmailList = $emailList
 	$opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\ETL\Hadoop\'
+}
+If ($noDupeCheck.IsPresent -eq $true) {
+	$configFile = "C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Optimus.exe.config"
+	[xml]$doc = Get-Content -Path $configFile
+	$etting = $doc.configuration.applicationSettings.'Ansira.Sel.BITC.DataExtract.Optimus.Properties.Settings'.setting | Where-Object -FilterScript {$_.Name -eq 'DupFileCheck'}
+	$etting.value = '0'
+	$doc.Save($configFile)
 }
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
@@ -87,7 +95,7 @@ While ($y -lt $range) {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Created folder: $opsLogRootPath"
 		}
 		Else {
-			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop
+			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop -Encoding Unicode
 		}
 		If ($(Test-Path -Path $destinationRootPath) -eq $false) {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Creating $destinationRootPath..."
@@ -110,37 +118,9 @@ While ($y -lt $range) {
 				$fileCount = $(Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File).Count
 	# Seperate files into 5 seperate folders for paralell processing
 				$milestone_1 = Get-Date
-				#Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
+				Split-FilesAmongFolders -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog
 	# Decompress files
-				#Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog -processDate $processDate -dataLakeRoot $dataLakeSearchPathRoot
-				$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter '*.gz' -File -ErrorAction Stop
-				$status = @()
-				$status += 'pass'
-				$status += '-----------------------------------------'
-				$badFiles = $null
-				$failed = 0
-				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Decompressing..."
-				ForEach ($file in $files) {
-					Try {
-						Expand-7Zip -ArchiveFileName $($file.FullName) -TargetPath $($destinationRootPath + $processDate + '\') -ErrorAction Stop > $null
-					}
-					Catch {
-						$status[0] = 'fail'
-						$status += $($file.Name)
-					}
-					Finally {
-						Remove-Item -Path $($file.FullName) -Force -ErrorAction Stop > $null
-					}
-				}
-				If ($status[0] -ne 'pass') {
-					ForEach ($line in $status[2..$($status.Count)]) {
-						[string]$badFiles += "$dataLakeRoot$processDate/$line`r`n"
-					}
-					$failed = 1
-				}
-				If ($failed -eq 1) {
-					throw "Decompression Failed!!!`r`nThe following files failed to decompress:`r`n$badFiles"
-				}
+				Expand-FilesInParallel -rootPath $($destinationRootPath + $processDate + '\') -log $opsLog -processDate $processDate -dataLakeRoot $dataLakeSearchPathRoot
 				$retry = 3
 			}
 			Catch {
@@ -154,57 +134,70 @@ While ($y -lt $range) {
 		}
 	# Execute C# app as job on raw files to create CSV's
 		$milestone_2 = Get-Date
-		$outputPath = $destinationRootPath + $processDate + '_Output\'
-		If ($(Test-Path -Path $outputPath) -eq $false) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating folder:  $outputPath ..."
-			New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop > $null
-		}
-		[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Starting Optimus..."
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "& $optimus $($destinationRootPath + $processDate + '\') $outputPath $transTypes $processDate"
-		& $optimus $($destinationRootPath + $processDate + '\') $outputPath $transTypes $processDate
-		Remove-Item -Path $($destinationRootPath + $processDate + '\') -Recurse -Force -ErrorAction Stop
-		Add-Content -Value "$(New-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop
-		$outputFile = Get-ChildItem -Path $outputPath -File -Filter "*output*" -ErrorAction Stop
-		$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-		If ($jsonObj.ResponseCode -ne 0) {
-			[string]$optimusError = $jsonObj.ResponseMsg
-			$errorParams = @{
-				Message = "Optimus Failed: $optimusError";
-				ErrorId = "$($jsonObj.ResponseCode)";
-				RecommendedAction = "Check ops log.";
-				ErrorAction = "Stop";
+		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		ForEach ($folder in $folders) {
+			$outputPath = $($folder.Parent.FullName) + '\' + $($folder.Name) + '_Output\'
+			If ($(Test-Path -Path $outputPath) -eq $false) {
+				Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating folder:  $outputPath ..."
+				New-Item -ItemType Directory -Path $outputPath -Force -ErrorAction Stop > $null
 			}
-			Write-Error @errorParams
+			$block = {
+				[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
+				& $args[0] $args[1..4];
+				Remove-Item -Path $($args[1]) -Recurse -Force -ErrorAction Stop;
+			}
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Starting convert job:  $($folder.FullName)..."
+			Start-Job -ScriptBlock $block -ArgumentList "$optimus", "$($folder.FullName)", "$outputPath", "$transTypes", "$($processDate)_$($folder.Name)" -ErrorAction Stop
+			Start-Sleep -Milliseconds 128
 		}
-		Else {
-			Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop
-			Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Converting..."
+		Get-Job | Wait-Job
+		Get-Job | Remove-Job -ErrorAction Stop
+		Add-Content -Value "$(New-TimeStamp)  Optimus Report:" -Path $opsLog -ErrorAction Stop -Encoding Unicode
+		$folders = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Directory -ErrorAction Stop
+		ForEach ($folder in $folders) {
+			$outputFile = Get-ChildItem -Path $($folder.FullName) -Recurse -File -Filter "*output*" -ErrorAction Stop
+			$jsonObj = Get-Content -Raw -Path $outputFile.FullName -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+			If ($jsonObj.ResponseCode -ne 0) {
+				[string]$optimusError = $jsonObj.ResponseMsg
+				$errorParams = @{
+					Message = "Optimus Failed: $optimusError";
+					ErrorId = "$($jsonObj.ResponseCode)";
+					RecommendedAction = "Check ops log.";
+					ErrorAction = "Stop";
+				}
+				Write-Error @errorParams
+			}
+			Else {
+				Add-Content -Value "$($folder.FullName)" -Path $opsLog -ErrorAction Stop -Encoding Unicode
+				Add-Content -Value "TotalNumRecords: $($jsonObj.TotalNumRecords)" -Path $opsLog -ErrorAction Stop -Encoding Unicode
+				Add-Content -Value "TotalNumFiles: $($jsonObj.TotalNumFiles)" -Path $opsLog -ErrorAction Stop -Encoding Unicode
+				Add-Content -Value "------------------------------------------------------------------------------------------------------" -Path $opsLog -ErrorAction Stop -Encoding Unicode
+			}
 		}
 	# Concatinate CSV's to one file
-	<#
 		$milestone_3 = Get-Date
 		$121files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_121*" -Recurse -File -ErrorAction Stop
 		$122files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1_122*" -Recurse -File -ErrorAction Stop
-		$121output = @()
-		$122output = @()
-		$121output += Get-Content -Path $121files[0].FullName -TotalCount 1
-		$122output += Get-Content -Path $122files[0].FullName -TotalCount 1
+		$121outFile = $($destinationRootPath + $processDate + '\' + $processDate + '_D1_121_Headers.csv')
+		$122outFile = $($destinationRootPath + $processDate + '\' + $processDate + '_D1_122_Details.csv')
+		Set-Content -Path $121outFile -Value $(Get-Content -Path $121files[0].FullName -TotalCount 1) -ErrorAction Stop
+		Set-Content -Path $122outFile -Value $(Get-Content -Path $122files[0].FullName -TotalCount 1) -ErrorAction Stop
 		ForEach ($121file in $121files) {
-			$121output += Get-Content -Path $121file.FullName | Select-Object -Skip 1
+			$121output = $(Get-Content -Path $121file.FullName -ReadCount 0)
+			$121output = $121output | Select-Object -Skip 1
+			Add-Content -Path $121outFile -Value $121output -ErrorAction Stop
 		}
-		Set-Content -Value $121output -Path $($destinationRootPath + $processDate + '\' + $processDate + 'D1_121_Headers.csv') -Force -ErrorAction Stop
 		$121output = $null
 		ForEach ($122file in $122files) {
-			$122output += Get-Content -Path $122file.FullName | Select-Object -Skip 1
+			$122output = $(Get-Content -Path $122file.FullName -ReadCount 0)
+			$122output = $122output | Select-Object -Skip 1
+			Add-Content -Path $122outFile -Value $122output -ErrorAction Stop
 		}
-		Set-Content -Value $122output -Path $($destinationRootPath + $processDate + '\' + $processDate + 'D1_121_Details.csv') -Force -ErrorAction Stop
 		$122output = $null
-	#>
 	# Upload CSV's to blob storage
-		$milestone_3 = Get-Date
-		$files = Get-ChildItem -Path $outputPath -Filter "*D1*" -File -ErrorAction Stop
+		$milestone_4 = Get-Date
+		$files = Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -Filter "*D1*" -File -ErrorAction Stop
 		ForEach ($file in $files) {
 			If ($file.Name -like "*D1_121*") {
 				$destination = $121blobPath
@@ -236,9 +229,9 @@ While ($y -lt $range) {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  File uploaded successfully."
 		}
 	# Delete data from temp drive
-		$milestone_4 = Get-Date
+		$milestone_5 = Get-Date
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Deleting $destinationRootPath..."
-		Remove-Item -Path $destinationRootPath -Recurse -Force -ErrorAction Stop
+		Remove-Item -Path "$destinationRootPath\*" -Recurse -Force -ErrorAction Stop
 	# Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
@@ -246,9 +239,9 @@ While ($y -lt $range) {
 		$rawTime = New-TimeSpan -Start $milestone_0 -End $milestone_1
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 		$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
-		#$catTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-		$uplTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-		$cleTime = New-TimeSpan -Start $milestone_4 -End $endTime
+		$catTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
+		$uplTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
+		$cleTime = New-TimeSpan -Start $milestone_5 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
 		$message01 = "Start Time--------:  $startTimeText"
 		$message02 = "End Time----------:  $endTimeText"
@@ -256,22 +249,22 @@ While ($y -lt $range) {
 		$message04 = "Raw File Download-:  $($rawTime.Hours.ToString("00")) h $($rawTime.Minutes.ToString("00")) m $($rawTime.Seconds.ToString("00")) s"
 		$message05 = "Decompression-----:  $($sepTime.Hours.ToString("00")) h $($sepTime.Minutes.ToString("00")) m $($sepTime.Seconds.ToString("00")) s"
 		$message06 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
-		#$message07 = "Concat CSV Files--:  $($catTime.Hours.ToString("00")) h $($catTime.Minutes.ToString("00")) m $($catTime.Seconds.ToString("00")) s"
-		$message07 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
-		$message08 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
-		$message09 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-		$message10 = "Total File Count--:  $fileCount"
+		$message07 = "Concat CSV Files--:  $($catTime.Hours.ToString("00")) h $($catTime.Minutes.ToString("00")) m $($catTime.Seconds.ToString("00")) s"
+		$message08 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
+		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
+		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+		$message11 = "Total File Count--:  $fileCount"
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message04
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message05
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message06
-		#Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message07
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message07
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message08
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message09
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message10
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message11
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -294,11 +287,12 @@ While ($y -lt $range) {
 				$message08<br>
 				$message09<br>
 				$message10<br>
+				$message11<br>
 				</font>
 "@
 		}
 		Send-MailMessage @params
-		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop
+		Add-Content -Value '::ETL SUCCESSFUL::' -Path $opsLog -ErrorAction Stop -Encoding Unicode
 		$y++
 		If ($y -lt $range) {
 			Write-Output "Starting next day in 10..."
@@ -361,6 +355,11 @@ While ($y -lt $range) {
 	Finally {
 		Write-Output 'Finally...'
 		Get-Job | Remove-Job -Force
+		$configFile = "C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Optimus.exe.config"
+		[xml]$doc = Get-Content -Path $configFile
+		$etting = $doc.configuration.applicationSettings.'Ansira.Sel.BITC.DataExtract.Optimus.Properties.Settings'.setting | Where-Object -FilterScript {$_.Name -eq 'DupFileCheck'}
+		$etting.value = '1'
+		$doc.Save($configFile)
 	}
 }
 Return $exitCode
