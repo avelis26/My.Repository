@@ -36,7 +36,7 @@ Function Expand-FilesInParallel {
 		Start-Job -ScriptBlock $block -ArgumentList $($folder.FullName) -Name $($jobBaseName + $jobI.ToString()) -ErrorAction Stop
 		$jobI++
 	}
-	Tee-Object -FilePath $log -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Spliting and decompressing..."
+	Tee-Object -FilePath $log -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Decompressing..."
 	$r = 0
 	[string]$badFiles = $null
 	[int]$failed = 0
