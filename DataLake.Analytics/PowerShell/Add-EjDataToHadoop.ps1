@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.7
+# Version  --  v1.0.3.8
 #######################################################################################################
 #
 #######################################################################################################
@@ -42,7 +42,7 @@ If ($noDupeCheck.IsPresent -eq $true) {
 }
 $userName = 'gpink003'
 $transTypes = 'D1121,D1122'
-$destinationRootPath = 'D:\BIT_CRM\Hadoop\'
+$destinationRootPath = 'D:\BIT_CRM\'
 $dataLakeSubId = 'ee691273-18af-4600-bc24-eb6768bf9cfa'
 $smtpServer = '10.128.1.125'
 $port = 25
@@ -228,10 +228,6 @@ While ($y -lt $range) {
 			}
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  File uploaded successfully."
 		}
-	# Delete data from temp drive
-		$milestone_5 = Get-Date
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Deleting $destinationRootPath..."
-		Remove-Item -Path "$destinationRootPath\*" -Recurse -Force -ErrorAction Stop
 	# Send report
 		$endTime = Get-Date
 		$endTimeText = $(New-TimeStamp -forFileName)
@@ -240,8 +236,7 @@ While ($y -lt $range) {
 		$sepTime = New-TimeSpan -Start $milestone_1 -End $milestone_2
 		$exeTime = New-TimeSpan -Start $milestone_2 -End $milestone_3
 		$catTime = New-TimeSpan -Start $milestone_3 -End $milestone_4
-		$uplTime = New-TimeSpan -Start $milestone_4 -End $milestone_5
-		$cleTime = New-TimeSpan -Start $milestone_5 -End $endTime
+		$uplTime = New-TimeSpan -Start $milestone_4 -End $endTime
 		$totTime = New-TimeSpan -Start $startTime -End $endTime
 		$message01 = "Start Time--------:  $startTimeText"
 		$message02 = "End Time----------:  $endTimeText"
@@ -251,9 +246,8 @@ While ($y -lt $range) {
 		$message06 = "File Processing---:  $($exeTime.Hours.ToString("00")) h $($exeTime.Minutes.ToString("00")) m $($exeTime.Seconds.ToString("00")) s"
 		$message07 = "Concat CSV Files--:  $($catTime.Hours.ToString("00")) h $($catTime.Minutes.ToString("00")) m $($catTime.Seconds.ToString("00")) s"
 		$message08 = "CSV File Upload---:  $($uplTime.Hours.ToString("00")) h $($uplTime.Minutes.ToString("00")) m $($uplTime.Seconds.ToString("00")) s"
-		$message09 = "Cleanup-----------:  $($cleTime.Hours.ToString("00")) h $($cleTime.Minutes.ToString("00")) m $($cleTime.Seconds.ToString("00")) s"
-		$message10 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
-		$message11 = "Total File Count--:  $fileCount"
+		$message09 = "Total Run Time----:  $($totTime.Hours.ToString("00")) h $($totTime.Minutes.ToString("00")) m $($totTime.Seconds.ToString("00")) s"
+		$message10 = "Total File Count--:  $fileCount"
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message01
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message02
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message03
@@ -264,7 +258,6 @@ While ($y -lt $range) {
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message08
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message09
 		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message10
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject $message11
 		$params = @{
 			SmtpServer = $smtpServer;
 			Port = $port;
@@ -287,7 +280,6 @@ While ($y -lt $range) {
 				$message08<br>
 				$message09<br>
 				$message10<br>
-				$message11<br>
 				</font>
 "@
 		}
@@ -354,12 +346,17 @@ While ($y -lt $range) {
 	}
 	Finally {
 		Write-Output 'Finally...'
+		# Remove any stale jobs
 		Get-Job | Remove-Job -Force
+		# Set Optimus config back to DupFileCheck = 1
 		$configFile = "C:\Scripts\C#\Optimus\Hadoop\Ansira.Sel.BITC.DataExtract.Optimus.exe.config"
 		[xml]$doc = Get-Content -Path $configFile
 		$etting = $doc.configuration.applicationSettings.'Ansira.Sel.BITC.DataExtract.Optimus.Properties.Settings'.setting | Where-Object -FilterScript {$_.Name -eq 'DupFileCheck'}
 		$etting.value = '1'
 		$doc.Save($configFile)
+		# Delete data from temp drive
+		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Deleting $destinationRootPath..."
+		Remove-Item -Path "$destinationRootPath" -Recurse -Force -ErrorAction Stop
 	}
 }
 Return $exitCode
