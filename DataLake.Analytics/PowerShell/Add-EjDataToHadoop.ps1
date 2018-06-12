@@ -1,4 +1,4 @@
-# Version  --  v1.0.3.8
+# Version  --  v1.0.3.9
 #######################################################################################################
 #
 #######################################################################################################
@@ -355,7 +355,6 @@ While ($y -lt $range) {
 		$etting.value = '1'
 		$doc.Save($configFile)
 		# Delete data from temp drive
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Deleting $destinationRootPath..."
 		Remove-Item -Path "$destinationRootPath" -Recurse -Force -ErrorAction Stop
 	}
 }
