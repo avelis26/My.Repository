@@ -162,7 +162,6 @@ $comp_da = $comp_dt.comp_dt.Day.ToString('00')
 $lastYearDate = $comp_yr + '-' + $comp_mo + '-' + $comp_da
 $scriptStartTime = Get-Date
 $scriptStartTimeText = $(New-TimeStamp -forFileName)
-$currentYearDateObj = Get-Date -Date $currentYearDate
 $lastYearDateObj = Get-Date -Date $lastYearDate
 Write-Host '********************************************************************' -ForegroundColor Magenta
 Write-Host "Current Year    ::  $currentYearDate"
