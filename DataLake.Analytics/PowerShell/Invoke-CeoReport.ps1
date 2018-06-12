@@ -1,7 +1,11 @@
-# Init  --  v1.0.1.3
+# Init  --  v1.0.1.4
 ##########################################
-$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
-$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
+Write-Output "Importing SQL module and custom functions..."
+Import-Module SqlServer -ErrorAction Stop
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Copy-SqlDataFromProd.ps1')
+$opsAddr = 'graham.pinkston@ansira.com', 'Britten.Morse@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
 $opsLogRoot = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\Report\CEO\'
 $smtpServer = '10.128.1.125'
@@ -140,9 +144,6 @@ Function Execute-CeoAggregation {
 	Add-Content -Value "---------------------------------------------------------------------------------------------------------------------------------------" -Path $opsLog
 }
 # Init
-Add-Content -Value "$(New-TimeStamp)  Importing SQL module and custom functions..." -Path $opsLog
-Import-Module SqlServer -ErrorAction Stop
-. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 Add-Content -Value "$(New-TimeStamp)  Getting comp date..." -Path $opsLog
 $query = 'SELECT [comp_dt] FROM [dbo].[RPTS_Calendar] WHERE [calendar_dt] = DATEADD(day, -1, CAST(GETDATE() AS DATE))'
 $sqlParams = @{
@@ -210,6 +211,7 @@ Try {
 "@
 	}
 	Send-MailMessage @params
+	Copy-SqlDataFromProd
 	$sqlParams = @{
 		query = $query;
 		ServerInstance = $sqlServer;

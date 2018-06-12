@@ -1,15 +1,19 @@
-# Init  --  v1.3.3.3
+# Init  --  v1.3.3.4
 ##########################################
-# Fix error hanlding
+# 
 ##########################################
+Write-Output "Importing SQL module and custom functions..."
+Import-Module SqlServer -ErrorAction Stop
+. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
+. $($PSScriptRoot + '\Copy-SqlDataFromProd.ps1')
 $scriptStartTime = Get-Date
 $day = $($scriptStartTime.AddDays(-1)).day.ToString("00")
 $month = $($scriptStartTime.AddDays(-1)).month.ToString("00")
 $year = $($scriptStartTime.AddDays(-1)).year.ToString("0000")
 $end = $year + '-' + $month + '-' + $day
 ##########################################
-$opsAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'Britten.Morse@Ansira.com'
-$finalAddr = 'graham.pinkston@ansira.com', 'mayank.minawat@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
+$opsAddr = 'graham.pinkston@ansira.com', 'Britten.Morse@Ansira.com'
+$finalAddr = 'graham.pinkston@ansira.com', 'megan.morace@ansira.com', 'Anna.Behle@Ansira.com', 'Ben.Smith@Ansira.com', 'Britten.Morse@Ansira.com'
 ##########################################
 $opsLogRoot = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\Report\Store\'
 $smtpServer = '10.128.1.125'
@@ -312,7 +316,8 @@ Function Execute-LocalStoreAndProduct {
 "@
 	}
 	Send-MailMessage @params
-	$sqlSandPParams = @{
+	Copy-SqlDataFromProd
+	$sqlParams = @{
 		query = $query;
 		ServerInstance = $sqlServer;
 		Database = $database;
@@ -321,7 +326,7 @@ Function Execute-LocalStoreAndProduct {
 		QueryTimeout = 0;
 		ErrorAction = 'Stop';
 	}
-	$result = Invoke-Sqlcmd @sqlSandPParams
+	$result = Invoke-Sqlcmd @sqlParams
 	$message = "Store And Product Tables Updated Successfully"
 	Write-Output $message
 	Add-Content -Value "$(New-TimeStamp)  $message" -Path $opsLog
@@ -442,8 +447,6 @@ Try {
 	If ($endDate.DayOfWeek -ne 'Sunday') {
 		throw [System.ArgumentOutOfRangeException] "End date should be a Sunday!!!"
 	}
-	Import-Module SqlServer -ErrorAction Stop
-	. $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 	$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
 	Add-Content -Value "$(New-TimeStamp)  SSL Policy: $policy" -Path $opsLog -ErrorAction Stop
 	Set-SslCertPolicy
