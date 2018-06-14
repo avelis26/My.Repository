@@ -1,4 +1,4 @@
-# Version  --  v1.1.3.9
+# Version  --  v1.1.4.0
 #######################################################################################################
 # add logic to start and stop SQL server
 #######################################################################################################
@@ -126,6 +126,7 @@ Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - Store Failed!!!' -log $opsLog
 }
 # Data to SQL - CEO
+<#
 Try {
 	$start = Get-Date
 	$message = "$(New-TimeStamp)  Adding CEO EJ data to SQL..."
@@ -153,6 +154,7 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - CEO Failed!!!' -log $opsLog
 }
+#>
 # Perform SQL Maintenance 
 Try {
 	If ($maintenance.IsPresent -eq $true) {
