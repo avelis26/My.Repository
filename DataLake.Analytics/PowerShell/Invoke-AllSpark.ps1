@@ -186,6 +186,7 @@ Try {
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
 # Delete Old Data From CEO
+<#
 		$message = "$(New-TimeStamp)  Removing old data from CEO database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
@@ -199,6 +200,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
+#>
 # Rebuild SQL Indexs
 		$message = "$(New-TimeStamp)  Rebuilding SQL indexes..."
 		Write-Output $message
@@ -268,6 +270,7 @@ Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Store Report Failed!!!' -log $opsLog
 }
 # Execute CEO Report
+<#
 Try {
 	If ($ceo.IsPresent -eq $true) {
 		$start = Get-Date
@@ -297,6 +300,7 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!' -log $opsLog
 }
+#>
 Finally {
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'

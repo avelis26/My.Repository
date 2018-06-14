@@ -1,9 +1,10 @@
-# Init  --  v1.3.3.4
+# Init  --  v1.3.3.5
 ##########################################
 # 
 ##########################################
 Write-Output "Importing SQL module and custom functions..."
 Import-Module SqlServer -ErrorAction Stop
+. $($PSScriptRoot + '\New-TimeStamp.ps1')
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Copy-SqlDataFromProd.ps1')
 $scriptStartTime = Get-Date
@@ -24,19 +25,6 @@ $sqlUser = 'sqladmin'
 $sqlPass = 'Password20!7!'
 $sqlServer = 'MS-SSW-CRM-SQL'
 ##########################################
-Function New-TimeStamp {
-	[CmdletBinding()]
-	Param(
-		[switch]$forFileName
-	)
-	If ($forFileName -eq $true) {
-		$timeStamp = Get-Date -Format 'yyyyMMdd_HHmmss' -ErrorAction Stop
-	}
-	Else {
-		$timeStamp = Get-Date -Format 'yyyy/MM/dd_HH:mm:ss' -ErrorAction Stop
-	}
-	Return $timeStamp
-}
 Function Execute-AggregateOneOne {
 	$startTime = Get-Date
 	$message = "Store Report: 1 of 8 For Date Range: $start - $end"
@@ -548,5 +536,16 @@ Catch {
 	}
 	Send-MailMessage @params
 	$exitCode = 1
+}
+Finally {
+	$sqlParams = @{
+		query = 'DROP TABLE [7ELE].[dbo].[tmp_query_data_joined]; DROP TABLE [7ELE].[dbo].[tmp_query_data_FINAL]';
+		ServerInstance = $sqlServer;
+		Database = $database;
+		Username = $sqlUser;
+		Password = $sqlPass;
+		QueryTimeout = 0;
+	}
+	Invoke-Sqlcmd @sqlParams
 }
 Return $exitCode
