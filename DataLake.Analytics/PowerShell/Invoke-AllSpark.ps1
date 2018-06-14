@@ -84,6 +84,20 @@ Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!' -log $opsLog
 }
 #>
+# Starting Up SQL Server
+Try {
+	$message = "$(New-TimeStamp)  Starting up SQL server..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	Start-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop
+	$message = "$(New-TimeStamp)  Waiting 10 minutes for SQL server to warm up..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	Start-Sleep -Seconds 600
+}
+Catch {
+	Invoke-ErrorReport -Subject 'AllSpark: SQL Server Startup Failed!!!' -log $opsLog
+}
 # Data to SQL - Store
 Try {
 	If ($scheduled.IsPresent -eq $true) {
@@ -302,6 +316,15 @@ Catch {
 }
 #>
 Finally {
+	Try {
+		$message = "$(New-TimeStamp)  Shutting down SQL server..."
+		Write-Output $message
+		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Stop-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop -Force
+	}
+	Catch {
+		Invoke-ErrorReport -Subject 'AllSpark: SQL Server Startup Failed!!!' -log $opsLog
+	}
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
