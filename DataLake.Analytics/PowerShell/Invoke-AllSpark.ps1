@@ -323,7 +323,7 @@ Finally {
 		Stop-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop -Force
 	}
 	Catch {
-		Invoke-ErrorReport -Subject 'AllSpark: SQL Server Startup Failed!!!' -log $opsLog
+		Invoke-ErrorReport -Subject 'AllSpark: SQL Server Shutdown Failed!!!' -log $opsLog
 	}
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
