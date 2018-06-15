@@ -1,4 +1,4 @@
-# Version  --  v1.1.4.0
+# Version  --  v1.1.4.1
 #######################################################################################################
 # add logic to start and stop SQL server
 #######################################################################################################
@@ -27,6 +27,11 @@ $sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
 $sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
+$userName = 'gpink003'
+$user = $userName + '@7-11.com'
+$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
+$azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred"
+$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass)
 #######################################################################################################
 # Init
 If ($([System.Diagnostics.EventLog]::SourceExists('AllSpark')) -eq $false) {
@@ -52,6 +57,7 @@ $opsLog = $opsLogRootPath + "$(Get-Date -Format 'yyyyMMdd_HHmmss')_AllSpark.log"
 If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
+Connect-AzureRmAccount -Subscription $subId -Credential $credential
 # Data to Hadoop
 <#
 Try {
@@ -320,6 +326,7 @@ Finally {
 		$message = "$(New-TimeStamp)  Shutting down SQL server..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+		Select-AzureRmSubscription -Subscription $subId -ErrorAction Stop
 		Stop-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop -Force
 	}
 	Catch {
