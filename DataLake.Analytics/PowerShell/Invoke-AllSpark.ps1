@@ -1,4 +1,4 @@
-# Version  --  v1.1.4.1
+# Version  --  v1.1.4.2
 #######################################################################################################
 # add logic to start and stop SQL server
 #######################################################################################################
@@ -20,9 +20,9 @@ Import-Module AzureRM -ErrorAction Stop
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 $opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\AllSpark\'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
-$AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
+#$AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 $InvokeStoreReportScript = 'C:\Scripts\PowerShell\Invoke-StoreReport.ps1'
-$InvokeCeoReportScript = 'C:\Scripts\PowerShell\Invoke-CeoReport.ps1'
+#$InvokeCeoReportScript = 'C:\Scripts\PowerShell\Invoke-CeoReport.ps1'
 $sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
@@ -322,16 +322,11 @@ Catch {
 }
 #>
 Finally {
-	Try {
-		$message = "$(New-TimeStamp)  Shutting down SQL server..."
-		Write-Output $message
-		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-		Select-AzureRmSubscription -Subscription $subId -ErrorAction Stop
-		Stop-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop -Force
-	}
-	Catch {
-		Invoke-ErrorReport -Subject 'AllSpark: SQL Server Shutdown Failed!!!' -log $opsLog
-	}
+	$message = "$(New-TimeStamp)  Shutting down SQL server..."
+	Write-Output $message
+	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
+	Select-AzureRmSubscription -Subscription $subId -ErrorAction Stop
+	Stop-AzureRmVM -ResourceGroupName "CRM-SQL" -Name "MS-SSW-CRM-SQL" -ErrorAction Stop -Force
 	Add-Content -Value "$(New-TimeStamp -forFileName) :: $($MyInvocation.MyCommand.Name) :: End" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	Add-Content -Value "----------------------------------------------------------------------------------" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 	If ($exit.IsPresent -eq $true) {	
