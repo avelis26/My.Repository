@@ -16,7 +16,7 @@ Function Get-DataLakeRawFiles {
 		Path = $source;
 		Destination = $destination;
 		Force = $true;
-		Concurrency = 256;
+		Concurrency = 96;
 		ErrorAction = 'Stop';
 	}
 	Export-AzureRmDataLakeStoreItem @exportParams

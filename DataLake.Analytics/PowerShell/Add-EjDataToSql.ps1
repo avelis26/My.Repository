@@ -1,4 +1,4 @@
-# Version  --  v3.1.7.1
+# Version  --  v3.1.7.2
 #######################################################################################################
 # need to imporve multithreading
 # Add logic to check bcp error file for content
@@ -114,7 +114,8 @@ Start-Sleep -Seconds 1
 Try {
 	$range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 	$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
-	Write-Debug -Message $credential.UserName
+	Set-SslCertPolicy
+	Connect-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 	While ($y -lt $range) {
 		$startTime = Get-Date -ErrorAction Stop
 		$startTimeText = $(New-TimeStamp -forFileName)
@@ -140,14 +141,6 @@ Try {
 			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $errLogRootPath..."
 			New-Item -ItemType Directory -Path $errLogRootPath -Force -ErrorAction Stop > $null
 		}
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
-		Set-SslCertPolicy
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Logging into Azure..."
-		Connect-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Login successful."
 # Get raw files
 		$retry = 0
 		While ($retry -lt 3) {
