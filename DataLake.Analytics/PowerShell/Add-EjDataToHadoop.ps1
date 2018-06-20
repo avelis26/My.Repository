@@ -1,4 +1,4 @@
-# Version  --  v1.0.4.1
+# Version  --  v1.0.4.2
 #######################################################################################################
 #
 #######################################################################################################
@@ -105,9 +105,9 @@ While ($y -lt $range) {
 		}
 	# Get raw files
 		$retry = 0
+		$milestone_0 = Get-Date -ErrorAction Stop
 		While ($retry -lt 3) {
 			Try {
-				$milestone_0 = Get-Date -ErrorAction Stop
 				Get-DataLakeRawFiles -dataLakeStoreName $dataLakeStoreName -destination $($destinationRootPath + $processDate + '\') -source $($dataLakeSearchPathRoot + $processDate) -log $opsLog
 				$fileCount = $(Get-ChildItem -Path $($destinationRootPath + $processDate + '\') -File).Count
 	# Seperate files into 5 seperate folders for paralell processing
