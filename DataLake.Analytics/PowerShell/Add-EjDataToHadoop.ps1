@@ -1,4 +1,4 @@
-# Version  --  v1.0.4.0
+# Version  --  v1.0.4.1
 #######################################################################################################
 #
 #######################################################################################################
@@ -79,6 +79,8 @@ Start-Sleep -Seconds 1
 $exitCode = 0
 $range = $(New-TimeSpan -Start $startDateObj -End $endDateObj -ErrorAction Stop).Days + 1
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass -ErrorAction Stop) -ErrorAction Stop
+Set-SslCertPolicy
+Connect-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
 While ($y -lt $range) {
 	Try {
 		$startTime = Get-Date -ErrorAction Stop
@@ -98,17 +100,9 @@ While ($y -lt $range) {
 			Add-Content -Value "$(New-TimeStamp)  Process Date: $processDate" -Path $opsLog -ErrorAction Stop -Encoding Unicode
 		}
 		If ($(Test-Path -Path $destinationRootPath) -eq $false) {
-			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Creating $destinationRootPath..."
+			Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  Creating $destinationRootPath..."
 			New-Item -ItemType Directory -Path $destinationRootPath -Force -ErrorAction Stop > $null
 		}
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
-		Set-SslCertPolicy
-		$policy = [System.Net.ServicePointManager]::CertificatePolicy.ToString()
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "$(New-TimeStamp)  SSL Policy: $policy"
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Logging into Azure..."
-		Login-AzureRmAccount -Credential $credential -Subscription $dataLakeSubId -Force -ErrorAction Stop
-		Tee-Object -FilePath $opsLog -Append -ErrorAction Stop -InputObject "Login successful."
 	# Get raw files
 		$retry = 0
 		While ($retry -lt 3) {
