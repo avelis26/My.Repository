@@ -17,7 +17,7 @@ OR								[TABLE_NAME] LIKE 'ext_storeTable%'
 OPEN							rebuildindexes
 DECLARE							@tableSchema							NVARCHAR(128)
 DECLARE							@tableName								NVARCHAR(128)
-DECLARE							@Statement								NVARCHAR(300) 
+DECLARE							@Statement								NVARCHAR(300)
 FETCH NEXT FROM					rebuildindexes
 INTO							@tableSchema,
 								@tableName
@@ -28,6 +28,6 @@ EXEC							sp_executesql @Statement
 FETCH NEXT FROM					rebuildindexes
 INTO							@tableSchema,
 								@tableName
-END 
+END
 CLOSE							rebuildindexes
-DEALLOCATE						rebuildindexes 
+DEALLOCATE						rebuildindexes
