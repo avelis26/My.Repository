@@ -1,6 +1,9 @@
-# Version  --  v1.1.4.2
+# Version  --  v1.1.4.3
 #######################################################################################################
-# add logic to start and stop SQL server
+# Scheduled Task Action:
+# Start a program
+# Program/script: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+# Add arguments (optional): -MTA -File "C:\Scripts\PowerShell\Invoke-AllSpark.ps1" -scheduled -store -exit
 #######################################################################################################
 [CmdletBinding()]
 Param(
