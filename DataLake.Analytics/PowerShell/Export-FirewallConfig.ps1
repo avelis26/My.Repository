@@ -1,3 +1,4 @@
+# info https://cwiki.apache.org/confluence/download/attachments/30753712/XML_API_Training.pdf?version=1&modificationDate=1366305635000
 $user = 'gpink003'
 $password = 'C:\Scripts\Secrets\firewall.txt'
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $password -AsPlainText -Force)
