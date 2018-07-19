@@ -4,6 +4,9 @@
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 Set-SslCertPolicy
-$key = Get-Content -Path 'C:\Scripts\Secrets\firewall_key.txt'
-$configUrl = "https://xxx.xxx.xxx.xxx/api/?type=import&category=configuration&key=$key"
-[xml]$config = Invoke-WebRequest -Uri $configUrl
+$key1 = Get-Content -Path 'C:\Scripts\Secrets\firewall_1_key.txt'
+$key2 = Get-Content -Path 'C:\Scripts\Secrets\firewall_2_key.txt'
+$exportUrl = "https://172.22.162.133/api/?type=export&category=configuration&key=$key1"
+[xml]$config = Invoke-WebRequest -Uri $exportUrl
+$importUrl = "https://172.22.162.132/api/?type=import&category=configuration&key=$key2"
+Invoke-WebRequest -Uri $importUrl -Body $config -Method 'Post' -ContentType 'application/xml'
