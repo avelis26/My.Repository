@@ -1,0 +1,1 @@
+aws rds describe-db-snapshots --snapshot-type automated | grep '"DBSnapshotIdentifier": "rds:purina-dev-' | tail -1
