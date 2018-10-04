@@ -18,3 +18,5 @@ print("Current UTC time is:  " + datetime.datetime.now().strftime("%Y-%m-%d %H:%
 print("Starting restore...")
 cmd = "aws rds restore-db-instance-from-db-snapshot --db-instance-identifier '" + str(new_instance_name) + "' --db-snapshot-identifier '" + str(latest_snapshot_name) + "'"
 result = subprocess.check_output([cmd], shell=True)
+print("Current UTC time is:  " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print("Done :)")
