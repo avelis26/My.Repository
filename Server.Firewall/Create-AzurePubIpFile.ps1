@@ -24,4 +24,3 @@ Foreach ($region in $Azureipranges.AzurePublicIpAddresses.region) {
 }
 If (!(Test-Path -Path $path)) {New-Item -ItemType Directory -Path $path}
 Set-Content -Path $($path + 'azuredcip.txt') -Value $newArray
-429
