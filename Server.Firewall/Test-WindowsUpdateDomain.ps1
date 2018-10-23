@@ -14,6 +14,6 @@ $domains = `
 'blob.core.windows.net', `
 'azure-automation.net'
 ForEach ($domain in $domains) {
-    $ip = Resolve-DnsName -Name $domain -DnsOnly -TcpOnly
+    $ip = Resolve-DnsName -Name $domain -DnsOnly -TcpOnly -Type A
     #Add-Content -Path $outFile -Value $ip[2].IPAddress
 }
