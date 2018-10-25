@@ -13,7 +13,17 @@ $domains = `
 'oms.opinsights.azure.com', `
 'blob.core.windows.net', `
 'azure-automation.net'
+$hash = @{}
 ForEach ($domain in $domains) {
-    $ip = Resolve-DnsName -Name $domain -DnsOnly -TcpOnly -Type A
-    #Add-Content -Path $outFile -Value $ip[2].IPAddress
+	$responses = Resolve-DnsName -Name $domain -DnsOnly -TcpOnly -Type A
+	ForEach ($response in $responses) {
+		If ($response.Type -eq 'A') {
+			# need to fix this, some domains have 2 A records.
+			If ($hash.$domain -ne $null) {
+				$hash.$domain = @($($hash.$domain), 'bar')
+			}
+			$hash.Add($domain, $response.Address)
+		}
+	}
 }
+Write-Output $hash
