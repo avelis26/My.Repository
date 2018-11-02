@@ -11,12 +11,6 @@ $wsusport = "8530"
  
 ##Set Log Location
 $log = "C:\scripts\wsus-maintenance.log"
- 
-##Set Mail Config
-$toaddress = "graham.pinkston@ansira.com"
-$fromaddress = $wsussrvr + "@ansira.com"
-$subject = "WSUS Maintenance"
-$mailserver = '10.128.1.125'
 
 ##Start Log
 Start-Transcript $log
@@ -26,9 +20,17 @@ Get-WsusServer | Invoke-WsusServerCleanup -CleanupObsoleteComputers -CleanupObso
  
 ##Stop Log
 Stop-Transcript
- 
-##Send Mail
 $body = Get-Content -Path $log | Out-String
-Send-MailMessage -To $toaddress -From $fromaddress -Subject $subject -Body $body -SmtpServer $mailserver
- 
-##END
+
+##Send Mail
+$params = @{
+	SmtpServer = '10.128.1.125';
+	Port = '25';
+	UseSsl = 0;
+	From = 'no-reply@7-11.com';
+	To = 'graham.pinkston@ansira.com';
+	BodyAsHtml = $true;
+	Subject = 'WSUS Maintenance';
+	Body = $body
+}
+Send-MailMessage @params

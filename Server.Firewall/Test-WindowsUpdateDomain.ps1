@@ -15,7 +15,7 @@ $domains = `
 'azure-automation.net'
 $hash = @{}
 ForEach ($domain in $domains) {
-	$responses = Resolve-DnsName -Name $domain -DnsOnly -TcpOnly -Type A
+	$responses = Resolve-DnsName -Name $domain -Type A
 	ForEach ($response in $responses) {
 		If ($response.Type -eq 'A') {
 			# need to fix this, some domains have 2 A records.
