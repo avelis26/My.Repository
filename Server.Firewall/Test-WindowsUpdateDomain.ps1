@@ -1,6 +1,8 @@
-Clear-Host
-$outFile = 'C:\tmp\domain.txt'
-Set-Content -Path $outFile -Value $(Get-Date -Format 'yyyy/MM/dd_HH:mm:ss')
+$outFile = 'C:\inetpub\wwwroot\MWUS.txt'
+$content = Get-Content -Path $outFile
+If ($content.Count -gt 5000) {
+	Set-Content -Path $outFile -Value ''
+}
 $domains = `
 'windowsupdate.microsoft.com', `
 'update.microsoft.com', `
@@ -13,13 +15,35 @@ $domains = `
 'oms.opinsights.azure.com', `
 'blob.core.windows.net', `
 'azure-automation.net'
-$ipList = $null
+[string[]]$ipList = $null
 ForEach ($domain in $domains) {
-	$responses = Resolve-DnsName -Name $domain -Type A
+	$responses = Resolve-DnsName -Name $domain
 	ForEach ($response in $responses) {
 		If ($response.Type -eq 'A') {
-			$ipList.Add($response.Address)
+			$ipList += $($response.Address)
+		}
+		ElseIf ($response.Type -eq 'CNAME') {
+			$ipList += $(Resolve-DnsName -Name $response.NameHost).IP4Address
+		}
+		ElseIf ($response.Type -eq 'SOA') {
+			$results = Resolve-DnsName -Name $response.PrimaryServer
+			ForEach ($result in $results) {
+				If ($result.Type -eq 'A') {
+					$ipList += $result.IPAddress
+				}
+			}
+			$results = Resolve-DnsName -Name $response.NameAdministrator
+			ForEach ($result in $results) {
+				If ($result.Type -eq 'A') {
+					$ipList += $result.IPAddress
+				}
+			}
+		}
+		Else {
+			Write-Host -ForegroundColor Yellow "UNKNOWN RECORD TYPE: $($response.Type)"
 		}
 	}
 }
-Write-Output $ipList
+$content = Get-Content -Path $outFile
+$content = $content + $ipList
+Add-Content -Path $outFile -Value $($content | Sort-Object | Get-Unique)
