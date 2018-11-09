@@ -1,4 +1,5 @@
-$outFile = 'C:\inetpub\wwwroot\MWUS.txt'
+#$outFile = 'C:\inetpub\wwwroot\MWUS.txt'
+$outFile = 'C:\tmp\MWUS.txt'
 $domains = `
 'windowsupdate.microsoft.com', `
 'update.microsoft.com', `
@@ -41,9 +42,6 @@ ForEach ($domain in $domains) {
 	}
 }
 $content = Get-Content -Path $outFile -ErrorAction SilentlyContinue
-If ($content.Count -gt 5000) {
-	Set-Content -Path $outFile -Value ''
-}
-$content = Get-Content -Path $outFile -ErrorAction SilentlyContinue
-$content = $content + $ipList
-Add-Content -Path $outFile -Value $($content | Sort-Object | Get-Unique)
+$output = $ipList + $content
+$final = $output | Sort-Object | Get-Unique
+Set-Content -Path $outFile -Value $final
