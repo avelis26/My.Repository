@@ -48,8 +48,7 @@ sudo chmod 775 /media/data/scvl/inbound
 sudo chmod 775 /media/data/scvl/outbound
 sudo mkdir /home/scvlsftp/.ssh
 sudo chown scvlsftp:sftpusers /home/scvlsftp/.ssh
-sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY2BJmaWS9hxVSB0oAPO19MuU5jgu7R2YiWoYymfhuPiDe95mmj5FhITdJH//wdHgoC0FxDGAG0f4QX6PA2J/ZKu0Ba3sMCLg263UAiD84BSk95TwGocUKEWoEkWVfjNGawC8AuSwscMi27qXqIz2tLa60bKyEKNlXEJi5izSIM38I7BimQ1tChsovNzmAODSMHmsRzcnGw0hJYcxnh/9BtHLRdDcJgGtdJzEda4Tfo1K4DJzyQ4mnpuNFg6rhGwLbW86Hy76bPxZhXtPa8XY8yF+26SDWGPfW2/wMx88y8xOcO57C64Fm0ZUOownypLBuV23/Z9VexrxB6Hc6wskd scvlsftp' >> /home/scvlsftp/.ssh/authorized_keys"
-sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEArV0K522fOME13iAdEN2h/ryVKsM7dnSfRSZCr78F2AICnuQXPP59d7urvMBNeeFRAn/ZhCVnQSsTXaDKY+k1+qWJ8b5X2n3YIXdopfHHWGS14tpbbt1DC5IzVEpCIQHRHZO4DU8/1X0/cJGZv8PX/jGTKrfBwqs0SNFpVmg0nmx+ZbzdCYJy4lccoYMGSGqVtT4elV0c5TF/fdrgJrlYmV/89pS6k40hGLZ1iu/Cib79/et9iIOCPePsv0LmTLOKCz6d3A3DWk+c2e4xSpF1WIQtLvWfV5u140chRgZfHD/34DqnkneEChwdd3dkZjtmS4OXsfXYGZF6ZGPQgLkEXQ scvlsftp-customer-provided' >> /home/scvlsftp/.ssh/authorized_keys"
+sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEArV0K522fOME13iAdEN2h/ryVKsM7dnSfRSZCr78F2AICnuQXPP59d7urvMBNeeFRAn/ZhCVnQSsTXaDKY+k1+qWJ8b5X2n3YIXdopfHHWGS14tpbbt1DC5IzVEpCIQHRHZO4DU8/1X0/cJGZv8PX/jGTKrfBwqs0SNFpVmg0nmx+ZbzdCYJy4lccoYMGSGqVtT4elV0c5TF/fdrgJrlYmV/89pS6k40hGLZ1iu/Cib79/et9iIOCPePsv0LmTLOKCz6d3A3DWk+c2e4xSpF1WIQtLvWfV5u140chRgZfHD/34DqnkneEChwdd3dkZjtmS4OXsfXYGZF6ZGPQgLkEXQ== rsa-key-20190110' >> /home/scvlsftp/.ssh/authorized_keys"
 sudo chown scvlsftp:sftpusers /home/scvlsftp/.ssh/authorized_keys
 sudo useradd -g sftpusers --create-home --no-user-group vibessftp
 sudo mkdir -p /media/data/vibes/inbound
@@ -127,5 +126,7 @@ sftp -o "IdentityFile=scvlsftp.ppk" scvlsftp@scvl-test-sftp-01.centralus.cloudap
 "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
 "net use z: /delete"
 "net use z: \\10.0.0.21\data Password20!7! /user:localadmin"
+
+sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY2BJmaWS9hxVSB0oAPO19MuU5jgu7R2YiWoYymfhuPiDe95mmj5FhITdJH//wdHgoC0FxDGAG0f4QX6PA2J/ZKu0Ba3sMCLg263UAiD84BSk95TwGocUKEWoEkWVfjNGawC8AuSwscMi27qXqIz2tLa60bKyEKNlXEJi5izSIM38I7BimQ1tChsovNzmAODSMHmsRzcnGw0hJYcxnh/9BtHLRdDcJgGtdJzEda4Tfo1K4DJzyQ4mnpuNFg6rhGwLbW86Hy76bPxZhXtPa8XY8yF+26SDWGPfW2/wMx88y8xOcO57C64Fm0ZUOownypLBuV23/Z9VexrxB6Hc6wskd scvlsftp' >> /home/scvlsftp/.ssh/authorized_keys"
 
 ##sudo useradd -s /bin/true smbsvc
