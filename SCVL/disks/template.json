@@ -1,283 +1,209 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
+        "disks_ScvlBiSql01_g_data_01_name": {
+            "defaultValue": "ScvlBiSql01_g_data_01",
             "type": "string"
         },
-        "networkInterfaceName": {
+        "disks_ScvlBiSql01_g_data_02_name": {
+            "defaultValue": "ScvlBiSql01_g_data_02",
             "type": "string"
         },
-        "networkSecurityGroupName": {
+        "disks_ScvlBiSql01_g_data_03_name": {
+            "defaultValue": "ScvlBiSql01_g_data_03",
             "type": "string"
         },
-        "networkSecurityGroupRules": {
-            "type": "array"
-        },
-        "subnetName": {
+        "disks_ScvlBiSql01_g_data_04_name": {
+            "defaultValue": "ScvlBiSql01_g_data_04",
             "type": "string"
         },
-        "virtualNetworkId": {
+        "disks_ScvlBiSql01_h_data_01_name": {
+            "defaultValue": "ScvlBiSql01_h_data_01",
             "type": "string"
         },
-        "publicIpAddressName": {
+        "disks_ScvlBiSql01_h_data_02_name": {
+            "defaultValue": "ScvlBiSql01_h_data_02",
             "type": "string"
         },
-        "publicIpAddressType": {
+        "disks_ScvlBiSql01_h_data_03_name": {
+            "defaultValue": "ScvlBiSql01_h_data_03",
             "type": "string"
         },
-        "publicIpAddressSku": {
-            "type": "string"
-        },
-        "virtualMachineName": {
-            "type": "string"
-        },
-        "virtualMachineRG": {
-            "type": "string"
-        },
-        "osDiskType": {
-            "type": "string"
-        },
-        "dataDisks": {
-            "type": "array"
-        },
-        "dataDiskResources": {
-            "type": "array"
-        },
-        "virtualMachineSize": {
-            "type": "string"
-        },
-        "adminUsername": {
-            "type": "string"
-        },
-        "adminPublicKey": {
-            "type": "secureString"
-        },
-        "diagnosticsStorageAccountName": {
-            "type": "string"
-        },
-        "diagnosticsStorageAccountId": {
-            "type": "string"
-        },
-        "autoShutdownStatus": {
-            "type": "string"
-        },
-        "autoShutdownTime": {
-            "type": "string"
-        },
-        "autoShutdownTimeZone": {
-            "type": "string"
-        },
-        "autoShutdownNotificationStatus": {
-            "type": "string"
-        },
-        "autoShutdownNotificationLocale": {
-            "type": "string"
-        },
-        "autoShutdownNotificationEmail": {
+        "disks_ScvlBiSql01_h_data_04_name": {
+            "defaultValue": "ScvlBiSql01_h_data_04",
             "type": "string"
         }
     },
-    "variables": {
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-        "vnetId": "[parameters('virtualNetworkId')]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
-        "aadLoginExtensionName": "AADLoginForLinux"
-    },
+    "variables": {},
     "resources": [
         {
-            "name": "[parameters('networkInterfaceName')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-08-01",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
-                            }
-                        }
-                    }
-                ],
-                "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
-                }
-            },
-            "tags": {}
-        },
-        {
-            "name": "[parameters('networkSecurityGroupName')]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2018-08-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": "[parameters('networkSecurityGroupRules')]"
-            },
-            "tags": {}
-        },
-        {
-            "name": "[parameters('publicIpAddressName')]",
-            "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2018-08-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
-            },
-            "sku": {
-                "name": "[parameters('publicIpAddressSku')]"
-            },
-            "tags": {}
-        },
-        {
-            "name": "[parameters('dataDiskResources')[copyIndex()].name]",
+            "comments": "hello world",
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2018-06-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "diskSizeGB": "[parameters('dataDiskResources')[copyIndex()].diskSizeGB]",
-                "creationData": "[parameters('dataDiskResources')[copyIndex()].creationData]"
-            },
             "sku": {
-                "name": "[parameters('dataDiskResources')[copyIndex()].sku]"
+                "name": "Premium_LRS",
+                "tier": "Premium"
             },
-            "copy": {
-                "name": "managedDiskResources",
-                "count": "[length(parameters('dataDiskResources'))]"
-            },
-            "tags": {}
-        },
-        {
-            "name": "[parameters('virtualMachineName')]",
-            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('disks_ScvlBiSql01_g_data_01_name')]",
             "apiVersion": "2018-06-01",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "managedDiskResources",
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
-            ],
+            "location": "centralus",
+            "scale": null,
             "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('virtualMachineSize')]"
+                "creationData": {
+                    "createOption": "Empty"
                 },
-                "storageProfile": {
-                    "osDisk": {
-                        "createOption": "fromImage",
-                        "managedDisk": {
-                            "storageAccountType": "[parameters('osDiskType')]"
-                        }
-                    },
-                    "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "UbuntuServer",
-                        "sku": "18.04-LTS",
-                        "version": "latest"
-                    },
-                    "copy": [
-                        {
-                            "name": "dataDisks",
-                            "count": "[length(parameters('dataDisks'))]",
-                            "input": {
-                                "lun": "[parameters('dataDisks')[copyIndex('dataDisks')].lun]",
-                                "createOption": "[parameters('dataDisks')[copyIndex('dataDisks')].createOption]",
-                                "caching": "[parameters('dataDisks')[copyIndex('dataDisks')].caching]",
-                                "writeAcceleratorEnabled": "[parameters('dataDisks')[copyIndex('dataDisks')].writeAcceleratorEnabled]",
-                                "managedDisk": {
-                                    "id": "[coalesce(parameters('dataDisks')[copyIndex('dataDisks')].id, if(equals(parameters('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', parameters('dataDisks')[copyIndex('dataDisks')].name)))]",
-                                    "storageAccountType": "[parameters('dataDisks')[copyIndex('dataDisks')].storageAccountType]"
-                                }
-                            }
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
-                        }
-                    ]
-                },
-                "osProfile": {
-                    "computerName": "[parameters('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "linuxConfiguration": {
-                        "disablePasswordAuthentication": true,
-                        "ssh": {
-                            "publicKeys": [
-                                {
-                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                                    "keyData": "[parameters('adminPublicKey')]"
-                                }
-                            ]
-                        }
-                    }
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true,
-                        "storageUri": "[concat('https://', parameters('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
-                    }
-                }
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
             },
-            "identity": {
-                "type": "systemAssigned"
-            },
-            "tags": {}
+            "dependsOn": []
         },
         {
-            "name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
-            "type": "Microsoft.DevTestLab/schedules",
-            "apiVersion": "2017-04-26-preview",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
-            ],
-            "properties": {
-                "status": "[parameters('autoShutdownStatus')]",
-                "taskType": "ComputeVmShutdownTask",
-                "dailyRecurrence": {
-                    "time": "[parameters('autoShutdownTime')]"
-                },
-                "timeZoneId": "[parameters('autoShutdownTimeZone')]",
-                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
-                "notificationSettings": {
-                    "status": "[parameters('autoShutdownNotificationStatus')]",
-                    "notificationLocale": "[parameters('autoShutdownNotificationLocale')]",
-                    "timeInMinutes": "30",
-                    "emailRecipient": "[parameters('autoShutdownNotificationEmail')]"
-                }
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
             },
-            "tags": {}
+            "name": "[parameters('disks_ScvlBiSql01_g_data_02_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
         },
         {
-            "name": "[concat(parameters('virtualMachineName'),'/', variables('aadLoginExtensionName'))]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2017-12-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publisher": "Microsoft.Azure.ActiveDirectory.LinuxSSH",
-                "type": "AADLoginForLinux",
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": true
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
             },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
-            ]
+            "name": "[parameters('disks_ScvlBiSql01_g_data_03_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "name": "[parameters('disks_ScvlBiSql01_g_data_04_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "name": "[parameters('disks_ScvlBiSql01_h_data_01_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "name": "[parameters('disks_ScvlBiSql01_h_data_02_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "name": "[parameters('disks_ScvlBiSql01_h_data_03_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "hello world",
+            "type": "Microsoft.Compute/disks",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "name": "[parameters('disks_ScvlBiSql01_h_data_04_name')]",
+            "apiVersion": "2018-06-01",
+            "location": "centralus",
+            "scale": null,
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1023,
+                "diskIOPSReadWrite": 5000,
+                "diskMBpsReadWrite": 200
+            },
+            "dependsOn": []
         }
-    ],
-    "outputs": {
-        "adminUsername": {
-            "type": "string",
-            "value": "[parameters('adminUsername')]"
-        }
-    }
+    ]
 }

@@ -2,113 +2,29 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "value": "centralus"
+        "disks_ScvlBiSql01_g_data_01_name": {
+            "value": "ScvlBiSql01_g_data_01"
         },
-        "networkInterfaceName": {
-            "value": "scvl-test-sftp-01324"
+        "disks_ScvlBiSql01_g_data_02_name": {
+            "value": "ScvlBiSql01_g_data_02"
         },
-        "networkSecurityGroupName": {
-            "value": "scvl-test-sftp-01-nsg"
+        "disks_ScvlBiSql01_g_data_03_name": {
+            "value": "ScvlBiSql01_g_data_03"
         },
-        "networkSecurityGroupRules": {
-            "value": [
-                {
-                    "name": "SSH",
-                    "properties": {
-                        "priority": 300,
-                        "protocol": "TCP",
-                        "access": "Allow",
-                        "direction": "Inbound",
-                        "sourceAddressPrefix": "*",
-                        "sourcePortRange": "*",
-                        "destinationAddressPrefix": "*",
-                        "destinationPortRange": "22"
-                    }
-                }
-            ]
+        "disks_ScvlBiSql01_g_data_04_name": {
+            "value": "ScvlBiSql01_g_data_04"
         },
-        "subnetName": {
-            "value": "dmz"
+        "disks_ScvlBiSql01_h_data_01_name": {
+            "value": "ScvlBiSql01_h_data_01"
         },
-        "virtualNetworkId": {
-            "value": "/subscriptions/f6915c04-23d0-4ac4-8cd7-b69ac91c2ab8/resourceGroups/PROD-Networking-rsg/providers/Microsoft.Network/virtualNetworks/SCVL-vnet"
+        "disks_ScvlBiSql01_h_data_02_name": {
+            "value": "ScvlBiSql01_h_data_02"
         },
-        "publicIpAddressName": {
-            "value": "scvl-test-sftp-01-ip"
+        "disks_ScvlBiSql01_h_data_03_name": {
+            "value": "ScvlBiSql01_h_data_03"
         },
-        "publicIpAddressType": {
-            "value": "Static"
-        },
-        "publicIpAddressSku": {
-            "value": "Basic"
-        },
-        "virtualMachineName": {
-            "value": "scvl-test-sftp-01"
-        },
-        "virtualMachineRG": {
-            "value": "TEST-Compute-rsg"
-        },
-        "osDiskType": {
-            "value": "Standard_LRS"
-        },
-        "dataDisks": {
-            "value": [
-                {
-                    "lun": 0,
-                    "createOption": "attach",
-                    "caching": "None",
-                    "writeAcceleratorEnabled": false,
-                    "id": null,
-                    "name": "scvl-test-sftp-01_DataDisk_0",
-                    "storageAccountType": null
-                }
-            ]
-        },
-        "dataDiskResources": {
-            "value": [
-                {
-                    "name": "scvl-test-sftp-01_DataDisk_0",
-                    "diskSizeGB": 8,
-                    "sku": "Standard_LRS",
-                    "creationData": {
-                        "createOption": "empty"
-                    }
-                }
-            ]
-        },
-        "virtualMachineSize": {
-            "value": "Standard_B1s"
-        },
-        "adminUsername": {
-            "value": "localadmin"
-        },
-        "adminPublicKey": {
-            "value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCNWjOfboT01cAXKwGSfkzwwl/snl1hSEbo9kzQlWqdqm1bcZhphiwzw9CAR8Onet/UZzPmNBgJSZ86w2haO7DQtyMu/U7X+R6EAgt0+/qXYNTwL16JuroXwvgaM1904WRjp6PGbp7qZhzWJFAz1wEhodOeBZ75h8QAaekbv5IyVKqGdNE7aWKNj6eafPgWQ21MKynjm2NB9ppILA5048THW/8jN5nJDSpAYY7Jwdg8AjEmZBnserotsEPjutGxUABqEhcTuyMNVWt6wk6FN2EVZ9eEtVrbiclaKv8RRsxON3WFv4zSM6xAxWViD1fnxjC9WvwzDekIhnK6EAF05x3b"
-        },
-        "diagnosticsStorageAccountName": {
-            "value": "scvlbootdiag"
-        },
-        "diagnosticsStorageAccountId": {
-            "value": "/subscriptions/f6915c04-23d0-4ac4-8cd7-b69ac91c2ab8/resourceGroups/PROD-Storage-rsg/providers/Microsoft.Storage/storageAccounts/scvlbootdiag"
-        },
-        "autoShutdownStatus": {
-            "value": "Disabled"
-        },
-        "autoShutdownTime": {
-            "value": "01:00"
-        },
-        "autoShutdownTimeZone": {
-            "value": "UTC"
-        },
-        "autoShutdownNotificationStatus": {
-            "value": "Enabled"
-        },
-        "autoShutdownNotificationLocale": {
-            "value": "en"
-        },
-        "autoShutdownNotificationEmail": {
-            "value": "graham.pinkston@ansira.com"
+        "disks_ScvlBiSql01_h_data_04_name": {
+            "value": "ScvlBiSql01_h_data_04"
         }
     }
 }

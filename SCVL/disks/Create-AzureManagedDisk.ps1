@@ -25,20 +25,20 @@
 #>
 [CmdletBinding()]
 param(
- [Parameter(Mandatory=$False)]
+ [Parameter(Mandatory=$false)]
  [string]
  $subscriptionId = 'f6915c04-23d0-4ac4-8cd7-b69ac91c2ab8',
 
- [Parameter(Mandatory=$False)]
+ [Parameter(Mandatory=$false)]
  [string]
- $resourceGroupName = 'TEST-Compute-rsg',
+ $resourceGroupName = 'PROD-Storage-rsg',
 
  [string]
  $resourceGroupLocation = 'centralus',
 
- [Parameter(Mandatory=$False)]
+ [Parameter(Mandatory=$false)]
  [string]
- $deploymentName = 'test01',
+ $deploymentName = 'test02',
 
  [string]
  $templateFilePath = "template.json",
@@ -79,7 +79,7 @@ Write-Host "Selecting subscription '$subscriptionId'";
 Select-AzureRmSubscription -SubscriptionID $subscriptionId;
 
 # Register RPs
-$resourceProviders = @("microsoft.network","microsoft.compute","microsoft.devtestlab");
+$resourceProviders = @("microsoft.compute","microsoft.storage");
 if($resourceProviders.length) {
     Write-Host "Registering resource providers"
     foreach($resourceProvider in $resourceProviders) {
@@ -105,7 +105,7 @@ else{
 # Start the deployment
 Write-Host "Starting deployment...";
 if(Test-Path $parametersFilePath) {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $deploymentName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath;
 } else {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -Name $deploymentName -TemplateFile $templateFilePath;
 }
