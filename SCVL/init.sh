@@ -106,6 +106,20 @@ sudo chown databasescvs:sftpusers /home/databasescvs/.ssh
 sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy83ZEFiUH9cSH9MMKBzJWvJveeLBqD0D7SXz92YqPiO/Cr55M4lSV6rg5MN/Ste2BD04ijc/OJwaNuRfuGC0mm0gPj5NnOlBGtRF0rsPEfjqfNeCVwbonqjz6uLDru/PHzrIqbdhrXJWDKr/8CCNlEJqZskelnzqU1JNgnZKPyZ6jHLFCOJ54B3/B9qJuGaN/1vs+EfUfeccJZmshKcpTR8mOrgOHqb3i2lF1L37WX8kLhnolIslhRL7QsqpMKdXm7KR28R9f62bLRkdLGj4W3dVqJ6zWl7ps8cw48HRWms56EBF14ZRiQEkxhUQcDtGRU3udm9zQ/TH1xHo3fiAD databasescvs' >> /home/databasescvs/.ssh/authorized_keys"
 sudo chown databasescvs:sftpusers /home/databasescvs/.ssh/authorized_keys
 
+sudo useradd -g sftpusers --create-home --no-user-group crowdtwist
+sudo mkdir -p /media/data/crowdtwist/inbound
+sudo mkdir -p /media/data/crowdtwist/outbound
+sudo chown -R root:root /media/data/crowdtwist
+sudo chown crowdtwist:sftpadmins /media/data/crowdtwist/inbound
+sudo chown crowdtwist:sftpadmins /media/data/crowdtwist/outbound
+sudo chmod 775 /media/data/crowdtwist/inbound
+sudo chmod 775 /media/data/crowdtwist/outbound
+sudo mkdir /home/crowdtwist/.ssh
+sudo chown crowdtwist:sftpusers /home/crowdtwist/.ssh
+sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxvWxOUVF+lkBh2KBxZkUDa2+fzN8SXd1jYDvVR1mtkt1lio66U13ARAsEpfL9mtDmCpBbQNuPFXtZ+WYvxg0wkton/LembdkRYrwh9K/s3BNxnHJ7vP5Z+hJApB/NqR7Ushm7OtpOlmiGq7L4Ug1qr+LBv52hrir0rSbBUqKkmQNnS6pwv7QCLyTFyERgOsxO7mIbKBNv21l2s0a9TSfDOgYi0JxvZtV/5iTFs6E1OXnAiWLtIR9BwJGOjl17ih2ckZmI01WAmE/LPc8DRqDdamA+ufBcisv2Hwi9sOq+poHBBbWebfySaqqs7Xh6WoNIsao4AecXjI9SX6zzb5Mj' >> /home/crowdtwist/.ssh/authorized_keys"
+sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCcp/oqfof5cBejc2/tiiAFGQWbDs5myM3dgRvW3on+FB2As70mVc2oIYrdKXqh8kzapE034WlYKf49ajvZhyw4dJJ0OQQ04+VbpDlB7jlk+V1gEjxxNh7xaP8S+FuRS6vwfabRdveAhNXo1shRkA72yMn6mHI6pAkh9d1dxdUBqrVpKhxFfosTs+mBm6/YIj2VixCB98WFk2xAhLgBK5EVkpLACdGGU+eLvZrlk4b7KWOJpl75ZyI87eE07KmBZdGgACEhDnyRCjXKh7gViJmUFKIQdx8g8iP6A+xcXFV1AgG276vpemSGQf51Wz+Q9kXEDfv10Q4sfVX/PAQ7yMnZ mikechuang@ip-192-168-1-19.ec2.internal' >> /home/crowdtwist/.ssh/authorized_keys"
+sudo chown crowdtwist:sftpusers /home/crowdtwist/.ssh/authorized_keys
+
 sudo sh -c "echo 'Match user scvlsftp
 ForceCommand internal-sftp -u 7
 ChrootDirectory /media/data/scvlsftp
@@ -130,6 +144,13 @@ X11Forwarding no
 Match user sfccsftp
 ForceCommand internal-sftp -u 7
 ChrootDirectory /media/data/sfccsftp
+PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+Match user crowdtwist
+ForceCommand internal-sftp -u 7
+ChrootDirectory /media/data/crowdtwist
 PermitTunnel no
 AllowAgentForwarding no
 AllowTcpForwarding no
