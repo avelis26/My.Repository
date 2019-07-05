@@ -1,7 +1,7 @@
 Clear-Host
 Import-Module -Name "Az" -Verbose -ErrorAction Stop
 Connect-AzAccount -ErrorAction Stop
-$storageAccountKey = 'jL1ubaqVwy51ISx7y1EixQMUBuijJjRyMPf22Ttu+Dm5l+eI13RaLXLDIBRMqy533EGehWaJdB9/NWQQVoVu0g=='
+$storageAccountKey = Get-Content -Path 'C:\key'
 $storageAccountName = 'vmdiagstoraccount'
 $shareName = 'temp'
 $params = @{
