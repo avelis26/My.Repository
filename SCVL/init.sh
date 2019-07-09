@@ -162,14 +162,28 @@ PermitTunnel no
 AllowAgentForwarding no
 AllowTcpForwarding no
 X11Forwarding no' >> /etc/ssh/sshd_config"
-sudo systemctl restart sshd
 
+sudo chmod 700 /home/crowdtwist/.ssh
+sudo chmod 700 /home/databasescvs/.ssh
+sudo chmod 700 /home/localadmin/.ssh
+sudo chmod 700 /home/responsyssftp/.ssh
+sudo chmod 700 /home/scvlsftp/.ssh
+sudo chmod 700 /home/sfccsftp/.ssh
+sudo chmod 700 /home/vibessftp/.ssh
+sudo chmod 644 /home/crowdtwist/.ssh/authorized_keys
+sudo chmod 644 /home/databasescvs/.ssh/authorized_keys
+sudo chmod 644 /home/localadmin/.ssh/authorized_keys
+sudo chmod 644 /home/responsyssftp/.ssh/authorized_keys
+sudo chmod 644 /home/scvlsftp/.ssh/authorized_keys
+sudo chmod 644 /home/sfccsftp/.ssh/authorized_keys
+sudo chmod 644 /home/vibessftp/.ssh/authorized_keys
 
+sudo service ssh restart
 
 
 #sftp -o "IdentityFile=scvlsftp.ppk" scvlsftp@scvl-test-sftp-01.centralus.cloudapp.azure.com
 #"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
 #"net use z: /delete"
-#"net use z: \\10.0.0.21\data Password20!7! /user:localadmin"
+#"net use z: \\10.0.0.21\data password /user:localadmin"
 #sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY2BJmaWS9hxVSB0oAPO19MuU5jgu7R2YiWoYymfhuPiDe95mmj5FhITdJH//wdHgoC0FxDGAG0f4QX6PA2J/ZKu0Ba3sMCLg263UAiD84BSk95TwGocUKEWoEkWVfjNGawC8AuSwscMi27qXqIz2tLa60bKyEKNlXEJi5izSIM38I7BimQ1tChsovNzmAODSMHmsRzcnGw0hJYcxnh/9BtHLRdDcJgGtdJzEda4Tfo1K4DJzyQ4mnpuNFg6rhGwLbW86Hy76bPxZhXtPa8XY8yF+26SDWGPfW2/wMx88y8xOcO57C64Fm0ZUOownypLBuV23/Z9VexrxB6Hc6wskd scvlsftp' >> /home/scvlsftp/.ssh/authorized_keys"
 ##sudo useradd -s /bin/true smbsvc
