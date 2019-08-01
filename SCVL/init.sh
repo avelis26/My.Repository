@@ -44,8 +44,8 @@ sudo useradd -g sftpusers --create-home --no-user-group scvlsftp
 sudo mkdir -p /media/data/scvlsftp/inbound
 sudo mkdir -p /media/data/scvlsftp/outbound
 sudo chown -R root:root /media/data/scvlsftp
-sudo chown scvlsftp:sftpadmins /media/data/scvlsftp/inbound
-sudo chown scvlsftp:sftpadmins /media/data/scvlsftp/outbound
+sudo chown scvlsftp:sftpusers /media/data/scvlsftp/inbound
+sudo chown scvlsftp:sftpusers /media/data/scvlsftp/outbound
 sudo chmod 775 /media/data/scvlsftp/inbound
 sudo chmod 775 /media/data/scvlsftp/outbound
 sudo mkdir /home/scvlsftp/.ssh
@@ -58,8 +58,8 @@ sudo useradd -g sftpusers --create-home --no-user-group vibessftp
 sudo mkdir -p /media/data/vibessftp/inbound
 sudo mkdir -p /media/data/vibessftp/outbound
 sudo chown -R root:root /media/data/vibessftp
-sudo chown vibessftp:sftpadmins /media/data/vibessftp/inbound
-sudo chown vibessftp:sftpadmins /media/data/vibessftp/outbound
+sudo chown vibessftp:sftpusers /media/data/vibessftp/inbound
+sudo chown vibessftp:sftpusers /media/data/vibessftp/outbound
 sudo chmod 775 /media/data/vibessftp/inbound
 sudo chmod 775 /media/data/vibessftp/outbound
 sudo mkdir /home/vibessftp/.ssh
@@ -71,8 +71,8 @@ sudo useradd -g sftpusers --create-home --no-user-group responsyssftp
 sudo mkdir -p /media/data/responsyssftp/inbound
 sudo mkdir -p /media/data/responsyssftp/outbound
 sudo chown -R root:root /media/data/responsyssftp
-sudo chown responsyssftp:sftpadmins /media/data/responsyssftp/inbound
-sudo chown responsyssftp:sftpadmins /media/data/responsyssftp/outbound
+sudo chown responsyssftp:sftpusers /media/data/responsyssftp/inbound
+sudo chown responsyssftp:sftpusers /media/data/responsyssftp/outbound
 sudo chmod 775 /media/data/responsyssftp/inbound
 sudo chmod 775 /media/data/responsyssftp/outbound
 sudo mkdir /home/responsyssftp/.ssh
@@ -84,8 +84,8 @@ sudo useradd -g sftpusers --create-home --no-user-group sfccsftp
 sudo mkdir -p /media/data/sfccsftp/inbound
 sudo mkdir -p /media/data/sfccsftp/outbound
 sudo chown -R root:root /media/data/sfccsftp
-sudo chown sfccsftp:sftpadmins /media/data/sfccsftp/inbound
-sudo chown sfccsftp:sftpadmins /media/data/sfccsftp/outbound
+sudo chown sfccsftp:sftpusers /media/data/sfccsftp/inbound
+sudo chown sfccsftp:sftpusers /media/data/sfccsftp/outbound
 sudo chmod 775 /media/data/sfccsftp/inbound
 sudo chmod 775 /media/data/sfccsftp/outbound
 sudo mkdir /home/sfccsftp/.ssh
@@ -97,8 +97,8 @@ sudo useradd -g sftpusers --create-home --no-user-group databasescvs
 sudo mkdir -p /media/data/databasescvs/inbound
 sudo mkdir -p /media/data/databasescvs/outbound
 sudo chown -R root:root /media/data/databasescvs
-sudo chown databasescvs:sftpadmins /media/data/databasescvs/inbound
-sudo chown databasescvs:sftpadmins /media/data/databasescvs/outbound
+sudo chown databasescvs:sftpusers /media/data/databasescvs/inbound
+sudo chown databasescvs:sftpusers /media/data/databasescvs/outbound
 sudo chmod 775 /media/data/databasescvs/inbound
 sudo chmod 775 /media/data/databasescvs/outbound
 sudo mkdir /home/databasescvs/.ssh
@@ -110,8 +110,8 @@ sudo useradd -g sftpusers --create-home --no-user-group crowdtwist
 sudo mkdir -p /media/data/crowdtwist/inbound
 sudo mkdir -p /media/data/crowdtwist/outbound
 sudo chown -R root:root /media/data/crowdtwist
-sudo chown crowdtwist:sftpadmins /media/data/crowdtwist/inbound
-sudo chown crowdtwist:sftpadmins /media/data/crowdtwist/outbound
+sudo chown crowdtwist:sftpusers /media/data/crowdtwist/inbound
+sudo chown crowdtwist:sftpusers /media/data/crowdtwist/outbound
 sudo chmod 775 /media/data/crowdtwist/inbound
 sudo chmod 775 /media/data/crowdtwist/outbound
 sudo mkdir /home/crowdtwist/.ssh
@@ -119,6 +119,14 @@ sudo chown crowdtwist:sftpusers /home/crowdtwist/.ssh
 sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxvWxOUVF+lkBh2KBxZkUDa2+fzN8SXd1jYDvVR1mtkt1lio66U13ARAsEpfL9mtDmCpBbQNuPFXtZ+WYvxg0wkton/LembdkRYrwh9K/s3BNxnHJ7vP5Z+hJApB/NqR7Ushm7OtpOlmiGq7L4Ug1qr+LBv52hrir0rSbBUqKkmQNnS6pwv7QCLyTFyERgOsxO7mIbKBNv21l2s0a9TSfDOgYi0JxvZtV/5iTFs6E1OXnAiWLtIR9BwJGOjl17ih2ckZmI01WAmE/LPc8DRqDdamA+ufBcisv2Hwi9sOq+poHBBbWebfySaqqs7Xh6WoNIsao4AecXjI9SX6zzb5Mj' >> /home/crowdtwist/.ssh/authorized_keys"
 sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCcp/oqfof5cBejc2/tiiAFGQWbDs5myM3dgRvW3on+FB2As70mVc2oIYrdKXqh8kzapE034WlYKf49ajvZhyw4dJJ0OQQ04+VbpDlB7jlk+V1gEjxxNh7xaP8S+FuRS6vwfabRdveAhNXo1shRkA72yMn6mHI6pAkh9d1dxdUBqrVpKhxFfosTs+mBm6/YIj2VixCB98WFk2xAhLgBK5EVkpLACdGGU+eLvZrlk4b7KWOJpl75ZyI87eE07KmBZdGgACEhDnyRCjXKh7gViJmUFKIQdx8g8iP6A+xcXFV1AgG276vpemSGQf51Wz+Q9kXEDfv10Q4sfVX/PAQ7yMnZ mikechuang@ip-192-168-1-19.ec2.internal' >> /home/crowdtwist/.ssh/authorized_keys"
 sudo chown crowdtwist:sftpusers /home/crowdtwist/.ssh/authorized_keys
+
+sudo useradd -g sftpusers --create-home --no-user-group sfccscvl
+sudo chown sfccscvl:sftpusers /media/data/sfccsftp/inbound
+sudo chown sfccscvl:sftpusers /media/data/sfccsftp/outbound
+sudo mkdir /home/sfccscvl/.ssh
+sudo chown sfccscvl:sftpusers /home/sfccscvl/.ssh
+sudo sh -c "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+YNsVnJ+9nCGpg5RnnBGkYMFtuuXYq75gkTP1OKzvZD392uC2noAg8C/PfsSTEk2gwo/M1TCVMSzXW7BsqTwRWAT/I29h5T+fmSOcQrfwllVWUKdkUWUuCYVs8ngWXIn/oe6+HO63aTzrNxRIBFBf0ijV1ujpUb0TnOEm6W41TjsoB9+7mjacqXO76DuM55zYLEVjlOSy1FYniZiJD46G48QFknmhACHjFSuK52mT8f8NtaQqY4kDB4D8lqQ4CTubPjhZZA/lW0jc5XYKlPb6D8FiXDxqrNQQHwPy3nU9l+CJ7bmcvuFUTFYsjbGbHe9as2CuIWUleaqaheAel1BB sfccscvl' >> /home/sfccscvl/.ssh/authorized_keys"
+sudo chown sfccscvl:sftpusers /home/sfccscvl/.ssh/authorized_keys
 
 sudo sh -c "echo 'Match user scvlsftp
 ForceCommand internal-sftp -u 7
@@ -158,6 +166,13 @@ X11Forwarding no
 Match user databasescvs
 ForceCommand internal-sftp -u 7
 ChrootDirectory /media/data/databasescvs
+PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no
+Match user sfccscvl
+ForceCommand internal-sftp -u 7
+ChrootDirectory /media/data/sfccsftp
 PermitTunnel no
 AllowAgentForwarding no
 AllowTcpForwarding no
