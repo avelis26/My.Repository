@@ -19,8 +19,7 @@ sudo -i blkid
 
 [copy UUID of sdc1]
 
-# TERMIUS WONT PASTE THE TABS!!!!!!!!!!!!!!!!
-sudo sh -c "echo 'UUID=c7bb2301-949c-47b0-99d1-7e11a88f55ff	/media/data	ext4	defaults,nofail	1	2' >> /etc/fstab"
+sudo sh -c "echo 'UUID=c7bb2301-949c-47b0-99d1-7e11a88f55ff    /media/data    ext4    defaults,nofail    1    2' >> /etc/fstab"
 echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y'" >> /home/localadmin/.bashrc
 sudo reboot
 
