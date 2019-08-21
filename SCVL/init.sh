@@ -193,6 +193,29 @@ sudo chmod 644 /home/scvlsftp/.ssh/authorized_keys
 sudo chmod 644 /home/sfccsftp/.ssh/authorized_keys
 sudo chmod 644 /home/vibessftp/.ssh/authorized_keys
 
+
+
+
+
+
+
+
+
+
+
+
+sudo setfacl -d -R -m u::rwx,g::rw,o::- /media/data/databasescvs/
+
+
+getfacl /media/data/databasescvs/
+
+
+
+
+
+sudo setfacl -b -R /media/data/databasescvs/
+
+
 sudo service ssh restart
 
 
