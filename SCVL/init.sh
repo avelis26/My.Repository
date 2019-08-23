@@ -198,26 +198,72 @@ sudo chmod 644 /home/vibessftp/.ssh/authorized_keys
 
 
 
+find /media/data/ -type d -exec sudo chmod 771 {} \;
+find /media/data/ -type d -exec chmod 775 {} \;
+
+
+
+find /media/data/ -type d -exec sudo chmod 771 {} \;
+find /media/data/ -type f -exec sudo chmod 660 {} \;
 
 
 
 
+find /media/data/crowdtwist/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/crowdtwist/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/crowdtwist/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/crowdtwist/outbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/databasescvs/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/databasescvs/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/databasescvs/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/databasescvs/outbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/responsyssftp/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/responsyssftp/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/responsyssftp/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/responsyssftp/outbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/scvlsftp/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/scvlsftp/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/scvlsftp/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/scvlsftp/outbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/sfccsftp/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/sfccsftp/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/sfccsftp/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/sfccsftp/outbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/vibessftp/inbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/vibessftp/inbound/ -type f -exec sudo chmod 660 {} \;
+find /media/data/vibessftp/outbound/ -type d -exec sudo chmod 771 {} \;
+find /media/data/vibessftp/outbound/ -type f -exec sudo chmod 660 {} \;
 
 
-sudo setfacl -d -R -m u::rwx,g::rw,o::- /media/data/databasescvs/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/crowdtwist/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/databasescvs/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/responsyssftp/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/scvlsftp/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/sfccsftp/
+sudo setfacl -d -R -m u:localadmin:rwx,g:sftpusers:rw,o::- /media/data/vibessftp/
+
+
+
+find /home/avelis/secrets/ -type f -exec sudo chmod 600 {} \;
+
+
 
 
 getfacl /media/data/databasescvs/
-
-
-
-
 
 sudo setfacl -b -R /media/data/databasescvs/
 
 
 sudo service ssh restart
 
+
+
+sftp -o "IdentityFile=scvlsftp.ppk" scvlsftp@40.122.73.201
+
+
+sftp -i ./scvlsftp.ppk scvlsftp@40.122.73.201
+
+sftp -i /home/avelis/secrets/sfccsftp.ppk sfccsftp@40.122.73.201
 
 #sftp -o "IdentityFile=scvlsftp.ppk" scvlsftp@scvl-test-sftp-01.centralus.cloudapp.azure.com
 #"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
