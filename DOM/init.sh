@@ -19,7 +19,7 @@ sudo -i blkid
 #[copy UUID of sdc1 and paste in next command]
 
 sudo sh -c "echo 'UUID=979c0330-3248-4999-9563-7ae77acbc650    /media/data    ext4    defaults,nofail    1    2' >> /etc/fstab"
-echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y'" >> /home/localadmin/.bashrc
+echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y && sudo apt autoremove -y'" >> /home/localadmin/.bashrc
 sudo reboot
 
 update && sudo apt-get -y install samba
