@@ -22,21 +22,6 @@ sudo sh -c "echo 'UUID=979c0330-3248-4999-9563-7ae77acbc650    /media/data    ex
 echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y && sudo apt autoremove -y'" >> /home/localadmin/.bashrc
 sudo reboot
 
-update && sudo apt-get -y install samba
-
-sudo smbpasswd -a localadmin
-
-sudo sh -c "echo '
-[data]
-   path = /media/data
-   available = yes
-   valid users = localadmin
-   read only = no
-   browsable = yes
-   public = yes
-   writable = yes' >> /etc/samba/smb.conf"
-sudo service smbd restart
-
 sudo chmod 755 /media/data
 
 sudo useradd -g sftpusers --create-home --no-user-group databasescvs
@@ -61,8 +46,27 @@ PermitTunnel no
 AllowAgentForwarding no
 AllowTcpForwarding no
 X11Forwarding no' >> /etc/ssh/sshd_config"
-sudo service ssh restart
 
-#"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
-#"net use z: /delete"
-#"net use z: \\10.0.0.21\data password /user:localadmin"
+update && sudo apt-get -y install samba
+sudo smbpasswd -a localadmin
+sudo useradd -M svcDomSqlDev01
+sudo smbpasswd -a svcDomSqlDev01
+sudo sh -c "echo '
+[data]
+   path = /media/data
+   available = yes
+   valid users = localadmin, databasescvs, svcDomSqlDev01
+   read only = no
+   browsable = yes
+   public = yes
+   writable = yes' >> /etc/samba/smb.conf"
+
+sudo service ssh restart
+sudo service smbd restart
+
+#mklink /D C:\DomSftpProd01 \\10.2.4.4\data
+#Use credential manager to create a windows credential if user and password needed for remote folder.
+
+# C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
+# net use z: /delete
+# net use z: C:\folder \\10.2.4.4\data /user:localadmin password

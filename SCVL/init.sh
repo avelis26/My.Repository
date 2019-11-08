@@ -5,22 +5,21 @@ sudo usermod -a -G sftpadmins localadmin
 sudo usermod -a -G sftpusers localadmin
 sudo mkdir /media/data
 sudo fdisk /dev/sdc
-
-n
-p
-1
-[default]
-[default]
-p
-w
+#n
+#p
+#1
+#[default]
+#[default]
+#p
+#w
 
 sudo mkfs -t ext4 /dev/sdc1
 sudo -i blkid
 
-[copy UUID of sdc1]
+#[copy UUID of sdc1 and paste in next command]
 
 sudo sh -c "echo 'UUID=c7bb2301-949c-47b0-99d1-7e11a88f55ff    /media/data    ext4    defaults,nofail    1    2' >> /etc/fstab"
-echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y'" >> /home/localadmin/.bashrc
+echo "alias update='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y && sudo apt-get autoclean -y && sudo apt autoremove -y'" >> /home/localadmin/.bashrc
 sudo reboot
 
 update && sudo apt-get -y install samba
