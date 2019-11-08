@@ -51,6 +51,7 @@ update && sudo apt-get -y install samba
 sudo smbpasswd -a localadmin
 sudo useradd -M svcDomSqlDev01
 sudo smbpasswd -a svcDomSqlDev01
+sudo smbpasswd -a databasescvs
 sudo sh -c "echo '
 [data]
    path = /media/data
