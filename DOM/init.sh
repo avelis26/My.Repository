@@ -65,8 +65,9 @@ sudo sh -c "echo '
 sudo service ssh restart
 sudo service smbd restart
 
-#mklink /D C:\DomSftpProd01 \\10.2.4.4\data
-#Use credential manager to create a windows credential if user and password needed for remote folder.
+# mklink /D C:\SFTP_Folders\DomSftpProd01\databasescvs \\10.2.4.4\data
+# Use credential manager to create a windows credential if user and password needed for remote folder.
+# PowerShell version: New-Item -Path C:\SFTP_Folders\DomSftpProd01\databasescvs -ItemType SymbolicLink -Value \\10.2.4.4\data
 
 # C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
 # net use z: /delete
