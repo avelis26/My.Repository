@@ -1,10 +1,9 @@
 # Version  --  v1.1.4.3
-#######################################################################################################
-# Scheduled Task Action:
-# Start a program
+###################################################################################
+# Scheduled Task Details:
 # Program/script: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
 # Add arguments (optional): -MTA -File "C:\Scripts\PowerShell\Invoke-AllSpark.ps1" -scheduled -store -exit
-#######################################################################################################
+###################################################################################
 [CmdletBinding()]
 Param(
 	[switch]$maintenance,
@@ -19,23 +18,23 @@ Import-Module AzureRM -ErrorAction Stop
 . $($PSScriptRoot + '\New-TimeStamp.ps1')
 . $($PSScriptRoot + '\Set-SslCertPolicy.ps1')
 . $($PSScriptRoot + '\Invoke-ErrorReport.ps1')
-#######################################################################################################
+###################################################################################
+# Hard vars
 Add-Content -Value "$(Get-Date -Format 'yyyyMMdd_HHmmss') :: $($MyInvocation.MyCommand.Name) :: Start" -Path '\\MS-SSW-CRM-MGMT\Data\Ops_Log\bitc.log'
 $opsLogRootPath = '\\MS-SSW-CRM-MGMT\Data\Ops_Log\AllSpark\'
 $AddEjDataToSqlScript = 'C:\Scripts\PowerShell\Add-EjDataToSql.ps1'
-#$AddEjDataToHadoopScript = 'C:\Scripts\PowerShell\Add-EjDataToHadoop.ps1'
 $InvokeStoreReportScript = 'C:\Scripts\PowerShell\Invoke-StoreReport.ps1'
-#$InvokeCeoReportScript = 'C:\Scripts\PowerShell\Invoke-CeoReport.ps1'
+$InvokeCeoReportScript = 'C:\Scripts\PowerShell\Invoke-CeoReport.ps1'
 $sqlServer = 'MS-SSW-CRM-SQL'
 $database = '7ELE'
 $sqlUser = 'sqladmin'
-$sqlPass = Get-Content -Path 'C:\Scripts\Secrets\sqlAdmin.txt' -ErrorAction Stop
+$sqlPass = Get-Content -Path 'C:\[censored].cred' -ErrorAction Stop
 $userName = 'gpink003'
 $user = $userName + '@7-11.com'
-$subId = 'da908b26-f6f8-4d61-bf60-b774ff3087ec'
-$azuPass = Get-Content -Path "C:\Scripts\Secrets\$userName.cred"
+$subId = '[censored]'
+$azuPass = Get-Content -Path "C:\[censored]\$userName.cred"
 $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $user, $(ConvertTo-SecureString -String $azuPass)
-#######################################################################################################
+###################################################################################
 # Init
 If ($([System.Diagnostics.EventLog]::SourceExists('AllSpark')) -eq $false) {
 	[System.Diagnostics.EventLog]::CreateEventSource('AllSpark', 'Application')
@@ -61,38 +60,7 @@ If ($(Test-Path -Path $opsLogRootPath) -eq $false) {
 	New-Item -Path $opsLogRootPath -ItemType Directory -ErrorAction Stop -Force > $null
 }
 Connect-AzureRmAccount -Subscription $subId -Credential $credential
-# Data to Hadoop
-<#
-Try {
-	[System.Threading.Thread]::CurrentThread.Priority = 'Highest'
-	Add-Content -Value "$(New-TimeStamp)  Current User: $([Environment]::UserName.ToString())" -Path $opsLog -ErrorAction Stop
-	$start = Get-Date
-	$message = "$(New-TimeStamp)  Adding EJ data to Hadoop..."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$EtlResult = Invoke-Expression -Command "$AddEjDataToHadoopScript -autoDate" -ErrorAction Stop
-	If ($EtlResult[$EtlResult.Count - 1] -ne 0) {
-		$errorParams = @{
-			Message = "$AddEjDataToHadoopScript Failed!!!";
-			ErrorId = "03";
-			RecommendedAction = "Fix it.";
-			ErrorAction = "Stop";
-		}
-		Write-Error @errorParams
-	}
-	$end = Get-Date
-	$run = New-TimeSpan -Start $start -End $end
-	$message = "$(New-TimeStamp)  EJ data added to Hadoop successfully."
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-	$message = "$(New-TimeStamp)  Run Time: $($run.Hours.ToString('00')) h $($run.Minutes.ToString('00')) m $($run.Seconds.ToString('00')) s"
-	Write-Output $message
-	Add-Content -Value $message -Path $opsLog -ErrorAction Stop
-}
-Catch {
-	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToHadoop Failed!!!' -log $opsLog
-}
-#>
+###################################################################################
 # Starting Up SQL Server
 Try {
 	$message = "$(New-TimeStamp)  Starting up SQL server..."
@@ -107,6 +75,7 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: SQL Server Startup Failed!!!' -log $opsLog
 }
+###################################################################################
 # Data to SQL - Store
 Try {
 	If ($scheduled.IsPresent -eq $true) {
@@ -148,8 +117,8 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - Store Failed!!!' -log $opsLog
 }
+###################################################################################
 # Data to SQL - CEO
-<#
 Try {
 	$start = Get-Date
 	$message = "$(New-TimeStamp)  Adding CEO EJ data to SQL..."
@@ -177,7 +146,7 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Add-EjDataToSql - CEO Failed!!!' -log $opsLog
 }
-#>
+###################################################################################
 # Perform SQL Maintenance 
 Try {
 	If ($maintenance.IsPresent -eq $true) {
@@ -194,6 +163,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
+###################################################################################
 # Delete Old Data From Store
 		$message = "$(New-TimeStamp)  Removing old data from store database..."
 		Write-Output $message
@@ -208,8 +178,8 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
+###################################################################################
 # Delete Old Data From CEO
-<#
 		$message = "$(New-TimeStamp)  Removing old data from CEO database..."
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop	
@@ -223,7 +193,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
-#>
+###################################################################################
 # Rebuild SQL Indexs
 		$message = "$(New-TimeStamp)  Rebuilding SQL indexes..."
 		Write-Output $message
@@ -238,6 +208,7 @@ Try {
 			ErrorAction = 'Stop';
 		}
 		Invoke-Sqlcmd @sqlTruncateParams
+###################################################################################
 # Update SQL Stats
 		$message = "$(New-TimeStamp)  Updating SQL stats..."
 		Write-Output $message
@@ -256,12 +227,12 @@ Try {
 		Write-Output $message
 		Add-Content -Value $message -Path $opsLog -ErrorAction Stop
 	}
-# Exit
 	$exitCode = 0
 }
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: SQL Maintenance Failed!!!' -log $opsLog
 }
+###################################################################################
 # Execute Store Report
 Try {
 	If ($store.IsPresent -eq $true) {
@@ -292,8 +263,8 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: Store Report Failed!!!' -log $opsLog
 }
+###################################################################################
 # Execute CEO Report
-<#
 Try {
 	If ($ceo.IsPresent -eq $true) {
 		$start = Get-Date
@@ -323,7 +294,6 @@ Try {
 Catch {
 	Invoke-ErrorReport -Subject 'AllSpark: CEO Report Failed!!!' -log $opsLog
 }
-#>
 Finally {
 	$message = "$(New-TimeStamp)  Shutting down SQL server..."
 	Write-Output $message
