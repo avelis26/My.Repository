@@ -1,8 +1,15 @@
-# https://medium.com/the-new-control-plane/generating-self-signed-certificates-on-windows-7812a600c2d8
-#$cert = New-SelfSignedCertificate -CertStoreLocation 'cert:\localmachine\my' -DnsName 'ansirascvl.com' -Subject 'ansirascvl.com' -NotAfter $($(Get-Date).AddYears(3))
-
-
-$cert = New-SelfSignedCertificate -CertStoreLocation 'cert:\localmachine\my' -Subject '*.ansirascvl.com' -NotAfter $($(Get-Date).AddYears(3))
-$pwd = ConvertTo-SecureString -String $(Get-Content -Path 'C:\tmp\secret.txt') -Force -AsPlainText
-$path = 'cert:\localMachine\my\' + $cert.thumbprint
-Export-PfxCertificate -cert $path -FilePath 'c:\tmp\ansira_scvl_ldap.pfx' -Password $pwd
+# https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps
+$subject = '*.ansirascvl.com'
+$years = 3
+$secret = 'C:\tmp\secret.txt'
+$certPath = 'cert:\localmachine\my\'
+$filePath = 'c:\tmp\ansira_scvl_ldap.pfx'
+$params = @{
+	CertStoreLocation = $certPath;
+	Subject = $subject;
+	NotAfter = $($(Get-Date).AddYears($years));
+}
+$certificate = New-SelfSignedCertificate @params
+$password = ConvertTo-SecureString -String $(Get-Content -Path $secret) -Force -AsPlainText
+$path = $certPath + $certificate.thumbprint
+Export-PfxCertificate -cert $path -FilePath $filePath -Password $password
