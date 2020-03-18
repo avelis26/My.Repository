@@ -40,7 +40,12 @@ $params = @{
 }
 $certificate = New-SelfSignedCertificate @params
 Export-PfxCertificate -cert $($certPath + $certificate.thumbprint) -FilePath $rootPath -Password $password
-Export-Certificate -cert $($certPath + $certificate.thumbprint) -FilePath $cerPath
+$content = @(
+	'-----BEGIN CERTIFICATE-----'
+	[System.Convert]::ToBase64String($certificate.RawData, 'InsertLineBreaks')
+	'-----END CERTIFICATE-----'
+)
+$content | Out-File -FilePath $cerPath -Encoding ascii
 
 # VPN Child Cert
 $params = @{
