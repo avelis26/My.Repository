@@ -1,30 +1,46 @@
 # https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps
-Function New-SelfSignedCertForLdap {
-	$subject = '*.ansirascvl.com'
-	$years = 3
-	$secret = 'C:\tmp\secret.txt'
-	$certPath = 'cert:\localmachine\my\'
-	$filePath = 'c:\tmp\ansira_scvl_ldap.pfx'
-	$params = @{
-		CertStoreLocation = $certPath;
-		Subject = $subject;
-		NotAfter = $($(Get-Date).AddYears($years));
-	}
-	$certificate = New-SelfSignedCertificate @params
-	$password = ConvertTo-SecureString -String $(Get-Content -Path $secret) -Force -AsPlainText
-	$path = $certPath + $certificate.thumbprint
-	Export-PfxCertificate -cert $path -FilePath $filePath -Password $password
+# https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-certificates-point-to-site
+$years = 3
+$password = ConvertTo-SecureString -String $(Get-Content -Path 'C:\Users\Avelis\OneDrive - Ansira.com\Secrets\tmp\secret.txt') -Force -AsPlainText
+$certPath = 'Cert:\CurrentUser\My\'
+$ldapPath = 'C:\Users\Avelis\OneDrive - Ansira.com\Secrets\tmp\Ansira_LDAP_Azure_Root.pfx'
+$cerPath = 'C:\Users\Avelis\OneDrive - Ansira.com\Secrets\tmp\Ansira_P2S_Azure_Root.cer'
+$rootPath = 'C:\Users\Avelis\OneDrive - Ansira.com\Secrets\tmp\Ansira_P2S_Azure_Root.pfx'
+$childPath = 'C:\Users\Avelis\OneDrive - Ansira.com\Secrets\tmp\Ansira_P2S_Azure_Child.pfx'
+$params = @{
+	CertStoreLocation = $certPath;
+	Subject = '*.ansirascvl.com';
+	NotAfter = $($(Get-Date).AddYears($years));
 }
-Function New-SelfSignedRootCertForVpn {
-	$cert = New-SelfSignedCertificate -Type Custom -KeySpec Signature `
-	-Subject "CN=P2SRootCert_Ansira" -KeyExportPolicy Exportable `
-	-HashAlgorithm sha256 -KeyLength 2048 `
-	-CertStoreLocation "Cert:\CurrentUser\My" -KeyUsageProperty Sign -KeyUsage CertSign
+$certificate = New-SelfSignedCertificate @params
+Export-PfxCertificate -cert $($certPath + $certificate.thumbprint) -FilePath $ldapPath -Password $password
+$params = @{
+	Type = 'Custom';
+	KeySpec = 'Signature';
+	Subject = 'CN=Ansira_P2S_Azure_Root';
+	KeyExportPolicy = 'Exportable';
+	HashAlgorithm = 'sha256';
+	KeyLength = 2048;
+	CertStoreLocation = $certPath;
+	KeyUsageProperty = 'Sign';
+	KeyUsage = 'CertSign';
+	NotAfter = $($(Get-Date).AddYears($years));
 }
-Function New-SelfSignedChildCertForVpn {
-	New-SelfSignedCertificate -Type Custom -DnsName P2SChildCert_Ansira -KeySpec Signature `
-	-Subject "CN=P2SChildCert_Ansira" -KeyExportPolicy Exportable `
-	-HashAlgorithm sha256 -KeyLength 2048 `
-	-CertStoreLocation "Cert:\CurrentUser\My" `
-	-Signer $cert -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2")
+$certificate = New-SelfSignedCertificate @params
+Export-PfxCertificate -cert $($certPath + $certificate.thumbprint) -FilePath $rootPath -Password $password
+Export-Certificate -cert $($certPath + $certificate.thumbprint) -FilePath $cerPath
+$params = @{
+	Type =  'Custom';
+	DnsName = 'Ansira_P2S_Azure_Child';
+	KeySpec = 'Signature';
+	Subject = 'CN=Ansira_P2S_Azure_Child';
+	KeyExportPolicy = 'Exportable';
+	HashAlgorithm = 'sha256';
+	KeyLength = 2048;
+	CertStoreLocation = $certPath;
+	Signer = $certificate;
+	TextExtension = @('2.5.29.37={text}1.3.6.1.5.5.7.3.2');
+	NotAfter = $($(Get-Date).AddYears($years));
 }
+New-SelfSignedCertificate @params
+Export-PfxCertificate -cert $($certPath + $certificate.thumbprint) -FilePath $childPath -Password $password
