@@ -1,6 +1,6 @@
 <#
   .SYNOPSIS
-  This script is the answer to a pre-interview question asked my Loan Depot.
+  This script is the answer to a pre-interview question asked Loan Depot.
 
   .DESCRIPTION
   The original question asked was: "If we list all the natural numbers below 10
