@@ -8,7 +8,7 @@
   multiples is 23. Find the sum of all the multiples of 3 or 5 below 1000."
 
   .NOTES
-  Version 1.0.1
+  Version 1.0.2
 
   .INPUTS
   Inputs are hard coded values.
@@ -51,4 +51,4 @@ ForEach ($number in $range) {
 		}
 	}
 }
-Write-Host -BackgroundColor Black -ForegroundColor Cyan "The sum of all the multiples of 3 OR 5 found between 1 and 999 is $($sum.ToString('N0'))."
+Write-Host -BackgroundColor Black -ForegroundColor Cyan "The sum of all multiples of 3 OR 5 found between $($range[0]) and $($range[-1]) is $($sum.ToString('N0'))."
