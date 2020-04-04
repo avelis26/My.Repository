@@ -8,7 +8,7 @@
   multiples is 23. Find the sum of all the multiples of 3 or 5 below 1000."
 
   .NOTES
-  Version 1.0.0
+  Version 1.0.1
 
   .INPUTS
   Inputs are hard coded values.
@@ -32,12 +32,10 @@ Function Test-IsMultipleOf {
 		[int]
 		$multipleValue
 	)
-	$num = $inputValue
-	$mul = $multipleValue
-	while ($num -gt 0) {
-		$num = $num - $mul
+	while ($inputValue -gt 0) {
+		$inputValue = $inputValue - $multipleValue
 	}
-	if ($num -eq 0) {
+	if ($inputValue -eq 0) {
 		Write-Output -InputObject $true
 	} else {
 		Write-Output -InputObject $false
