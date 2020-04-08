@@ -1,14 +1,14 @@
 <#
   .SYNOPSIS
-  This script is the answer to a pre-interview question asked Loan Depot.
+  This script is the submitted answer to a pre-interview question.
 
   .DESCRIPTION
   The original question asked was: "If we list all the natural numbers below 10
-  that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these 
+  that are multiples of 3 or 5, we get [3, 5, 6, 9]. The sum of these 
   multiples is 23. Find the sum of all the multiples of 3 or 5 below 1000."
 
   .NOTES
-  Version 1.0.2
+  Version 1.0.3
 
   .INPUTS
   Inputs are hard coded values.
@@ -21,7 +21,7 @@
 #>
 Clear-Host
 $multiples = 3, 5
-$range = 1..999
+$range = 0..9
 $sum = 0
 Function Test-IsMultipleOf {
 	param(
