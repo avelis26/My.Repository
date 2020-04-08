@@ -21,7 +21,7 @@
 #>
 Clear-Host
 $multiples = 3, 5
-$range = 0..9
+$range = 0..999
 $sum = 0
 Function Test-IsMultipleOf {
 	param(
