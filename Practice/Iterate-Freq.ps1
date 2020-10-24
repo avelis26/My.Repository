@@ -1,8 +1,9 @@
 $filePathString = 'C:\Users\Avelis\Documents\ff-test.csv'
 $array = @()
+
 $Location = 0;
 $Name = 'FF-001';
-$Frequency = 147.607500;
+$Frequency = 147.605000;
 $Duplex = $null;
 $Offset = 0.000000;
 $Tone = $null;
@@ -18,6 +19,38 @@ $URCALL = $null;
 $RPT1CALL = $null;
 $RPT2CALL = $null;
 $DVCODE = $null;
-$data = [PSCustomObject]@{Location = $Location;Name = $Name;Frequency = $("{0:n6}" -f $Frequency);Duplex = $Duplex;Offset = $("{0:n6}" -f $Offset);Tone = $Tone;rToneFreq = $rToneFreq;cToneFreq = $cToneFreq;DtcsCode = $("{0:d3}" -f $DtcsCode);DtcsPolarity = $DtcsPolarity;Mode = $Mode;TStep = $("{0:n2}" -f $TStep);Skip = $Skip;Comment = $Comment;URCALL = $URCALL;RPT1CALL = $RPT1CALL;RPT2CALL = $RPT2CALL;DVCODE = $DVCODE;}
+
+$data = [PSCustomObject]@{
+	Location = $Location;
+	Name = $Name;
+	Frequency = $("{0:n6}" -f $Frequency);
+	Duplex = $Duplex;
+	Offset = $("{0:n6}" -f $Offset);
+	Tone = $Tone;
+	rToneFreq = $rToneFreq;
+	cToneFreq = $cToneFreq;
+	DtcsCode = $("{0:d3}" -f $DtcsCode);
+	DtcsPolarity = $DtcsPolarity;
+	Mode = $Mode;
+	TStep = $("{0:n2}" -f $TStep);
+	Skip = $Skip;
+	Comment = $Comment;
+	URCALL = $URCALL;
+	RPT1CALL = $RPT1CALL;
+	RPT2CALL = $RPT2CALL;
+	DVCODE = $DVCODE;}
 $array += $data
 Write-Output $array
+
+
+
+
+<#
+$i = 0
+While ($i -lt 128) {
+	$Frequency = $Frequency + 0.0025
+	$i++
+	$out = $("{0:n6}" -f $Frequency)
+	Write-Output $out
+}
+#>
