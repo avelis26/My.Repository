@@ -112,7 +112,7 @@ function Append-CustomRow {
 		$fileContent = $(Get-Content -Path $filePathString -Tail 1)
 		$lineNumber = $fileContent.Substring(0,3)
 		$data = [PSCustomObject]@{
-			Channel_No = $("{0:d3}" -f $Channel_No).ToString();
+			Channel_No = $("{0:d3}" -f $lineNumber).ToString();
 			Priority_CH = $Priority_CH;
 			Receive_Frequency = $("{0:n5}" -f $Receive_Frequency);
 			Transmit_Frequency = $("{0:n5}" -f $Transmit_Frequency);
