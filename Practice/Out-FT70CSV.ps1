@@ -11,15 +11,15 @@ Param(
 		[string]$Priority_CH = 'OFF',
 	# RX:
 	[Parameter()][ValidateRange(107,581)]
-		[double]$Receive_Frequency = 442.825,
+		[double]$Receive_Frequency = 435.69,
 	# TX:
 	[Parameter()][ValidateRange(107,581)]
-		[double]$Transmit_Frequency = 447.825,
+		[double]$Transmit_Frequency = 145.9,
 	# Offset:
 	[Parameter()][ValidateRange(0,474)]
-		[int]$Offset_Frequency = 5,
+		[int]$Offset_Frequency = 0,
 	[Parameter()][ValidateSet('+RPT', '-RPT', '-/+', 'OFF')]
-		[string]$Offset_Direction = '+RPT',
+		[string]$Offset_Direction = '-/+',
 	# Modes
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$AUTO_MODE = 'ON',
@@ -28,15 +28,15 @@ Param(
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$AMS = 'ON',
 	[Parameter()][ValidateSet('DN', 'ANALOG')]
-		[string]$DIG_ANALOG = 'DN',
-	# Name:
-	[Parameter()][ValidateSet('OFF', 'ON')]
-		[string]$Name = 'N5VAV',
+		[string]$DIG_ANALOG = 'ANALOG',
+	# Name: -- validate unique
+	[Parameter()][ValidateLength(1, 255)]
+		[string]$Name = 'CAS-7C',
 	# Tones:
 	[Parameter()][ValidateSet('OFF','TONE', 'TONE SQL', 'DCS', 'REV TONE', 'PR FREQ', 'PAGER')]
-		[string]$Tone_Mode = 'TONE',
+		[string]$Tone_Mode = 'OFF',
 	[Parameter()][ValidateSet('67.0 Hz', '69.4 Hz', '71.9 Hz', '74.4 Hz', '77.0 Hz', '79.7 Hz', '82.5 Hz', '85.4 Hz', '88.5 Hz', '91.5 Hz', '94.8 Hz', '97.4 Hz', '100.0 Hz', '103.5 Hz', '107.2 Hz', '110.9 Hz', '114.8 Hz', '118.8 Hz', '123.0 Hz', '127.3 Hz', '131.8 Hz', '136.5 Hz', '141.3 Hz', '146.2 Hz', '150.0 Hz')]
-		[string]$CTCSS_Frequency = '110.9 Hz',
+		[string]$CTCSS_Frequency = '67.0 Hz',
 	[Parameter()][ValidateSet(23, 25, 26, 31, 32, 43, 47, 51, 53, 54, 65, 71, 72, 73, 74, 114, 115, 116, 122, 125, 131, 132, 134, 143, 152, 155, 156, 162, 165, 172, 174, 205, 212, 223, 225, 226, 243, 244, 245, 246, 251, 252, 261, 263, 265, 266, 271, 306, 311, 315, 325, 331, 343, 346, 351, 364, 365, 371, 411, 412, 413, 423, 425, 431, 432, 445, 446, 452, 455, 464, 465, 466, 503, 506, 516, 521, 525, 532, 546, 552, 564, 565, 606, 612, 624, 627, 631, 632, 645, 652, 654, 662, 664, 703, 712, 723, 725, 726, 731, 732, 734, 743, 754)]
 		[int]$DCS_Code = 23,
 	[Parameter()][ValidateSet('RX Normal TX Normal', 'RX Invert TX Normal', 'RX Both TX Normal', 'RX Normal TX Invert', 'RX Invert TX Invert', 'RX Both TX Invert')]
@@ -69,6 +69,10 @@ Param(
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$GMRS_BANK = 'OFF',
 	[Parameter()][ValidateSet('OFF', 'ON')]
+		[string]$MURS_BANK = 'OFF',
+	[Parameter()][ValidateSet('OFF', 'ON')]
+		[string]$CALL_BANK = 'OFF',
+	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$SAT_BANK = 'OFF',
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$C4FM_BANK = 'OFF',
@@ -80,10 +84,6 @@ Param(
 		[string]$VHF_BANK = 'OFF',
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$UHF_BANK = 'OFF',
-	[Parameter()][ValidateSet('OFF', 'ON')]
-		[string]$BANK_08 = 'OFF',
-	[Parameter()][ValidateSet('OFF', 'ON')]
-		[string]$BANK_09 = 'OFF',
 	[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$BANK_10 = 'OFF',
 	[Parameter()][ValidateSet('OFF', 'ON')]
@@ -149,14 +149,14 @@ $data = [PSCustomObject]@{
 	Half_DEV = $Half_DEV;
 	Clock_Shift = $Clock_Shift;
 	GMRS_BANK = $GMRS_BANK;
+	MURS_BANK = $MURS_BANK;
+	CALL_BANK = $CALL_BANK;
 	SAT_BANK = $SAT_BANK;
 	C4FM_BANK = $C4FM_BANK;
 	WIRES_BANK = $WIRES_BANK;
 	AIR_BANK = $AIR_BANK;
 	VHF_BANK = $VHF_BANK;
 	UHF_BANK = $UHF_BANK;
-	BANK_08 = $BANK_08;
-	BANK_09 = $BANK_09;
 	BANK_10 = $BANK_10;
 	BANK_11 = $BANK_11;
 	BANK_12 = $BANK_12;
@@ -203,14 +203,14 @@ $var =	$data.Channel_No + ',' + `
 		$data.Half_DEV + ',' + `
 		$data.Clock_Shift + ',' + `
 		$data.GMRS_BANK + ',' + `
+		$data.MURS_BANK + ',' + `
+		$data.CALL_BANK + ',' + `
 		$data.SAT_BANK + ',' + `
 		$data.C4FM_BANK + ',' + `
 		$data.WIRES_BANK + ',' + `
 		$data.AIR_BANK + ',' + `
 		$data.VHF_BANK + ',' + `
 		$data.UHF_BANK + ',' + `
-		$data.BANK_08 + ',' + `
-		$data.BANK_09 + ',' + `
 		$data.BANK_10 + ',' + `
 		$data.BANK_11 + ',' + `
 		$data.BANK_12 + ',' + `
@@ -230,3 +230,12 @@ $var =	$data.Channel_No + ',' + `
 		$data.Line_Terminate
 
 Out-File -FilePath $filePathString -InputObject $var -Append
+<#
+$i = 40
+While ($i -lt 901) {
+	$blank_line = $("{0:d3}" -f $i).ToString() + ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0'
+	Write-Output $blank_line
+	Out-File -FilePath 'C:\Users\Avelis\Documents\ft70-test.csv' -InputObject $blank_line -Append
+	$i++
+}
+#>
