@@ -2,7 +2,7 @@ function Append-CustomRow {
 	[CmdletBinding()]
 	Param(
 		[Parameter(Mandatory=$true)][ValidateLength(1, 255)]
-		[string]$filePathString,
+		[string]$filePath,
 		[Parameter()][ValidateSet('OFF', 'ON')]
 		[string]$Priority_CH = 'OFF',
 		[Parameter(Mandatory=$true)][ValidateRange(107,581)]
@@ -10,7 +10,7 @@ function Append-CustomRow {
 		[Parameter(Mandatory=$true)][ValidateRange(107,581)]
 		[double]$Transmit_Frequency,
 		[Parameter()][ValidateRange(0,474)]
-		[int]$Offset_Frequency = 0,
+		[decimal]$Offset_Frequency = 0,
 		[Parameter()][ValidateSet('+RPT', '-RPT', '-/+', 'OFF')]
 		[string]$Offset_Direction = 'OFF',
 		[Parameter()][ValidateSet('OFF', 'ON')]
@@ -25,7 +25,7 @@ function Append-CustomRow {
 		[string]$Name,
 		[Parameter()][ValidateSet('OFF','TONE', 'TONE SQL', 'DCS', 'REV TONE', 'PR FREQ', 'PAGER')]
 		[string]$Tone_Mode = 'OFF',
-		[Parameter()][ValidateSet('67.0 Hz', '69.4 Hz', '71.9 Hz', '74.4 Hz', '77.0 Hz', '79.7 Hz', '82.5 Hz', '85.4 Hz', '88.5 Hz', '91.5 Hz', '94.8 Hz', '97.4 Hz', '100.0 Hz', '103.5 Hz', '107.2 Hz', '110.9 Hz', '114.8 Hz', '118.8 Hz', '123.0 Hz', '127.3 Hz', '131.8 Hz', '136.5 Hz', '141.3 Hz', '146.2 Hz', '150.0 Hz')]
+		[Parameter()][ValidateSet('67.0 Hz', '69.4 Hz', '71.9 Hz', '74.4 Hz', '77.0 Hz', '79.7 Hz', '82.5 Hz', '85.4 Hz', '88.5 Hz', '91.5 Hz', '94.8 Hz', '97.4 Hz', '100.0 Hz', '103.5 Hz', '107.2 Hz', '110.9 Hz', '114.8 Hz', '118.8 Hz', '123.0 Hz', '127.3 Hz', '131.8 Hz', '136.5 Hz', '141.3 Hz', '146.2 Hz', '150.0 Hz', '151.4 Hz', '156.7 Hz', '159.8 Hz', '162.2 Hz', '165.5 Hz', '167.9 Hz', '171.3 Hz', '173.8 Hz', '177.3 Hz', '179.9 Hz', '183.5 Hz', '186.2 Hz', '189.9 Hz', '192.8 Hz', '196.6 Hz', '199.5 Hz', '203.5 Hz', '206.5 Hz', '210.7 Hz', '218.1 Hz', '225.7 Hz', '229.1 Hz', '233.6 Hz', '241.8 Hz', '250.3 Hz', '254.1 Hz')]
 		[string]$CTCSS_Frequency = '88.5 Hz',
 		[Parameter()][ValidateSet(23, 25, 26, 31, 32, 43, 47, 51, 53, 54, 65, 71, 72, 73, 74, 114, 115, 116, 122, 125, 131, 132, 134, 143, 152, 155, 156, 162, 165, 172, 174, 205, 212, 223, 225, 226, 243, 244, 245, 246, 251, 252, 261, 263, 265, 266, 271, 306, 311, 315, 325, 331, 343, 346, 351, 364, 365, 371, 411, 412, 413, 423, 425, 431, 432, 445, 446, 452, 455, 464, 465, 466, 503, 506, 516, 521, 525, 532, 546, 552, 564, 565, 606, 612, 624, 627, 631, 632, 645, 652, 654, 662, 664, 703, 712, 723, 725, 726, 731, 732, 734, 743, 754)]
 		[int]$DCS_Code = 23,
@@ -109,8 +109,8 @@ function Append-CustomRow {
 		[int]$Line_Terminate = 0
 )
 	begin {
-		$fileContent = $(Get-Content -Path $filePathString -Tail 1)
-		$lineNumber = $fileContent.Substring(0,3)
+		$fileContent = $(Get-Content -Path $filePath -Tail 1)
+		$lineNumber = [int]$($fileContent.Substring(0,3)) + 1
 		$data = [PSCustomObject]@{
 			Channel_No = $("{0:d3}" -f $lineNumber).ToString();
 			Priority_CH = $Priority_CH;
@@ -223,15 +223,16 @@ function Append-CustomRow {
 		$data.Line_Terminate
 	}
 	end {
-		Out-File -FilePath $filePathString -InputObject $output -Append
+		Out-File -FilePath $filePath -InputObject $output -Append
 	}
 }
 <#
-$i = 40
+$i = 335
 While ($i -lt 901) {
 	$blank_line = $("{0:d3}" -f $i).ToString() + ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0'
 	Write-Output $blank_line
 	Out-File -FilePath 'C:\Users\Avelis\Documents\ft70-test.csv' -InputObject $blank_line -Append
 	$i++
 }
+
 #>
