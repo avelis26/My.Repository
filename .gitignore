@@ -260,5 +260,3 @@ __pycache__/
 *.pyc
 
 # Git Secret
-.gitsecret/keys/random_seed
-Lexipol/init_gpinkston.sh
