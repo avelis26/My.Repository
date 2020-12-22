@@ -258,3 +258,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Git Secret
+.gitsecret/keys/random_seed
+Lexipol/init_gpinkston.sh
