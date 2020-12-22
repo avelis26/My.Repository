@@ -1,1 +1,2 @@
 init_gpinkston.sh filter=git-crypt diff=git-crypt
+init_higgins.sh filter=git-crypt diff=git-crypt
