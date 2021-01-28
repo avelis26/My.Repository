@@ -20,4 +20,5 @@ sudo usermod -aG wheel,docker gpinkston
 # Create alias's
 echo 'alias ls="ls -lAp --color=always"' >> ~/.bashrc
 echo 'alias ll="ls -lAp --color=always"' >> ~/.bashrc
+echo 'alias update="sudo apt update -y && sudo apt full-upgrade -y && sudo apt autoremove -y"' >> ~/.bashrc
 source ~/.bashrc
