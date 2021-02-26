@@ -19,15 +19,10 @@ As a player, I want to know when the game is over
 As a player, I want to play against the computer to sharpen my skills
 #>
 
+# init var's
+$playerOne = Read-Host -Prompt 'Enter Player one name:'
+$playerTwo = Read-Host -Prompt 'Enter Player two name:'
 
-#player choice
-#$playerOne = Read-Host -Prompt 'Enter Player one name:'
-#$playerTwo = Read-Host -Prompt 'Enter Player two name:'
-
-
-
-
-#make the board
 $board = @{
     place01 = " ";
     place02 = " ";
@@ -40,21 +35,10 @@ $board = @{
     place09 = " ";
 }
 
-$board = @(
-    
-)
-
-
-
-
-
-#board selection
-
-#game logic
-$gameStart
-$gameEnd
-$whosTurn
-
+# game logic
+#$gameStart
+#$gameEnd
+#$whosTurn
 
 Function Clear-Board {
     $place01 = " "
@@ -115,6 +99,4 @@ Function Place-Mark {
     Make-Board
 }
 
-
-#
 Place-Mark -mark 'x'
