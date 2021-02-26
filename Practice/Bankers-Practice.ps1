@@ -1,3 +1,25 @@
+<#
+Tic Tac Toe
+
+We love playing Tic Tac Toe (also called Crosses and Bones, Kółko i krzyżyk)
+and want to write a program to eliminate the need for expensive pens and paper. 
+
+Let's play!
+
+Here are the stories:
+
+As a player, I want to be able to print the current state of the board. E.g.
+X| |O
+ | |
+X|X|O
+As a player, I want to be able to place a piece on the board.
+As a player, I want to be able to take turns with an opponent placing pieces on the board
+As a player, I want to make sure my opponent can not cheat
+As a player, I want to know when the game is over
+As a player, I want to play against the computer to sharpen my skills
+#>
+
+
 #player choice
 #$playerOne = Read-Host -Prompt 'Enter Player one name:'
 #$playerTwo = Read-Host -Prompt 'Enter Player two name:'
