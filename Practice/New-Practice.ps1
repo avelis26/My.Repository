@@ -1,5 +1,4 @@
-Clear-Host
-$total = 10
+$total = 78
 $i = 0
 $above = @()
 $below = @()
@@ -15,5 +14,12 @@ While ($i -lt $total) {
 	}
 	$i++
 }
-Write-Host -ForegroundColor Red "The below count was: $($below.Count) out of $total, or $(($below.Count / $total) * 100)%"
-Write-Host -ForegroundColor Green "The above count was: $($above.Count) out of $total, or $(($above.Count / $total) * 100)%"
+function Get-Percentage {
+	param (
+		[int]$value,
+		[int]$total
+	)
+	Return $(($value / $total) * 100).ToString("#.#")
+}
+Write-Host -ForegroundColor Red "The below count was: $($below.Count) out of $total, or $(Get-Percentage -value $below.Count -total $total)%"
+Write-Host -ForegroundColor Green "The above count was: $($above.Count) out of $total, or $(Get-Percentage -value $above.Count -total $total)%"
