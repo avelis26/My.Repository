@@ -12,10 +12,14 @@ if (!$results) {
 }
 $today = $results.forecast.forecastday[0].day.maxtemp_f
 $tmrw = $results.forecast.forecastday[1].day.maxtemp_f
+$rain = $results.forecast.forecastday[1].day.daily_will_it_rain
 Write-Debug "Today: $today"
 Write-Debug "TMRW: $tmrw"
 switch ($true) {
     { $tmrw -gt $today } { Write-Host -ForegroundColor Red "Tomorrow will be hotter than today" }
     { $tmrw -eq $today } { Write-Host -ForegroundColor Gray "Tomorrow will be equal to today" }
     { $tmrw -lt $today } { Write-Host -ForegroundColor Blue "Tomorrow will be colder than today" }
+}
+if ($rain -eq 1) {
+    Write-Host -ForegroundColor DarkBlue "It will rain"
 }
