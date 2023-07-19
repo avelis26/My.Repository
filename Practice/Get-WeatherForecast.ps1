@@ -5,6 +5,7 @@ $zipCode = '65536'
 $days = '2'
 $uri = "http://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$zipCode&days=$days&aqi=no&alerts=no"
 Clear-Host
+#$results = $null
 if (!$results) {
     Write-Host -ForegroundColor Green "Calling API..."
     $results = Invoke-RestMethod -Method Get -Uri $uri
